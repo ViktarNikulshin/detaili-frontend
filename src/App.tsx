@@ -18,6 +18,7 @@ function App() {
                             <Route index element={<CalendarView />} />
                             <Route path="calendar" element={<CalendarView />} />
                             <Route path="orders/new" element={<OrderForm />} />
+                            <Route path="orders/:id" element={<OrderForm />} />
                         </Route>
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>

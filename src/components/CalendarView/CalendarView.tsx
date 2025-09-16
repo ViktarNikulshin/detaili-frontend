@@ -83,10 +83,6 @@ const CalendarView: React.FC = () => {
         setCurrentDate(date);
     };
 
-    const handleCreateOrder = () => {
-        navigate('/orders/new');
-    };
-
     const eventStyleGetter = (event: CalendarEvent) => {
         let backgroundColor = '#3174ad';
         let borderColor = '#1a5a8a';
@@ -125,13 +121,7 @@ const CalendarView: React.FC = () => {
     };
 
     const handleSelectEvent = (event: CalendarEvent) => {
-        alert(`
-      Клиент: ${event.clientName}
-      Автомобиль: ${event.carBrand}
-      Тип работ: ${event.workType}
-      Статус: ${event.status}
-      Время: ${moment(event.start).format('DD.MM.YYYY HH:mm')}
-    `);
+        navigate(`/orders/${event.id}`);
     };
 
     if (loading) {
@@ -146,14 +136,6 @@ const CalendarView: React.FC = () => {
         <div className="calendar-container">
             <div className="calendar-header">
                 <h1>Календарь заказов</h1>
-                {/*<div className="calendar-actions">*/}
-                {/*    <button*/}
-                {/*        className="btn btn-primary create-order-btn"*/}
-                {/*        onClick={handleCreateOrder}*/}
-                {/*    >*/}
-                {/*        + Создать заказ*/}
-                {/*    </button>*/}
-                {/*</div>*/}
                 <div className="calendar-info">
                     <span>Всего событий: {events.length}</span>
                     <span>Текущий вид: {currentView}</span>
