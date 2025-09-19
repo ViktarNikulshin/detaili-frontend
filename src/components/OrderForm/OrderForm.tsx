@@ -3,10 +3,11 @@ import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useParams } from "react-router-dom";
-import { orderAPI } from "../../services/api";
+import {api, orderAPI} from "../../services/api";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import "./OrderForm.css";
+import {number} from "yup";
 
 // ✅ Тип формы
 type OrderFormData = {
@@ -15,7 +16,7 @@ type OrderFormData = {
     carBrand: string;
     carModel: string;
     vin: string;
-    workType: string;
+    workTypeIds: number[];
     executionDate: string;
 };
 
@@ -31,6 +32,11 @@ interface CarModel {
     brand_id: string;
 }
 
+interface WorkType {
+    id: number;
+    name: string;
+}
+
 // ✅ Схема валидации
 const schema = Yup.object({
     clientName: Yup.string().required("Введите имя клиента"),
@@ -38,7 +44,10 @@ const schema = Yup.object({
     carBrand: Yup.string().required("Выберите марку автомобиля"),
     carModel: Yup.string().required("Выберите модель автомобиля"),
     vin: Yup.string().required("Введите VIN"),
-    workType: Yup.string().required("Опишите тип работ"),
+    workTypeIds: Yup.array()
+        .of(Yup.number().required()) // Каждый элемент должен быть числом и обязательным
+        .min(1, "Выберите хотя бы один тип работ")
+        .required("Выберите тип работ"),
     executionDate: Yup.string().required("Укажите дату выполнения"),
 });
 
@@ -47,6 +56,7 @@ const OrderForm: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [brands, setBrands] = useState<CarBrand[]>([]);
     const [models, setModels] = useState<CarModel[]>([]);
+    const [workTypes, setWorkTypes] = useState<WorkType[]>([]);
     const [modelsLoading, setModelsLoading] = useState(false);
 
     const {
@@ -65,7 +75,7 @@ const OrderForm: React.FC = () => {
             carBrand: "",
             carModel: "",
             vin: "",
-            workType: "",
+            workTypeIds: [] ,
             executionDate: "",
         },
     });
@@ -172,7 +182,7 @@ const OrderForm: React.FC = () => {
                     carBrand: order.carBrand || "",
                     carModel: order.carModel || "",
                     vin: order.vin || "",
-                    workType: order.workType || "",
+                    workTypeIds: order.workTypeIds || [],
                     executionDate: order.executionDate
                         ? order.executionDate.slice(0, 16)
                         : "",
@@ -191,19 +201,28 @@ const OrderForm: React.FC = () => {
         loadOrder();
     }, [id, reset, setValue]);
 
+    useEffect(() => {
+        // Загружаем список работ со справочника
+        orderAPI.getDictionaryByType("WORK_TYPE").then((res) => {
+            setWorkTypes(res.data);
+        });
+    }, []);
+
     // ✅ Сабмит
     const onSubmit: SubmitHandler<OrderFormData> = async (data) => {
         try {
-            const formDataToSend = new FormData();
-            Object.entries(data).forEach(([key, value]) => {
-                if (value) formDataToSend.append(key, value.toString());
-            });
+            // Убираем FormData и отправляем данные в формате JSON
+            const dataToSend = {
+                ...data,
+                // Если workTypeIds пустой, отправляем пустой массив
+                workTypeIds: data.workTypeIds || [],
+            };
 
             if (id) {
-                await orderAPI.update(id, formDataToSend);
+                await orderAPI.update(id, dataToSend);
                 alert("Заказ обновлён!");
             } else {
-                await orderAPI.create(formDataToSend);
+                await orderAPI.create(dataToSend);
                 alert("Заказ создан!");
             }
         } catch (error) {
@@ -297,14 +316,40 @@ const OrderForm: React.FC = () => {
                 <span className="error-text">{errors.vin.message}</span>
             )}
 
-            <textarea
-                placeholder="Тип работ"
-                {...register("workType")}
-                className={errors.workType ? "error" : ""}
-            />
-            {errors.workType && (
-                <span className="error-text">{errors.workType.message}</span>
-            )}
+            <div className="checkbox-group">
+                <label>Тип работ:</label>
+                <Controller
+                    name="workTypeIds"
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                        <div className="checkbox-container">
+                            {workTypes.map((workType) => (
+                                <div key={workType.id} className="checkbox-item">
+                                    <input
+                                        type="checkbox"
+                                        id={`work-type-${workType.id}`}
+                                        value={workType.id}
+                                        checked={value.includes(workType.id)}
+                                        onChange={(e) => {
+                                            const workTypeId = Number(e.target.value);
+                                            const newWorkTypeIds = e.target.checked
+                                                ? [...value, workTypeId]
+                                                : value.filter((id) => id !== workTypeId);
+                                            onChange(newWorkTypeIds);
+                                        }}
+                                    />
+                                    <label htmlFor={`work-type-${workType.id}`}>
+                                        {workType.name}
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                />
+                {errors.workTypeIds && (
+                    <span className="error-text">{errors.workTypeIds.message}</span>
+                )}
+            </div>
 
             <input
                 type="datetime-local"

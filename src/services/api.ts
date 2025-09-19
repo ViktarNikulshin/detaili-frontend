@@ -20,11 +20,28 @@ api.interceptors.request.use((config) => {
 });
 
 export const orderAPI = {
-    create: (order: FormData) => api.post('/orders', order),
-    update: (id: string, order: FormData) => api.put(`/orders/${id}`, order),
+    create: (order: {
+        clientName: string;
+        clientPhone: string;
+        carBrand: string;
+        carModel: string;
+        vin: string;
+        workTypeIds: number[];
+        executionDate: string
+    }) => api.post('/orders', order),
+    update: (id: string, order: {
+        clientName: string;
+        clientPhone: string;
+        carBrand: string;
+        carModel: string;
+        vin: string;
+        workTypeIds: number[];
+        executionDate: string
+    }) => api.put(`/orders/${id}`, order),
     getCalendar: (start: string, end: string) =>
         api.get(`/orders/calendar?start=${start}&end=${end}`),
     getById: (id: string) => api.get<Order>(`orders/${id}`),
     getCarBrands: () => api.get('/car/car-brands'),
-    getCarModel: (id: string) => api.get(`/car/car-models/${id}`)
+    getCarModel: (id: string) => api.get(`/car/car-models/${id}`),
+    getDictionaryByType: (code: string) => api.get(`/dictionary/type/${code}`)
 }

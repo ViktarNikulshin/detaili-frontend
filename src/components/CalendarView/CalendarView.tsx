@@ -61,7 +61,7 @@ const CalendarView: React.FC = () => {
                 end: new Date(moment(order.executionDate).add(1, 'hour').toDate()),
                 clientName: order.clientName,
                 carBrand: order.carBrand,
-                workType: order.workType,
+                workTypeIds: order.workTypeIds,
                 status: order.status,
                 allDay: false,
             }));

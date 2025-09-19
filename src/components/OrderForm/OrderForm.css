@@ -90,3 +90,80 @@
 .form-group select.error {
     border-color: #ff4444;
 }
+    /* Checkbox group container */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Spacing between the label and the checkboxes */
+    margin-bottom: 8px; /* Spacing before the next form field */
+}
+
+/* Label for the checkbox group */
+.checkbox-group label {
+    color: #1a3c47;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* Container for individual checkboxes */
+.checkbox-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px; /* Spacing between checkboxes */
+}
+
+/* Individual checkbox item */
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+/* Style for the checkbox input itself */
+.checkbox-item input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 1px solid rgba(90, 200, 250, 0.6);
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.6);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    outline: none;
+}
+
+/* Checkbox checked state */
+.checkbox-item input[type="checkbox"]:checked {
+    background-color: #00c3ff;
+    border-color: #00c3ff;
+}
+
+/* Checkmark inside the checkbox */
+.checkbox-item input[type="checkbox"]:checked::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -60%) rotate(45deg);
+}
+
+/* Checkbox label text */
+.checkbox-item label {
+    font-size: 15px;
+    color: #1a3c47;
+    font-weight: normal; /* Override the group label weight */
+    cursor: pointer;
+}
+
+/* Error state for checkbox group */
+.checkbox-group.error .checkbox-item input[type="checkbox"] {
+    border-color: #dc3545;
+}

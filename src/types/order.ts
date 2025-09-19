@@ -5,7 +5,7 @@ export interface Order {
     carBrand: string;
     carModel: string;
     vin: string;
-    workType: string;
+    workTypeIds: number[];
     masterId: number;
     executionDate: string;
     beforePhoto?: File;
@@ -14,7 +14,6 @@ export interface Order {
 }
 
 export interface CalendarEvent {
-    workType: string;
     id: number;
     title: string;
     start: Date;
