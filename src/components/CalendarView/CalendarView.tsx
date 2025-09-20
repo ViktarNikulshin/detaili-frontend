@@ -3,7 +3,7 @@ import { Calendar, momentLocalizer, View, stringOrDate } from 'react-big-calenda
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { orderAPI } from '../../services/api';
+import { orderAPI } from '../../services/orderApi';
 import { CalendarEvent, Order } from '../../types/order';
 import { useAuth } from '../../contexts/AuthContext';
 import './CalendarView.css';

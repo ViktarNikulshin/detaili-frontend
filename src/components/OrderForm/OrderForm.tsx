@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { useForm, Controller, SubmitHandler } from "react-hook-form";
+import {useForm, Controller, SubmitHandler, FieldValues} from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useParams } from "react-router-dom";
-import {api, orderAPI} from "../../services/api";
+import { orderAPI } from "../../services/orderApi";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import "./OrderForm.css";
-import {number} from "yup";
+import { userAPI } from "../../services/user";
+import {User} from "../../types/user";
 
-// ✅ Тип формы
+// ✅ Единый тип для формы и API-данных
 type OrderFormData = {
     clientName: string;
     clientPhone: string;
@@ -17,10 +18,25 @@ type OrderFormData = {
     carModel: string;
     vin: string;
     workTypeIds: number[];
+    masterIds: number[];
     executionDate: string;
+    orderCost: number;
+    executionTimeByMaster?: string | null;
 };
+interface OrderFormValues {
+    clientName: string;
+    clientPhone: string;
+    carBrand: string;
+    carModel: string;
+    vin: string;
+    workTypeIds: number[];
+    masterIds: number[];
+    executionDate: string;
+    orderCost: number;
+    executionTimeByMaster?: string | null;
+}
 
-// ✅ Типы для марок и моделей
+// ✅ Типы для марок, моделей, работ и мастеров
 interface CarBrand {
     id: string;
     name: string;
@@ -37,18 +53,26 @@ interface WorkType {
     name: string;
 }
 
-// ✅ Схема валидации
-const schema = Yup.object({
+interface Master {
+    id: number;
+    name: string;
+}
+
+// ✅ Исправленная схема валидации
+const schema: Yup.ObjectSchema<OrderFormValues> = Yup.object().shape({
     clientName: Yup.string().required("Введите имя клиента"),
     clientPhone: Yup.string().required("Введите телефон"),
     carBrand: Yup.string().required("Выберите марку автомобиля"),
     carModel: Yup.string().required("Выберите модель автомобиля"),
     vin: Yup.string().required("Введите VIN"),
     workTypeIds: Yup.array()
-        .of(Yup.number().required()) // Каждый элемент должен быть числом и обязательным
+        .of(Yup.number().required())
         .min(1, "Выберите хотя бы один тип работ")
         .required("Выберите тип работ"),
+    masterIds: Yup.array().of(Yup.number().required()).min(1, "Выберите хотя бы одного мастера").required("Выберите мастеров"),
     executionDate: Yup.string().required("Укажите дату выполнения"),
+    orderCost: Yup.number().typeError("Введите стоимость заказа").required("Введите стоимость заказа").min(0, "Стоимость не может быть отрицательной"),
+    executionTimeByMaster: Yup.string().nullable().optional(),
 });
 
 const OrderForm: React.FC = () => {
@@ -57,6 +81,7 @@ const OrderForm: React.FC = () => {
     const [brands, setBrands] = useState<CarBrand[]>([]);
     const [models, setModels] = useState<CarModel[]>([]);
     const [workTypes, setWorkTypes] = useState<WorkType[]>([]);
+    const [masters, setMasters] = useState<User[]>([]);
     const [modelsLoading, setModelsLoading] = useState(false);
 
     const {
@@ -67,7 +92,7 @@ const OrderForm: React.FC = () => {
         watch,
         setValue,
         formState: { errors },
-    } = useForm<OrderFormData>({
+    } = useForm<OrderFormValues>({
         resolver: yupResolver(schema),
         defaultValues: {
             clientName: "",
@@ -75,57 +100,47 @@ const OrderForm: React.FC = () => {
             carBrand: "",
             carModel: "",
             vin: "",
-            workTypeIds: [] ,
+            workTypeIds: [],
+            masterIds: [],
             executionDate: "",
-        },
+            orderCost: 0,
+            executionTimeByMaster: "",
+        } as OrderFormValues,
     });
 
-    // Следим за изменением выбранной марки
     const selectedBrand = watch("carBrand");
+    const selectedMasterIds = watch("masterIds");
 
-    // ✅ Загружаем список марок при монтировании
     useEffect(() => {
         const loadBrands = async () => {
+
             try {
-                // Здесь можно использовать ваше API или внешнее
-                // Пример с внешним API (можно заменить на ваше)
                 const response = await orderAPI.getCarBrands();
                 const data = await response.data;
-                setBrands(data);
+                    console.log("Результаты марок:", data); // ✅ Смотрим структуру
 
-                if (data.Results) {
-                    const carBrands = data.Results
-                        .filter((brand: any) => brand.Make_Name)
+                    const carBrands = data
+                        .filter((brand: any) => brand.name)
                         .map((brand: any) => ({
-                            id: brand.id,
+                            id:  brand.id?.toString(),
                             name: brand.name
                         }))
                         .sort((a: CarBrand, b: CarBrand) => a.name.localeCompare(b.name));
 
+                    console.log("Обработанные марки:", carBrands); // ✅ Проверяем результат
                     setBrands(carBrands);
-                }
             } catch (error) {
                 console.error("Ошибка загрузки марок:", error);
-                // Fallback список марок
                 setBrands([
                     { id: "1", name: "Audi" },
                     { id: "2", name: "BMW" },
                     { id: "3", name: "Mercedes-Benz" },
-                    { id: "4", name: "Volkswagen" },
-                    { id: "5", name: "Toyota" },
-                    { id: "6", name: "Honda" },
-                    { id: "7", name: "Ford" },
-                    { id: "8", name: "Chevrolet" },
-                    { id: "9", name: "Nissan" },
-                    { id: "10", name: "Hyundai" },
                 ]);
             }
         };
-
         loadBrands();
     }, []);
 
-    // ✅ Загружаем модели при изменении выбранной марки
     useEffect(() => {
         const loadModels = async () => {
             if (!selectedBrand) {
@@ -133,49 +148,55 @@ const OrderForm: React.FC = () => {
                 setValue("carModel", "");
                 return;
             }
-
             setModelsLoading(true);
             try {
                 const response = await orderAPI.getCarModel(selectedBrand);
                 const data = await response.data;
-                setModels(data);
-                if (data.Results) {
-                    const carModels = data.Results
-                        .filter((model: any) => model.Model_Name)
+
+                    const carModels = data
+                        .filter((model: any) => model.name)
                         .map((model: any) => ({
                             id: model.id,
                             name: model.name,
                             brand_id: selectedBrand
                         }))
                         .sort((a: CarModel, b: CarModel) => a.name.localeCompare(b.name));
-
                     setModels(carModels);
-                }
+
             } catch (error) {
                 console.error("Ошибка загрузки моделей:", error);
-                // Fallback список моделей
                 setModels([
                     { id: "1", name: "Model 1", brand_id: selectedBrand },
                     { id: "2", name: "Model 2", brand_id: selectedBrand },
-                    { id: "3", name: "Model 3", brand_id: selectedBrand },
                 ]);
             } finally {
                 setModelsLoading(false);
             }
         };
-
         loadModels();
     }, [selectedBrand, setValue]);
 
-    // ✅ Загружаем заказ по id
+    useEffect(() => {
+        orderAPI.getDictionaryByType("WORK_TYPE").then((res) => {
+            setWorkTypes(res.data);
+        });
+        userAPI.getUsersByRole("MASTER").then((res) => {
+            // ✅ Гарантируем, что получим массив
+            const mastersData = Array.isArray(res.data) ? res.data : [res.data];
+            setMasters(mastersData);
+        }).catch((error) => {
+            console.error("Ошибка загрузки мастеров:", error);
+            setMasters([]);
+        });
+    }, []);
+
     useEffect(() => {
         const loadOrder = async () => {
             if (!id) return;
             setLoading(true);
             try {
                 const response = await orderAPI.getById(id);
-                const order = response.data;
-
+                const order: Partial<OrderFormData> = response.data;
                 reset({
                     clientName: order.clientName || "",
                     clientPhone: order.clientPhone || "",
@@ -183,12 +204,12 @@ const OrderForm: React.FC = () => {
                     carModel: order.carModel || "",
                     vin: order.vin || "",
                     workTypeIds: order.workTypeIds || [],
+                    masterIds: order.masterIds || [],
                     executionDate: order.executionDate
                         ? order.executionDate.slice(0, 16)
                         : "",
+                    executionTimeByMaster: order.executionTimeByMaster || "",
                 });
-
-                // Если в заказе уже есть марка, загружаем соответствующие модели
                 if (order.carBrand) {
                     setValue("carBrand", order.carBrand);
                 }
@@ -201,23 +222,13 @@ const OrderForm: React.FC = () => {
         loadOrder();
     }, [id, reset, setValue]);
 
-    useEffect(() => {
-        // Загружаем список работ со справочника
-        orderAPI.getDictionaryByType("WORK_TYPE").then((res) => {
-            setWorkTypes(res.data);
-        });
-    }, []);
-
-    // ✅ Сабмит
-    const onSubmit: SubmitHandler<OrderFormData> = async (data) => {
+    const onSubmit: SubmitHandler<OrderFormValues> = async (data) => {
         try {
-            // Убираем FormData и отправляем данные в формате JSON
             const dataToSend = {
                 ...data,
-                // Если workTypeIds пустой, отправляем пустой массив
                 workTypeIds: data.workTypeIds || [],
+                masterIds: data.masterIds || [],
             };
-
             if (id) {
                 await orderAPI.update(id, dataToSend);
                 alert("Заказ обновлён!");
@@ -230,10 +241,18 @@ const OrderForm: React.FC = () => {
         }
     };
 
+    const getMasterNames = (ids: number[] | undefined) => {
+        if (!ids) return "";
+        return ids.map(id => {
+            const master = masters.find(m => m.id === id);
+            return master ? `${master.firstName} ${master.lastName}` : `Мастер ${id}`;
+        }).join(", ");
+    };
+
     if (loading) return <p>Загрузка...</p>;
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="order-form">
+        <form onSubmit={handleSubmit(onSubmit as SubmitHandler<FieldValues>)} className="order-form">
             <input
                 type="text"
                 placeholder="Имя клиента"
@@ -267,7 +286,6 @@ const OrderForm: React.FC = () => {
                 <span className="error-text">{errors.clientPhone.message}</span>
             )}
 
-            {/* Выбор марки автомобиля */}
             <div className="form-group">
                 <select
                     {...register("carBrand")}
@@ -285,7 +303,6 @@ const OrderForm: React.FC = () => {
                 )}
             </div>
 
-            {/* Выбор модели автомобиля */}
             <div className="form-group">
                 <select
                     {...register("carModel")}
@@ -351,6 +368,47 @@ const OrderForm: React.FC = () => {
                 )}
             </div>
 
+            <div className="checkbox-group">
+                <label>Мастера:</label>
+                <Controller
+                    name="masterIds"
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                        <div className="checkbox-container">
+                            {masters.map((master) => (
+                                <div key={master.id} className="checkbox-item">
+                                    <input
+                                        type="checkbox"
+                                        id={`master-${master.id}`}
+                                        value={master.id}
+                                        checked={value.includes(master.id)}
+                                        onChange={(e) => {
+                                            const masterId = Number(e.target.value);
+                                            const newMasterIds = e.target.checked
+                                                ? [...value, masterId]
+                                                : value.filter((id) => id !== masterId);
+                                            onChange(newMasterIds);
+                                        }}
+                                    />
+                                    <label htmlFor={`master-${master.id}`}>
+                                        {master.firstName} {master.lastName}
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                />
+                {errors.masterIds && (
+                    <span className="error-text">{errors.masterIds.message}</span>
+                )}
+            </div>
+
+            {selectedMasterIds && selectedMasterIds.length > 0 && (
+                <div className="selected-masters-display">
+                    <p>Выбраны мастера: <strong>{getMasterNames(selectedMasterIds)}</strong></p>
+                </div>
+            )}
+
             <input
                 type="datetime-local"
                 {...register("executionDate")}
@@ -358,6 +416,26 @@ const OrderForm: React.FC = () => {
             />
             {errors.executionDate && (
                 <span className="error-text">{errors.executionDate.message}</span>
+            )}
+
+            <input
+                type="number"
+                placeholder="Стоимость заказа"
+                {...register("orderCost", { valueAsNumber: true })}
+                className={errors.orderCost ? "error" : ""}
+            />
+            {errors.orderCost && (
+                <span className="error-text">{errors.orderCost.message}</span>
+            )}
+
+            <input
+                type="text"
+                placeholder="Время выполнения (например, 2 часа)"
+                {...register("executionTimeByMaster")}
+                className={errors.executionTimeByMaster ? "error" : ""}
+            />
+            {errors.executionTimeByMaster && (
+                <span className="error-text">{errors.executionTimeByMaster.message}</span>
             )}
 
             <button type="submit">Сохранить заказ</button>

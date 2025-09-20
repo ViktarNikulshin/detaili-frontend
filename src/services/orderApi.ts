@@ -3,7 +3,7 @@ import {Order} from "../types/order";
 
 const API_BASE_URL = 'http://localhost:8080/detailing/api';
 
-export const api = axios.create({
+export const orderApi = axios.create({
     baseURL: API_BASE_URL,
     headers: {
         'Content-Type': 'application/json',
@@ -11,7 +11,7 @@ export const api = axios.create({
 });
 
 // Интерцептор для добавления токена
-api.interceptors.request.use((config) => {
+orderApi.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -28,7 +28,7 @@ export const orderAPI = {
         vin: string;
         workTypeIds: number[];
         executionDate: string
-    }) => api.post('/orders', order),
+    }) => orderApi.post('/orders', order),
     update: (id: string, order: {
         clientName: string;
         clientPhone: string;
@@ -37,11 +37,11 @@ export const orderAPI = {
         vin: string;
         workTypeIds: number[];
         executionDate: string
-    }) => api.put(`/orders/${id}`, order),
+    }) => orderApi.put(`/orders/${id}`, order),
     getCalendar: (start: string, end: string) =>
-        api.get(`/orders/calendar?start=${start}&end=${end}`),
-    getById: (id: string) => api.get<Order>(`orders/${id}`),
-    getCarBrands: () => api.get('/car/car-brands'),
-    getCarModel: (id: string) => api.get(`/car/car-models/${id}`),
-    getDictionaryByType: (code: string) => api.get(`/dictionary/type/${code}`)
+        orderApi.get(`/orders/calendar?start=${start}&end=${end}`),
+    getById: (id: string) => orderApi.get<Order>(`orders/${id}`),
+    getCarBrands: () => orderApi.get('/car/car-brands'),
+    getCarModel: (id: string) => orderApi.get(`/car/car-models/${id}`),
+    getDictionaryByType: (code: string) => orderApi.get(`/dictionary/type/${code}`)
 }

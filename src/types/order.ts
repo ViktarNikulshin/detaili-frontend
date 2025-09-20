@@ -6,11 +6,13 @@ export interface Order {
     carModel: string;
     vin: string;
     workTypeIds: number[];
-    masterId: number;
+    masterIds: number[];
     executionDate: string;
     beforePhoto?: File;
     afterPhoto?: File;
     status: 'NEW' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+    orderCost: number;
+    executionTimeByMaster?: string | null;
 }
 
 export interface CalendarEvent {
@@ -20,5 +22,6 @@ export interface CalendarEvent {
     end: Date;
     clientName: string;
     carBrand: string;
+    carModel: string;
     status: string;
 }

@@ -80,6 +80,8 @@
     border-radius: 14px;
     font-size: 16px;
     background-color: white;
+    font-family: inherit;
+    color: #1a3c47;
 }
 
 .form-group select:disabled {
@@ -90,16 +92,18 @@
 .form-group select.error {
     border-color: #ff4444;
 }
-    /* Checkbox group container */
+
+/* Checkbox group container */
 .checkbox-group {
     display: flex;
     flex-direction: column;
-    gap: 8px; /* Spacing between the label and the checkboxes */
-    margin-bottom: 8px; /* Spacing before the next form field */
+    gap: 8px;
+    margin-bottom: 8px;
 }
 
 /* Label for the checkbox group */
-.checkbox-group label {
+.checkbox-group label,
+.form-group label {
     color: #1a3c47;
     font-size: 16px;
     font-weight: 600;
@@ -109,7 +113,7 @@
 .checkbox-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px; /* Spacing between checkboxes */
+    gap: 12px;
 }
 
 /* Individual checkbox item */
@@ -159,11 +163,26 @@
 .checkbox-item label {
     font-size: 15px;
     color: #1a3c47;
-    font-weight: normal; /* Override the group label weight */
+    font-weight: normal;
     cursor: pointer;
 }
 
 /* Error state for checkbox group */
 .checkbox-group.error .checkbox-item input[type="checkbox"] {
     border-color: #dc3545;
+}
+
+/* Styles for the selected masters display */
+.selected-masters-display {
+    padding: 12px;
+    background: rgba(90, 200, 250, 0.1);
+    border-radius: 14px;
+    font-size: 14px;
+    color: #1a3c47;
+    border: 1px solid rgba(90, 200, 250, 0.4);
+}
+
+.selected-masters-display p {
+    margin: 0;
+    font-weight: 500;
 }
