@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { authAPI } from '../../services/auth';
 import './Login.css';
+import logo from "../asserts/a593d73d858fdafbbe4065de23f69533.jpg";
 
 const Login: React.FC = () => {
     const [credentials, setCredentials] = useState({
@@ -81,7 +82,8 @@ const Login: React.FC = () => {
         <div className="login-container">
             <div className="login-card">
                 <div className="login-header">
-                    <h1>Детейлинг Сервис</h1>
+                    <img src={logo} alt="Cristal Car Logo" className="nav-logo" />
+                    <h1>Cristal car</h1>
                     <p>Войдите в свою учетную запись</p>
                 </div>
 

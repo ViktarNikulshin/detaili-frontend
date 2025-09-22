@@ -1,196 +1,177 @@
+/* Основной контейнер страницы */
 .login-container {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* Используем мягкий фон из OrderForm */
+    background: #f0f4f7;
     padding: 20px;
 }
 
+/* Карточка входа */
 .login-card {
-    background: white;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
+    /* Стили, схожие с .order-form */
+    max-width: 520px;
+    margin: 40px auto;
+    padding: 28px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px);
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(100, 180, 220, 0.25);
+    font-family: "Segoe UI", sans-serif;
+    color: #1a3c47;
+    width: 100%; /* Убедимся, что ширина сохраняется */
 }
 
+/* Заголовок */
 .login-header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 24px; /* Уменьшаем отступ для более компактного вида */
 }
 
 .login-header h1 {
-    margin: 0 0 10px 0;
-    color: #333;
+    margin: 0 0 8px 0;
+    color: #1a3c47; /* Используем цвет текста из OrderForm */
     font-size: 28px;
     font-weight: 600;
 }
 
 .login-header p {
     margin: 0;
-    color: #666;
+    color: #556c75;
     font-size: 14px;
 }
 
-.login-form {
-    margin-bottom: 30px;
-}
-
+/* Сообщение об ошибке */
 .error-message {
-    background: #fee;
-    color: #c53030;
+    background: rgba(220, 53, 69, 0.1); /* Легкий красный фон */
+    color: #dc3545;
     padding: 12px;
-    border-radius: 6px;
+    border-radius: 12px;
     margin-bottom: 20px;
-    border: 1px solid #feb2b2;
+    border: 1px solid rgba(220, 53, 69, 0.4);
     font-size: 14px;
 }
 
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-label {
-    display: block;
-    margin-bottom: 6px;
-    color: #333;
-    font-weight: 500;
-    font-size: 14px;
-}
-
+/* Поля ввода (input) */
 .form-input {
     width: 100%;
-    padding: 12px 16px;
-    border: 2px solid #e2e8f0;
-    border-radius: 6px;
+    /* Стили, схожие с полями в OrderForm */
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(90, 200, 250, 0.4);
     font-size: 16px;
-    transition: border-color 0.2s ease;
-    box-sizing: border-box;
+    outline: none;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.6);
+    color: #1a3c47;
+    box-sizing: border-box; /* Важно для корректной ширины */
 }
 
 .form-input:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    /* Стили фокуса из OrderForm */
+    border-color: #00c3ff;
+    box-shadow: 0 0 8px rgba(0, 195, 255, 0.4);
+    background: rgba(255, 255, 255, 0.95);
 }
 
 .form-input:disabled {
-    background-color: #f7fafc;
+    background-color: #f5f5f5;
     cursor: not-allowed;
+    opacity: 0.7;
 }
 
-.password-input-container {
-    position: relative;
-}
-
-.password-toggle {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    padding: 4px;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-}
-
-.password-toggle:hover {
-    background-color: #edf2f7;
-}
-
-.password-toggle:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-}
-
+/* Кнопка входа */
 .login-button {
     width: 100%;
-    padding: 14px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    /* Стили, схожие с кнопкой в OrderForm */
+    background: linear-gradient(135deg, #5ac8fa, #00c3ff);
     border: none;
-    border-radius: 6px;
-    font-size: 16px;
+    color: white;
     font-weight: 600;
+    padding: 14px;
+    border-radius: 16px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    font-size: 16px;
+    transition: all 0.3s ease;
 }
 
 .login-button:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #00c3ff, #5ac8fa);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0, 195, 255, 0.4);
 }
 
 .login-button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
+    background: #a1b2c5; /* Нейтральный цвет для отключенной кнопки */
+    box-shadow: none;
 }
 
-.loading-spinner {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
+/* Стили для кнопки переключения видимости пароля */
+.password-toggle {
+    /* Убираем старые стили и делаем её более легкой */
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0;
+    right: 14px; /* Позиционируем с учетом нового паддинга */
+    top: 50%;
+    transform: translateY(-50%);
+    position: absolute;
 }
 
-.spinner {
-    width: 16px;
-    height: 16px;
-    border: 2px solid transparent;
-    border-top: 2px solid white;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+.password-toggle:hover {
+    background: none; /* Убираем ховер эффект */
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
+/* Секция демо-доступа */
 .demo-section {
-    margin-bottom: 30px;
+    margin-top: 24px; /* Отступ сверху */
+    margin-bottom: 24px;
 }
 
 .demo-title {
-    text-align: center;
-    margin: 0 0 15px 0;
-    color: #666;
+    color: #556c75;
     font-size: 14px;
     font-weight: 500;
 }
 
 .demo-buttons {
     display: flex;
-    gap: 10px;
+    gap: 12px; /* Увеличиваем расстояние между кнопками */
     justify-content: center;
 }
 
 .demo-button {
-    padding: 8px 16px;
-    border: 2px solid #e2e8f0;
-    border-radius: 6px;
-    background: white;
-    color: #333;
-    font-size: 12px;
+    padding: 10px 18px; /* Немного увеличиваем размер */
+    border: 1px solid rgba(90, 200, 250, 0.4); /* Используем стиль бордера OrderForm */
+    border-radius: 14px; /* Скругление */
+    background: rgba(255, 255, 255, 0.6);
+    color: #1a3c47;
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .demo-button:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(100, 180, 220, 0.2);
 }
 
+.demo-button:disabled {
+    opacity: 0.6;
+}
+
+/* Цвета для кнопок демо-доступа */
 .demo-button.manager:hover:not(:disabled) {
-    border-color: #667eea;
-    color: #667eea;
+    border-color: #5ac8fa;
+    color: #5ac8fa;
 }
 
 .demo-button.admin:hover:not(:disabled) {
@@ -203,35 +184,15 @@
     color: #ed8936;
 }
 
-.demo-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
+/* Футер */
 .login-footer {
     text-align: center;
     padding-top: 20px;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid rgba(90, 200, 250, 0.2); /* Используем легкий разделитель */
 }
 
 .login-footer p {
     margin: 0;
-    color: #999;
+    color: #a1b2c5;
     font-size: 12px;
-}
-
-/* Адаптивность */
-@media (max-width: 480px) {
-    .login-card {
-        padding: 30px 20px;
-        margin: 10px;
-    }
-
-    .demo-buttons {
-        flex-direction: column;
-    }
-
-    .demo-button {
-        width: 100%;
-    }
 }

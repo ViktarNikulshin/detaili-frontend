@@ -21,6 +21,7 @@ export interface CalendarEvent {
     start: Date;
     end: Date;
     clientName: string;
+    clientPhone: string;
     carBrand: CarBrand;
     carModel: CarModel;
     status: string;

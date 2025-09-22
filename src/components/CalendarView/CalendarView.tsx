@@ -64,6 +64,7 @@ const CalendarView: React.FC = () => {
                 start: new Date(order.executionDate),
                 end: new Date(moment(order.executionDate).add(1, 'hour').toDate()),
                 clientName: order.clientName,
+                clientPhone: order.clientPhone,
                 carBrand: order.carBrand,
                 carModel: order.carModel,
                 workTypeIds: order.workTypeIds,

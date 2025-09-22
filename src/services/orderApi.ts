@@ -23,8 +23,8 @@ export const orderAPI = {
     create: (order: {
         clientName: string;
         clientPhone: string;
-        carBrand: CarBrand;
-        carModel: CarModel;
+        carBrand: CarBrand | null;
+        carModel: CarModel | null;
         vin: string;
         workTypeIds: number[];
         executionDate: string
@@ -32,8 +32,8 @@ export const orderAPI = {
     update: (id: string, order: {
         clientName: string;
         clientPhone: string;
-        carBrand: CarBrand;
-        carModel: CarModel;
+        carBrand: CarBrand | null;
+        carModel: CarModel | null;
         vin: string;
         workTypeIds: number[];
         executionDate: string

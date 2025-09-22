@@ -233,10 +233,6 @@ const OrderForm: React.FC = () => {
                 workTypeIds: data.workTypeIds || [],
                 masterIds: data.masterIds || [],
             };
-            if (!carBrandObj || !carModelObj) {
-                alert("Пожалуйста, выберите марку и модель автомобиля.");
-                return; // Останавливаем отправку формы, если марка или модель не выбраны
-            }
 
             if (id) {
                 await orderAPI.update(id, dataToSend);

@@ -17,4 +17,15 @@ export const authAPI = {
         const userStr = localStorage.getItem('user');
         return userStr ? JSON.parse(userStr) : null;
     },
+    validateToken: async (token: string) => {
+        try {
+            const response = await orderApi.post(`/auth/validate-token`, { token });
+            // Возвращаем true, если бэкенд подтвердил токен
+            return response.data.isValid;
+        } catch (error) {
+            // В случае ошибки (например, 401 Unauthorized), возвращаем false
+            console.error('Token validation failed:', error);
+            return false;
+        }
+    }
 };

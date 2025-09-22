@@ -36,8 +36,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 const userData = JSON.parse(userDataStr);
                 setUser(userData);
 
-                // Проверяем валидность токена (можно добавить проверку с бэкендом)
-                // authAPI.validateToken(token);
+                authAPI.validateToken(token);
 
             } catch (error) {
                 console.error('Error parsing user data:', error);
