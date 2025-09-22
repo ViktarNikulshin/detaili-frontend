@@ -28,7 +28,10 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, event, onClose, onEdit 
                 </div>
                 <div className="modal-body">
                     <p><strong>Клиент:</strong> {event.clientName}</p>
-                    <p><strong>Марка авто:</strong> {event.carBrand.name}  {event.carModel.name}</p>
+                    <p><strong>Марка авто:</strong>
+                        <strong>Марка авто:</strong>{" "}
+                        {event.carBrand?.name ?? "—"} {event.carModel?.name ?? ""}
+                    </p>
                     <p><strong>Телефон:</strong> {" "}
                         <a href={`tel:${event.clientPhone}`} className="phone-link">
                             {event.clientPhone}

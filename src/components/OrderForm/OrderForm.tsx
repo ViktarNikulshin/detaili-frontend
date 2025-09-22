@@ -13,39 +13,19 @@ import { Order } from "../../types/order";
 
 // ✅ Типы для марок, моделей, работ и мастеров
 interface CarBrand {
-    id: string;
+    id: number;
     name: string;
 }
 
 interface CarModel {
-    id: string;
+    id: number;
     name: string;
-    brand_id: string;
 }
 
 interface WorkType {
     id: number;
     name: string;
 }
-
-interface Master {
-    id: number;
-    firstName: string;
-    lastName: string;
-}
-
-type OrderFormData = {
-    clientName: string;
-    clientPhone: string;
-    carBrand: CarBrand | null;
-    carModel: CarModel | null;
-    vin: string;
-    workTypeIds: number[];
-    masterIds: number[];
-    executionDate: string;
-    orderCost: number;
-    executionTimeByMaster?: string | null;
-};
 
 interface OrderFormValues {
     clientName: string;
@@ -132,9 +112,9 @@ const OrderForm: React.FC = () => {
             } catch (error) {
                 console.error("Ошибка загрузки марок:", error);
                 setBrands([
-                    { id: "1", name: "Audi" },
-                    { id: "2", name: "BMW" },
-                    { id: "3", name: "Mercedes-Benz" },
+                    { id: 1, name: "Audi" },
+                    { id: 2, name: "BMW" },
+                    { id: 3, name: "Mercedes-Benz" },
                 ]);
             }
         };
@@ -166,8 +146,8 @@ const OrderForm: React.FC = () => {
             } catch (error) {
                 console.error("Ошибка загрузки моделей:", error);
                 setModels([
-                    { id: "1", name: "Model 1", brand_id: selectedBrandId },
-                    { id: "2", name: "Model 2", brand_id: selectedBrandId },
+                    { id: 1, name: "Model 1"},
+                    { id: 2, name: "Model 2"},
                 ]);
             } finally {
                 setModelsLoading(false);
@@ -223,8 +203,8 @@ const OrderForm: React.FC = () => {
     const onSubmit: SubmitHandler<OrderFormValues> = async (data) => {
         try {
             // Преобразуем ID в объекты для отправки
-            const carBrandObj = brands.find(brand => brand.id === data.carBrand) || null;
-            const carModelObj = models.find(model => model.id === data.carModel) || null;
+            const carBrandObj = brands.find(brand => brand.id.toString() === data.carBrand) || null;
+            const carModelObj = models.find(model => model.id.toString() === data.carModel) || null;
 
             const dataToSend = {
                 ...data,

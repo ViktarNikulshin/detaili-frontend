@@ -2,8 +2,8 @@ export interface Order {
     id?: number;
     clientName: string;
     clientPhone: string;
-    carBrand: CarBrand;
-    carModel: CarModel;
+    carBrand: CarBrand | null;
+    carModel: CarModel | null;
     vin: string;
     workTypeIds: number[];
     masterIds: number[];
@@ -22,8 +22,8 @@ export interface CalendarEvent {
     end: Date;
     clientName: string;
     clientPhone: string;
-    carBrand: CarBrand;
-    carModel: CarModel;
+    carBrand: CarBrand | null;
+    carModel: CarModel | null;
     status: string;
 }
 export interface CarBrand {

@@ -60,7 +60,7 @@ const CalendarView: React.FC = () => {
 
             const calendarEvents = response.data.map((order: Order) => ({
                 id: order.id!,
-                title: `${order.clientName} - ${order.carBrand.name} - ${order.carModel.name}`,
+                title: `${order.clientName} - ${order.carBrand?.name ?? ""} - ${order.carModel?.name ?? ""}`,
                 start: new Date(order.executionDate),
                 end: new Date(moment(order.executionDate).add(1, 'hour').toDate()),
                 clientName: order.clientName,
