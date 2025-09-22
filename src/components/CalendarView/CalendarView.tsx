@@ -7,6 +7,7 @@ import { orderAPI } from '../../services/orderApi';
 import { CalendarEvent, Order } from '../../types/order';
 import { useAuth } from '../../contexts/AuthContext';
 import './CalendarView.css';
+import EventModal from "../EventModal/EventModal";
 
 const localizer = momentLocalizer(moment);
 
@@ -18,6 +19,9 @@ const CalendarView: React.FC = () => {
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
     const { user } = useAuth();
     const navigate = useNavigate();
+    const [showModal, setShowModal] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+
 
     useEffect(() => {
         loadCalendarEvents();
@@ -56,11 +60,12 @@ const CalendarView: React.FC = () => {
 
             const calendarEvents = response.data.map((order: Order) => ({
                 id: order.id!,
-                title: `${order.clientName} - ${order.carBrand}`,
+                title: `${order.clientName} - ${order.carBrand.name} - ${order.carModel.name}`,
                 start: new Date(order.executionDate),
                 end: new Date(moment(order.executionDate).add(1, 'hour').toDate()),
                 clientName: order.clientName,
                 carBrand: order.carBrand,
+                carModel: order.carModel,
                 workTypeIds: order.workTypeIds,
                 status: order.status,
                 allDay: false,
@@ -121,7 +126,14 @@ const CalendarView: React.FC = () => {
     };
 
     const handleSelectEvent = (event: CalendarEvent) => {
-        navigate(`/orders/${event.id}`);
+        // Вместо навигации, устанавливаем выбранное событие и открываем модальное окно
+        setSelectedEvent(event);
+        setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setSelectedEvent(null);
     };
 
     if (loading) {
@@ -190,6 +202,12 @@ const CalendarView: React.FC = () => {
                     <span>Отменены</span>
                 </div>
             </div>
+            <EventModal
+                isOpen={showModal}
+                event={selectedEvent}
+                onClose={handleCloseModal}
+                onEdit={() => navigate(`/orders/${selectedEvent?.id}`)} // Возвращаем навигацию на страницу редактирования
+            />
         </div>
     );
 };

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {Order} from "../types/order";
+import {CarBrand, CarModel, Order} from "../types/order";
 
 const API_BASE_URL = 'http://localhost:8080/detailing/api';
 
@@ -23,8 +23,8 @@ export const orderAPI = {
     create: (order: {
         clientName: string;
         clientPhone: string;
-        carBrand: string;
-        carModel: string;
+        carBrand: CarBrand;
+        carModel: CarModel;
         vin: string;
         workTypeIds: number[];
         executionDate: string
@@ -32,8 +32,8 @@ export const orderAPI = {
     update: (id: string, order: {
         clientName: string;
         clientPhone: string;
-        carBrand: string;
-        carModel: string;
+        carBrand: CarBrand;
+        carModel: CarModel;
         vin: string;
         workTypeIds: number[];
         executionDate: string
