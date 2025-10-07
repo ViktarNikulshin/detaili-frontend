@@ -13,9 +13,12 @@
 /* Заголовок и панель управления */
 .calendar-header {
     display: flex;
-    flex-direction: column;
-    gap: 12px;
-    align-items: flex-start;
+    /* Изменено: теперь элементы будут располагаться по горизонтали */
+    flex-direction: row;
+    gap: 30px; /* Увеличиваем расстояние между основными блоками */
+    align-items: center; /* Выравнивание по центру вертикально */
+    flex-wrap: wrap; /* Разрешаем перенос на маленьких экранах */
+
     background: rgba(255, 255, 255, 0.65);
     backdrop-filter: blur(12px);
     padding: 16px 20px;
@@ -30,7 +33,49 @@
     background: linear-gradient(90deg, #5ac8fa, #007aff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    flex-shrink: 0; /* Не сжимать заголовок */
 }
+
+/* --- НОВЫЕ СТИЛИ ДЛЯ ФИЛЬТРОВ --- */
+
+.calendar-filters {
+    display: flex;
+    gap: 20px; /* Расстояние между фильтрами (Мастер и Статус) */
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.calendar-filters label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #3c6e71;
+    margin-right: 5px;
+    flex-shrink: 0;
+}
+
+.calendar-filters select {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #c2e0f1;
+    background-color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    color: #1a3c47;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    min-width: 150px;
+}
+
+.calendar-filters select:hover {
+    border-color: #5ac8fa;
+}
+
+.calendar-filters select:focus {
+    outline: none;
+    border-color: #007aff;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+}
+
+/* --------------------------------- */
 
 .calendar-actions {
     display: flex;
@@ -55,10 +100,14 @@
 }
 
 .calendar-info {
+    /* Изменено: отталкиваем информацию вправо */
+    margin-left: auto;
+
     display: flex;
     gap: 20px;
     font-size: 14px;
     color: #3c6e71;
+    flex-shrink: 0; /* Не сжимать блок */
 }
 
 /* Обёртка календаря */

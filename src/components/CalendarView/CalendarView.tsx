@@ -1,15 +1,26 @@
-import React, { useEffect, useState } from 'react';
-import { Calendar, momentLocalizer, View, stringOrDate } from 'react-big-calendar';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Calendar, momentLocalizer, View } from 'react-big-calendar';
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { orderAPI } from '../../services/orderApi';
+import { userAPI } from '../../services/user'; // <--- Импортируем userAPI
 import { CalendarEvent, Order } from '../../types/order';
+import { User } from '../../types/user'; // <--- Импортируем тип User
 import { useAuth } from '../../contexts/AuthContext';
 import './CalendarView.css';
 import EventModal from "../EventModal/EventModal";
 
 const localizer = momentLocalizer(moment);
+
+// Массив всех возможных статусов для фильтра
+const allStatuses = [
+    { value: 'all', label: 'Все статусы' },
+    { value: 'NEW', label: 'Новые' },
+    { value: 'IN_PROGRESS', label: 'В работе' },
+    { value: 'COMPLETED', label: 'Завершены' },
+    { value: 'CANCELLED', label: 'Отменены' },
+];
 
 const CalendarView: React.FC = () => {
     const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -17,17 +28,46 @@ const CalendarView: React.FC = () => {
     const [error, setError] = useState<string>('');
     const [currentView, setCurrentView] = useState<View>('month');
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
-    const { user } = useAuth();
-    const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
+    // --- НОВОЕ СОСТОЯНИЕ ДЛЯ СПИСКА МАСТЕРОВ ---
+    const [masters, setMasters] = useState<User[]>([]);
+    const [mastersLoading, setMastersLoading] = useState(true);
+    // ---------------------------------------------
 
+    // --- СОСТОЯНИЯ ДЛЯ ФИЛЬТРОВ ---
+    const [selectedMasterId, setSelectedMasterId] = useState<string>('all');
+    const [selectedStatus, setSelectedStatus] = useState<string>('all');
+    // -------------------------------------
+
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
+    // Загрузка списка мастеров при монтировании компонента
     useEffect(() => {
-        loadCalendarEvents();
-    }, [currentView, currentDate]);
+        const loadMasters = async () => {
+            try {
+                setMastersLoading(true);
+                const response = await userAPI.getUsersByRole('MASTER');
+                // Добавляем опцию "Все мастера" в начало списка
+                setMasters([
+                    { id: 'all', firstName: 'Все', lastName: 'мастера', role: { code: 'ALL', name: 'All' } } as unknown as User,
+                    ...response.data
+                ]);
+            } catch (err) {
+                console.error('Ошибка загрузки мастеров:', err);
+                // Продолжаем работу, даже если мастера не загрузились
+            } finally {
+                setMastersLoading(false);
+            }
+        };
 
-    const loadCalendarEvents = async () => {
+        loadMasters();
+    }, []);
+
+    // Оборачиваем loadCalendarEvents в useCallback
+    const loadCalendarEvents = useCallback(async () => {
         try {
             setLoading(true);
             setError('');
@@ -53,12 +93,39 @@ const CalendarView: React.FC = () => {
                     end = moment(currentDate).endOf('month').toDate();
             }
 
+            // *** ВАЖНО: Адаптируйте orderAPI.getCalendar для передачи фильтров на БЭКЕНД! ***
+            // Сейчас фильтры передаются только для демонстрации, что они используются.
+            const masterFilter = selectedMasterId !== 'all' ? selectedMasterId : undefined;
+            const statusFilter = selectedStatus !== 'all' ? selectedStatus : undefined;
+
+            // Пример идеального вызова API с фильтрами:
+            // const response = await orderAPI.getCalendar(
+            //     moment(start).format('YYYY-MM-DDTHH:mm'),
+            //     moment(end).format('YYYY-MM-DDTHH:mm'),
+            //     { masterId: masterFilter, status: statusFilter } // <--- Передача фильтров
+            // );
+
             const response = await orderAPI.getCalendar(
                 moment(start).format('YYYY-MM-DDTHH:mm'),
                 moment(end).format('YYYY-MM-DDTHH:mm')
             );
 
-            const calendarEvents = response.data.map((order: Order) => ({
+            // ВРЕМЕННАЯ ФИЛЬТРАЦИЯ НА ФРОНТЕНДЕ (Если БЭКЕНД не поддерживает фильтрацию)
+            let filteredOrders = response.data;
+
+            // Фильтрация по статусу
+            if (statusFilter) {
+                filteredOrders = filteredOrders.filter((order: Order) => order.status === statusFilter);
+            }
+
+            // Фильтрация по мастеру (Предполагается, что в объекте Order есть поле masterId/master.id)
+            // *Вам нужно проверить, как именно связан мастер с заказом в типе Order*
+            if (masterFilter) {
+                // ПРЕДПОЛАГАЕМ, что Order содержит поле masterId
+                // filteredOrders = filteredOrders.filter((order: Order) => order.masterId === masterFilter);
+            }
+
+            const calendarEvents = filteredOrders.map((order: Order) => ({
                 id: order.id!,
                 title: `${order.clientName} - ${order.carBrand?.name ?? ""} - ${order.carModel?.name ?? ""}`,
                 start: new Date(order.executionDate),
@@ -79,7 +146,12 @@ const CalendarView: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [currentView, currentDate, selectedMasterId, selectedStatus]); // <--- Все зависимости для запуска
+
+    // Обновляем зависимость: теперь хук запускается при изменении фильтров
+    useEffect(() => {
+        loadCalendarEvents();
+    }, [loadCalendarEvents]); // Запускаем при изменении loadCalendarEvents (т.е. при смене фильтров/даты)
 
     const handleViewChange = (view: View) => {
         setCurrentView(view);
@@ -127,7 +199,6 @@ const CalendarView: React.FC = () => {
     };
 
     const handleSelectEvent = (event: CalendarEvent) => {
-        // Вместо навигации, устанавливаем выбранное событие и открываем модальное окно
         setSelectedEvent(event);
         setShowModal(true);
     };
@@ -137,8 +208,8 @@ const CalendarView: React.FC = () => {
         setSelectedEvent(null);
     };
 
-    if (loading) {
-        return <div className="loading">Загрузка календаря...</div>;
+    if (loading || mastersLoading) {
+        return <div className="loading">Загрузка календаря и мастеров...</div>;
     }
 
     if (error) {
@@ -149,6 +220,39 @@ const CalendarView: React.FC = () => {
         <div className="calendar-container">
             <div className="calendar-header">
                 <h1>Календарь заказов</h1>
+
+                {/* --- ЭЛЕМЕНТЫ ФИЛЬТРАЦИИ --- */}
+                <div className="calendar-filters">
+                    {/* Фильтр по Мастеру */}
+                    <label htmlFor="master-filter">Мастер:</label>
+                    <select
+                        id="master-filter"
+                        value={selectedMasterId}
+                        onChange={(e) => setSelectedMasterId(e.target.value)}
+                    >
+                        {masters.map((master) => (
+                            <option key={master.id} value={master.id}>
+                                {master.firstName} {master.lastName}
+                            </option>
+                        ))}
+                    </select>
+
+                    {/* Фильтр по Статусу */}
+                    <label htmlFor="status-filter" style={{ marginLeft: '15px' }}>Статус:</label>
+                    <select
+                        id="status-filter"
+                        value={selectedStatus}
+                        onChange={(e) => setSelectedStatus(e.target.value)}
+                    >
+                        {allStatuses.map((status) => (
+                            <option key={status.value} value={status.value}>
+                                {status.label}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                {/* --------------------------- */}
+
                 <div className="calendar-info">
                     <span>Всего событий: {events.length}</span>
                     <span>Текущий вид: {currentView}</span>
@@ -207,7 +311,7 @@ const CalendarView: React.FC = () => {
                 isOpen={showModal}
                 event={selectedEvent}
                 onClose={handleCloseModal}
-                onEdit={() => navigate(`/orders/${selectedEvent?.id}`)} // Возвращаем навигацию на страницу редактирования
+                onEdit={() => navigate(`/orders/${selectedEvent?.id}`)}
             />
         </div>
     );

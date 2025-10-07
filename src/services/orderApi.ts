@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {CarBrand, CarModel, Order} from "../types/order";
 
-const API_BASE_URL = 'http://localhost:8080/detailing/api';
+const API_BASE_URL = '/detailing/api';
 
 export const orderApi = axios.create({
     baseURL: API_BASE_URL,
