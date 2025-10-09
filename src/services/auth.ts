@@ -1,9 +1,28 @@
 import { LoginRequest, LoginResponse } from '../types/user';
-import { orderApi } from './orderApi';
+import axios from "axios";
+
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+
+export const authApi = axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
+// Интерцептор для добавления токена
+authApi.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
 
 export const authAPI = {
+
     login: async (credentials: LoginRequest): Promise<LoginResponse> => {
-        const response = await orderApi.post<LoginResponse>('/auth/login', credentials);
+        const response = await authApi.post<LoginResponse>('/auth/login', credentials);
         return response.data;
     },
 
@@ -19,7 +38,7 @@ export const authAPI = {
     },
     validateToken: async (token: string) => {
         try {
-            const response = await orderApi.post(`/auth/validate-token`, { token });
+            const response = await authApi.post(`/auth/validate-token`, { token });
             // Возвращаем true, если бэкенд подтвердил токен
             return response.data.isValid;
         } catch (error) {

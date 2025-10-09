@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useForm, Controller, SubmitHandler, FieldValues } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useParams } from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import { orderAPI } from "../../services/orderApi";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
@@ -10,6 +10,9 @@ import "./OrderForm.css";
 import { userAPI } from "../../services/user";
 import { User } from "../../types/user";
 import { Order } from "../../types/order";
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { parseISO, format } from 'date-fns';
 
 interface CarBrand {
     id: number;
@@ -63,6 +66,7 @@ const OrderForm: React.FC = () => {
     const [workTypes, setWorkTypes] = useState<WorkType[]>([]);
     const [masters, setMasters] = useState<User[]>([]);
     const [modelsLoading, setModelsLoading] = useState(false);
+    const navigate = useNavigate();
 
     const {
         control,
@@ -94,7 +98,6 @@ const OrderForm: React.FC = () => {
     useEffect(() => {
         const loadInitialData = async () => {
             try {
-                // Carregar marcas de carros
                 const brandsResponse = await orderAPI.getCarBrands();
                 const carBrands = brandsResponse.data
                     .filter((brand: any) => brand.name)
@@ -105,11 +108,8 @@ const OrderForm: React.FC = () => {
                     .sort((a: CarBrand, b: CarBrand) => a.name.localeCompare(b.name));
                 setBrands(carBrands);
 
-                // Carregar tipos de trabalho
                 const workTypesResponse = await orderAPI.getDictionaryByType("WORK_TYPE");
                 setWorkTypes(workTypesResponse.data);
-
-                // Carregar mestres
                 const mastersResponse = await userAPI.getUsersByRole("MASTER");
                 const mastersData = Array.isArray(mastersResponse.data) ? mastersResponse.data : [mastersResponse.data];
                 setMasters(mastersData);
@@ -198,6 +198,7 @@ const OrderForm: React.FC = () => {
                 await orderAPI.create(dataToSend);
                 alert("Заказ создан!");
             }
+            navigate('/')
         } catch (error) {
             console.error("Ошибка сохранения:", error);
             alert("Произошла ошибка при сохранении заказа.");
@@ -255,23 +256,23 @@ const OrderForm: React.FC = () => {
             {errors.clientPhone && <span className="error-text">{errors.clientPhone.message}</span>}
 
             <div className="form-group">
-            <select {...register("carBrand")} className={errors.carBrand ? "error" : ""}>
-                <option value="">Выберите марку автомобиля</option>
-                {brands.map((brand) => (
-                    <option key={brand.id} value={brand.id}>{brand.name}</option>
-                ))}
-            </select>
+                <select {...register("carBrand")} className={errors.carBrand ? "error" : ""}>
+                    <option value="">Выберите марку автомобиля</option>
+                    {brands.map((brand) => (
+                        <option key={brand.id} value={brand.id}>{brand.name}</option>
+                    ))}
+                </select>
                 {errors.carBrand && <span className="error-text">{errors.carBrand.message}</span>}
             </div>
 
             <div className="form-group">
-            <select {...register("carModel")} disabled={!selectedBrandId || modelsLoading} className={errors.carModel ? "error" : ""}>
-                <option value="">{modelsLoading ? "Загрузка моделей..." : "Выберите модель автомобиля"}</option>
-                {models.map((model) => (
-                    <option key={model.id} value={model.id}>{model.name}</option>
-                ))}
-            </select>
-            {errors.carModel && <span className="error-text">{errors.carModel.message}</span>}
+                <select {...register("carModel")} disabled={!selectedBrandId || modelsLoading} className={errors.carModel ? "error" : ""}>
+                    <option value="">{modelsLoading ? "Загрузка моделей..." : "Выберите модель автомобиля"}</option>
+                    {models.map((model) => (
+                        <option key={model.id} value={model.id}>{model.name}</option>
+                    ))}
+                </select>
+                {errors.carModel && <span className="error-text">{errors.carModel.message}</span>}
             </div>
 
             <input type="text" placeholder="VIN (необязательно)" {...register("vin")} className={errors.vin ? "error" : ""} />
@@ -333,11 +334,46 @@ const OrderForm: React.FC = () => {
                 </div>
             )}
 
-            <input type="datetime-local" {...register("executionDate")} className={errors.executionDate ? "error" : ""} />
-            {errors.executionDate && <span className="error-text">{errors.executionDate.message}</span>}
+            {/* New section for Date and Cost, side-by-side */}
+            <div className="form-group order-form-date-cost">
+                <div className="form-group-half">
+                    <label className="date-time-label">
+                        Дата и время выполнения 📅:
+                    </label>
+                    <Controller
+                        name="executionDate"
+                        control={control}
+                        render={({ field }) => (
+                            <DatePicker
+                                selected={field.value ? parseISO(field.value) : null}
+                                onChange={(date: Date | null) => {
+                                    const isoString = date ? format(date, "yyyy-MM-dd'T'HH:mm") : "";
+                                    field.onChange(isoString);
+                                }}
+                                onBlur={field.onBlur}
+                                showTimeSelect
+                                timeFormat="HH:mm"
+                                dateFormat="dd.MM.yyyy HH:mm"
+                                placeholderText="Выберите дату"
+                                className={errors.executionDate ? "error" : ""}
+                            />
+                        )}
+                    />
+                    {errors.executionDate && <span className="error-text">{errors.executionDate.message}</span>}
+                </div>
 
-            <input type="number" placeholder="Стоимость заказа" {...register("orderCost", { valueAsNumber: true })} className={errors.orderCost ? "error" : ""} />
-            {errors.orderCost && <span className="error-text">{errors.orderCost.message}</span>}
+                <div className="form-group-half">
+                    <label htmlFor="orderCost">Стоимость заказа:</label>
+                    <input
+                        id="orderCost"
+                        type="number"
+                        placeholder="Стоимость заказа"
+                        {...register("orderCost", { valueAsNumber: true })}
+                        className={errors.orderCost ? "error" : ""}
+                    />
+                    {errors.orderCost && <span className="error-text">{errors.orderCost.message}</span>}
+                </div>
+            </div>
 
             <input type="text" placeholder="Время выполнения (например, 2 часа)" {...register("executionTimeByMaster")} className={errors.executionTimeByMaster ? "error" : ""} />
             {errors.executionTimeByMaster && <span className="error-text">{errors.executionTimeByMaster.message}</span>}

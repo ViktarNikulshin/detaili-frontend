@@ -154,38 +154,8 @@ const Login: React.FC = () => {
                     </button>
                 </form>
 
-                <div className="demo-section">
-                    <p className="demo-title">Демо доступ:</p>
-                    <div className="demo-buttons">
-                        <button
-                            type="button"
-                            className="demo-button manager"
-                            onClick={() => handleDemoLogin('MANAGER')}
-                            disabled={loading}
-                        >
-                            Менеджер
-                        </button>
-                        <button
-                            type="button"
-                            className="demo-button admin"
-                            onClick={() => handleDemoLogin('ADMIN')}
-                            disabled={loading}
-                        >
-                            Администратор
-                        </button>
-                        <button
-                            type="button"
-                            className="demo-button master"
-                            onClick={() => handleDemoLogin('MASTER')}
-                            disabled={loading}
-                        >
-                            Мастер
-                        </button>
-                    </div>
-                </div>
-
                 <div className="login-footer">
-                    <p>© 2024 Детейлинг Сервис. Все права защищены.</p>
+                    <p>© 2025 Детейлинг Сервис CRYSTAL_CAR. Все права защищены.</p>
                 </div>
             </div>
         </div>

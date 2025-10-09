@@ -4,7 +4,7 @@ export interface User {
     firstName: string;
     lastName: string;
     phone: string;
-    role: 'MANAGER' | 'ADMIN' | 'MASTER';
+    roles: Role [];
 }
 
 export interface LoginRequest {
@@ -22,4 +22,9 @@ export interface AuthState {
     user: User | null;
     loading: boolean;
     error: string | null;
+}
+
+export interface Role {
+    id: number;
+    name: string;
 }

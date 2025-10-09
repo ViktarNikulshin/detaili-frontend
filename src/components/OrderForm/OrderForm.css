@@ -33,6 +33,32 @@
     background: rgba(255, 255, 255, 0.95);
 }
 
+/* Стилизация DatePicker для соответствия остальным input'ам */
+.order-form .react-datepicker-wrapper,
+.order-form .react-datepicker__input-container {
+    width: 100%;
+}
+
+.order-form .react-datepicker__input-container input {
+    /* Переопределяем стили для инпута DatePicker */
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(90, 200, 250, 0.4);
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.6);
+    color: #1a3c47;
+    box-sizing: border-box; /* Важно, чтобы padding не увеличивал ширину */
+}
+
+.order-form .react-datepicker__input-container input:focus {
+    border-color: #00c3ff;
+    box-shadow: 0 0 8px rgba(0, 195, 255, 0.4);
+    background: rgba(255, 255, 255, 0.95);
+}
+
 /* Текстовая область */
 .order-form textarea {
     min-height: 100px;
@@ -70,7 +96,8 @@
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 15px; /* Уменьшаем отступ, так как в order-form уже есть gap */
+    /* Удаляем общую margin-bottom, так как контейнер order-form уже управляет промежутками */
 }
 
 .form-group select {
@@ -82,6 +109,7 @@
     background-color: white;
     font-family: inherit;
     color: #1a3c47;
+    box-sizing: border-box;
 }
 
 .form-group select:disabled {
@@ -103,7 +131,8 @@
 
 /* Label for the checkbox group */
 .checkbox-group label,
-.form-group label {
+.form-group label,
+.date-time-label { /* Добавляем новый класс для label */
     color: #1a3c47;
     font-size: 16px;
     font-weight: 600;
@@ -185,4 +214,35 @@
 .selected-masters-display p {
     margin: 0;
     font-weight: 500;
+}
+
+/* ------------------------------------------- */
+/* НОВЫЕ СТИЛИ ДЛЯ ДАТЫ И СТОИМОСТИ (В ОДНУ СТРОКУ) */
+/* ------------------------------------------- */
+
+.order-form-date-cost {
+    display: flex;
+    gap: 18px; /* Используем тот же gap, что и в order-form */
+    width: 100%;
+}
+
+.order-form-date-cost .form-group-half {
+    flex: 1; /* Обеспечивает 50% ширины */
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Отступ между label и input внутри половины */
+}
+
+/* Убеждаемся, что инпут стоимости тоже соответствует стилю */
+.order-form-date-cost .form-group-half input[type="number"] {
+    /* Наследует общие стили .order-form input, но добавляем box-sizing */
+    box-sizing: border-box;
+    width: 100%;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 550px) {
+    .order-form-date-cost {
+        flex-direction: column; /* На маленьких экранах переносим в столбец */
+    }
 }

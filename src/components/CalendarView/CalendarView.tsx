@@ -99,33 +99,13 @@ const CalendarView: React.FC = () => {
             const statusFilter = selectedStatus !== 'all' ? selectedStatus : undefined;
 
             // Пример идеального вызова API с фильтрами:
-            // const response = await orderAPI.getCalendar(
-            //     moment(start).format('YYYY-MM-DDTHH:mm'),
-            //     moment(end).format('YYYY-MM-DDTHH:mm'),
-            //     { masterId: masterFilter, status: statusFilter } // <--- Передача фильтров
-            // );
-
             const response = await orderAPI.getCalendar(
                 moment(start).format('YYYY-MM-DDTHH:mm'),
-                moment(end).format('YYYY-MM-DDTHH:mm')
+                moment(end).format('YYYY-MM-DDTHH:mm'),
+                { masterId: masterFilter, status: statusFilter } // <--- Передача фильтров
             );
 
-            // ВРЕМЕННАЯ ФИЛЬТРАЦИЯ НА ФРОНТЕНДЕ (Если БЭКЕНД не поддерживает фильтрацию)
-            let filteredOrders = response.data;
-
-            // Фильтрация по статусу
-            if (statusFilter) {
-                filteredOrders = filteredOrders.filter((order: Order) => order.status === statusFilter);
-            }
-
-            // Фильтрация по мастеру (Предполагается, что в объекте Order есть поле masterId/master.id)
-            // *Вам нужно проверить, как именно связан мастер с заказом в типе Order*
-            if (masterFilter) {
-                // ПРЕДПОЛАГАЕМ, что Order содержит поле masterId
-                // filteredOrders = filteredOrders.filter((order: Order) => order.masterId === masterFilter);
-            }
-
-            const calendarEvents = filteredOrders.map((order: Order) => ({
+            const calendarEvents = response.data.map((order: Order) => ({
                 id: order.id!,
                 title: `${order.clientName} - ${order.carBrand?.name ?? ""} - ${order.carModel?.name ?? ""}`,
                 start: new Date(order.executionDate),
