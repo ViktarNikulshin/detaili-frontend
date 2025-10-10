@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './EventModal.css';
 import { CalendarEvent } from '../../types/order';
 import moment from 'moment';
+import { useAuth } from '../../contexts/AuthContext';
+import { orderAPI } from '../../services/orderApi';
 
 interface EventModalProps {
     isOpen: boolean;
@@ -17,6 +19,23 @@ const EventModal: React.FC<EventModalProps> = ({
                                                    onClose,
                                                    onEdit
                                                }) => {
+    const { user } = useAuth();
+    const [isTaking, setIsTaking] = useState(false);
+
+    const isMaster = !!user?.roles?.some(role => role.name === 'MASTER');
+
+    const handleTakeToWork = async () => {
+        if (!event || !user) return;
+        try {
+            setIsTaking(true);
+            await orderAPI.changeStatus(String(event.id), 'IN_PROGRESS', String(user.id));
+            onClose();
+        } catch (error) {
+            console.error('Ошибка смены статуса заказа:', error);
+        } finally {
+            setIsTaking(false);
+        }
+    };
     if (!isOpen || !event) {
         return null;
     }
@@ -60,6 +79,15 @@ const EventModal: React.FC<EventModalProps> = ({
                     </div>
                 </div>
                 <div className="modal-footer">
+                    {isMaster && event.status === 'NEW' && (
+                        <button
+                            className="take-button"
+                            onClick={handleTakeToWork}
+                            disabled={isTaking}
+                        >
+                            {isTaking ? 'Берем…' : 'Взять в работу'}
+                        </button>
+                    )}
                     <button className="edit-button" onClick={onEdit}>Редактировать</button>
                     <button className="close-button-footer" onClick={onClose}>Закрыть</button>
                 </div>

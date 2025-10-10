@@ -70,7 +70,7 @@
     padding-top: 15px;
 }
 
-.edit-button, .close-button-footer {
+.edit-button, .close-button-footer, .take-button {
     padding: 10px 15px;
     border: none;
     border-radius: 5px;
@@ -95,4 +95,34 @@
 
 .close-button-footer:hover {
     background-color: #c82333;
+}
+
+/* MASTER-only take button */
+.take-button {
+    background-color: #28a745;
+    color: white;
+}
+
+.take-button:hover {
+    background-color: #218838;
+}
+
+/* Work types list styles */
+.work-types-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0 0;
+}
+
+.work-types-list li {
+    background-color: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    padding: 6px 10px;
+    border-radius: 16px;
+    font-size: 0.9em;
+    white-space: nowrap;
 }
