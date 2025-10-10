@@ -292,6 +292,7 @@ const CalendarView: React.FC = () => {
                 event={selectedEvent}
                 onClose={handleCloseModal}
                 onEdit={() => navigate(`/orders/${selectedEvent?.id}`)}
+                onStatusChanged={loadCalendarEvents}
             />
         </div>
     );
