@@ -245,3 +245,52 @@
 .logout-btn {
     display: none;
 }
+
+/* ------------------------------------------- */
+/* АДАПТИВНОСТЬ НАВИГАЦИИ                     */
+/* ------------------------------------------- */
+
+@media (max-width: 768px) {
+    .user-role {
+        display: none; /* Скрываем роль пользователя, чтобы экономить место */
+    }
+
+    .nav-brand a {
+        font-size: 18px; /* Чуть меньше заголовок */
+    }
+
+    .nav-user {
+        gap: 6px; /* Компактнее блок пользователя */
+    }
+}
+
+@media (max-width: 550px) {
+    .navigation {
+        padding: 8px 10px;
+        flex-wrap: wrap; /* Разрешаем перенос элементов */
+        row-gap: 8px;
+    }
+
+    .nav-brand a {
+        font-size: 16px;
+        max-width: 160px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    /* На совсем маленьких скрываем имя, оставляем бургер и кнопку */
+    .nav-user span {
+        display: none;
+    }
+
+    .menu-toggle-btn {
+        padding: 8px;
+    }
+
+    .dropdown-menu {
+        width: 140px;
+    }
+}
