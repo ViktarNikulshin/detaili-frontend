@@ -1,6 +1,7 @@
 import React from 'react';
-import './EventModal.css'; // Импортируем стили для модального окна
+import './EventModal.css';
 import { CalendarEvent } from '../../types/order';
+import { User } from '../../types/user';
 import moment from 'moment';
 
 interface EventModalProps {
@@ -8,9 +9,10 @@ interface EventModalProps {
     event: CalendarEvent | null;
     onClose: () => void;
     onEdit: () => void;
+    currentUser?: User | null;
 }
 
-const EventModal: React.FC<EventModalProps> = ({ isOpen, event, onClose, onEdit }) => {
+const EventModal: React.FC<EventModalProps> = ({ isOpen, event, onClose, onEdit, currentUser }) => {
     if (!isOpen || !event) {
         return null;
     }
@@ -28,7 +30,7 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, event, onClose, onEdit 
                 </div>
                 <div className="modal-body">
                     <p><strong>Клиент:</strong> {event.clientName}</p>
-                    <p><strong>Марка авто:</strong>
+                    <p>
                         <strong>Марка авто:</strong>{" "}
                         {event.carBrand?.name ?? "—"} {event.carModel?.name ?? ""}
                     </p>
@@ -37,6 +39,12 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, event, onClose, onEdit 
                             {event.clientPhone}
                         </a></p>
                     <p><strong>Статус:</strong> {event.status}</p>
+                    {currentUser && (
+                        <p>
+                            <strong>Текущий пользователь:</strong>{" "}
+                            {currentUser.firstName} {currentUser.lastName} ({currentUser.roles.map(r => r.name).join(', ')})
+                        </p>
+                    )}
                 </div>
                 <div className="modal-footer">
                     <button className="edit-button" onClick={onEdit}>Редактировать</button>

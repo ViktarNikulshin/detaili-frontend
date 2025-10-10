@@ -4,7 +4,7 @@ import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { orderAPI } from '../../services/orderApi';
-import { userAPI } from '../../services/user'; // <--- Импортируем userAPI
+import { userAPI } from '../../services/user';
 import { CalendarEvent, Order } from '../../types/order';
 import { User } from '../../types/user'; // <--- Импортируем тип User
 import { useAuth } from '../../contexts/AuthContext';
@@ -114,9 +114,7 @@ const CalendarView: React.FC = () => {
                 clientPhone: order.clientPhone,
                 carBrand: order.carBrand,
                 carModel: order.carModel,
-                workTypeIds: order.workTypeIds,
                 status: order.status,
-                allDay: false,
             }));
 
             setEvents(calendarEvents);
@@ -292,6 +290,7 @@ const CalendarView: React.FC = () => {
                 event={selectedEvent}
                 onClose={handleCloseModal}
                 onEdit={() => navigate(`/orders/${selectedEvent?.id}`)}
+                currentUser={user}
             />
         </div>
     );
