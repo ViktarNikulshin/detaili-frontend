@@ -39,10 +39,10 @@ const CalendarView: React.FC = () => {
     // --- СОСТОЯНИЯ ДЛЯ ФИЛЬТРОВ ---
     const [selectedMasterId, setSelectedMasterId] = useState<string>('all');
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
-    // -------------------------------------
 
-    const { user } = useAuth();
+
     const navigate = useNavigate();
+
 
     // Загрузка списка мастеров при монтировании компонента
     useEffect(() => {
@@ -114,7 +114,7 @@ const CalendarView: React.FC = () => {
                 clientPhone: order.clientPhone,
                 carBrand: order.carBrand,
                 carModel: order.carModel,
-                workTypeIds: order.workTypeIds,
+                workTypes: order.workTypes,
                 status: order.status,
                 allDay: false,
             }));

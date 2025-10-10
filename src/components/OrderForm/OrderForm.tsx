@@ -162,7 +162,7 @@ const OrderForm: React.FC = () => {
                     carBrand: order.carBrand?.id?.toString() || "",
                     carModel: order.carModel?.id?.toString() || "",
                     vin: order.vin || "",
-                    workTypeIds: order.workTypeIds || [],
+                    workTypeIds: order.workTypes.map(wt => wt.id).concat() || [],
                     masterIds: order.masterIds || [],
                     executionDate: order.executionDate ? order.executionDate.slice(0, 16) : "",
                     orderCost: order.orderCost || 0,
@@ -181,13 +181,14 @@ const OrderForm: React.FC = () => {
         try {
             const carBrandObj = brands.find(brand => brand.id.toString() === data.carBrand) || null;
             const carModelObj = models.find(model => model.id.toString() === data.carModel) || null;
+            const types =  workTypes.filter(wt => data.workTypeIds.includes(wt.id)) || []
 
             const dataToSend = {
                 ...data,
                 vin: data.vin || "",
                 carBrand: carBrandObj,
                 carModel: carModelObj,
-                workTypeIds: data.workTypeIds || [],
+                workTypes: types,
                 masterIds: data.masterIds || [],
             };
 
