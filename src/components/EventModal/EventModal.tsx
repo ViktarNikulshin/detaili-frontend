@@ -23,8 +23,10 @@ const EventModal: React.FC<EventModalProps> = ({
                                                }) => {
     const { user } = useAuth();
     const [isTaking, setIsTaking] = useState(false);
+    const [isCompleting, setIsCompleting] = useState(false);
 
     const isMaster = !!user?.roles?.some(role => role.name === 'MASTER');
+    const isAdmin = !!user?.roles?.some(role => role.name === 'ADMIN');
 
     const handleTakeToWork = async () => {
         if (!event || !user) return;
@@ -39,6 +41,22 @@ const EventModal: React.FC<EventModalProps> = ({
             console.error('Ошибка смены статуса заказа:', error);
         } finally {
             setIsTaking(false);
+        }
+    };
+
+    const handleComplete = async () => {
+        if (!event || !user) return;
+        try {
+            setIsCompleting(true);
+            await orderAPI.changeStatus(String(event.id), 'COMPLETED', String(user.id));
+            if (onStatusChanged) {
+                onStatusChanged();
+            }
+            onClose();
+        } catch (error) {
+            console.error('Ошибка смены статуса заказа:', error);
+        } finally {
+            setIsCompleting(false);
         }
     };
     if (!isOpen || !event) {
@@ -91,6 +109,15 @@ const EventModal: React.FC<EventModalProps> = ({
                             disabled={isTaking}
                         >
                             {isTaking ? 'Берем…' : 'Взять в работу'}
+                        </button>
+                    )}
+                    {(isMaster || isAdmin) && event.status === 'IN_PROGRESS' && (
+                        <button
+                            className="complete-button"
+                            onClick={handleComplete}
+                            disabled={isCompleting}
+                        >
+                            {isCompleting ? 'Завершаем…' : 'Завершить'}
                         </button>
                     )}
                     <button className="edit-button" onClick={onEdit}>Редактировать</button>
