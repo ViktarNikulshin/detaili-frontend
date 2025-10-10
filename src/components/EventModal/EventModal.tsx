@@ -10,6 +10,7 @@ interface EventModalProps {
     event: CalendarEvent | null;
     onClose: () => void;
     onEdit: () => void;
+    onStatusChanged?: () => void;
 
 }
 
@@ -17,7 +18,8 @@ const EventModal: React.FC<EventModalProps> = ({
                                                    isOpen,
                                                    event,
                                                    onClose,
-                                                   onEdit
+                                                   onEdit,
+                                                   onStatusChanged
                                                }) => {
     const { user } = useAuth();
     const [isTaking, setIsTaking] = useState(false);
@@ -29,6 +31,9 @@ const EventModal: React.FC<EventModalProps> = ({
         try {
             setIsTaking(true);
             await orderAPI.changeStatus(String(event.id), 'IN_PROGRESS', String(user.id));
+            if (onStatusChanged) {
+                onStatusChanged();
+            }
             onClose();
         } catch (error) {
             console.error('Ошибка смены статуса заказа:', error);

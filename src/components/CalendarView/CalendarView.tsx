@@ -188,6 +188,10 @@ const CalendarView: React.FC = () => {
         setSelectedEvent(null);
     };
 
+    const handleStatusChanged = async () => {
+        await loadCalendarEvents();
+    };
+
     if (loading || mastersLoading) {
         return <div className="loading">Загрузка календаря и мастеров...</div>;
     }
@@ -292,6 +296,7 @@ const CalendarView: React.FC = () => {
                 event={selectedEvent}
                 onClose={handleCloseModal}
                 onEdit={() => navigate(`/orders/${selectedEvent?.id}`)}
+                onStatusChanged={handleStatusChanged}
             />
         </div>
     );
