@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {User} from "../types/user";
+import {CarBrand, CarModel} from "../types/order";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
@@ -19,5 +20,11 @@ userApi.interceptors.request.use((config) => {
     return config;
 });
 export const userAPI = {
-    getUsersByRole: (code: string) => userApi.get<Array<User>>(`/users/role/${code}`)
+    getUsersByRole: (code: string) => userApi.get<Array<User>>(`/users/role/${code}`),
+    updateUser: (id: number, user: {
+        firstName: string;
+        lastName: string;
+        currentPassword: string;
+        newPassword: string;
+    }) => userApi.put(`/users/${id}`, user)
 }

@@ -4,10 +4,9 @@ import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { orderAPI } from '../../services/orderApi';
-import { userAPI } from '../../services/user'; // <--- Импортируем userAPI
+import { userAPI } from '../../services/userApi'; // <--- Импортируем userAPI
 import { CalendarEvent, Order } from '../../types/order';
 import { User } from '../../types/user'; // <--- Импортируем тип User
-import { useAuth } from '../../contexts/AuthContext';
 import './CalendarView.css';
 import EventModal from "../EventModal/EventModal";
 
@@ -205,7 +204,6 @@ const CalendarView: React.FC = () => {
             <div className="calendar-header">
                 <h1>Календарь заказов</h1>
 
-                {/* --- ЭЛЕМЕНТЫ ФИЛЬТРАЦИИ --- */}
                 <div className="calendar-filters">
                     {/* Фильтр по Мастеру */}
                     <label htmlFor="master-filter">Мастер:</label>
@@ -235,11 +233,9 @@ const CalendarView: React.FC = () => {
                         ))}
                     </select>
                 </div>
-                {/* --------------------------- */}
 
                 <div className="calendar-info">
                     <span>Всего событий: {events.length}</span>
-                    <span>Текущий вид: {currentView}</span>
                 </div>
             </div>
 

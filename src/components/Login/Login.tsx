@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { authAPI } from '../../services/auth';
+import { authAPI } from '../../services/authApi';
 import './Login.css';
 import logo from "../asserts/a593d73d858fdafbbe4065de23f69533.jpg";
 

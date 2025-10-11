@@ -7,7 +7,7 @@ import { orderAPI } from "../../services/orderApi";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import "./OrderForm.css";
-import { userAPI } from "../../services/user";
+import { userAPI } from "../../services/userApi";
 import { User } from "../../types/user";
 import { Order } from "../../types/order";
 import DatePicker from 'react-datepicker';
