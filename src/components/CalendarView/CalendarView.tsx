@@ -106,14 +106,13 @@ const CalendarView: React.FC = () => {
 
             const calendarEvents = response.data.map((order: Order) => ({
                 id: order.id!,
-                title: `${order.clientName} - ${order.carBrand?.name ?? ""} - ${order.carModel?.name ?? ""}`,
+                title: `${order.clientName} - ${order.carBrand?.name ?? ""}`,
                 start: new Date(order.executionDate),
                 end: new Date(moment(order.executionDate).add(1, 'hour').toDate()),
                 clientName: order.clientName,
                 clientPhone: order.clientPhone,
                 carBrand: order.carBrand,
-                carModel: order.carModel,
-                workTypes: order.workTypes,
+                works: order.works,
                 status: order.status,
                 allDay: false,
             }));
@@ -219,7 +218,6 @@ const CalendarView: React.FC = () => {
                         ))}
                     </select>
 
-                    {/* Фильтр по Статусу */}
                     <label htmlFor="status-filter" style={{ marginLeft: '15px' }}>Статус:</label>
                     <select
                         id="status-filter"

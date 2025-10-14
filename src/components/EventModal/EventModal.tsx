@@ -79,7 +79,7 @@ const EventModal: React.FC<EventModalProps> = ({
                     <p><strong>Клиент:</strong> {event.clientName}</p>
                     <p>
                         <strong>Марка авто:</strong>{" "}
-                        {event.carBrand?.name ?? "—"} {event.carModel?.name ?? ""}
+                        {event.carBrand?.name}
                     </p>
                     <p>
                         <strong>Телефон:</strong> {" "}
@@ -93,10 +93,35 @@ const EventModal: React.FC<EventModalProps> = ({
                     </p>
                     <p><strong>Статус:</strong> {event.status}</p>
                     <div>
-                        <strong>Типы работ:</strong>
-                        <ul className="work-types-list">
-                            {event.workTypes.map(wt => (
-                                <li key={wt.id}>{wt.name}</li>
+                        <strong>Список работ:</strong>
+                        <ul className="works-list-container">
+                            {event.works.map((work, index) => (
+                                <li key={work.id} className="work-item">
+                                    <div className="work-header">
+                                        <span className="work-title">
+                                            {index + 1}. {work.workType.name}
+                                        </span>
+                                    </div>
+
+                                    {work.comment && (
+                                        <p className="work-comment">
+                                            <strong>Комментарий:</strong> {work.comment}
+                                        </p>
+                                    )}
+
+                                    {work.parts && work.parts.length > 0 && (
+                                        <div className="work-parts-section">
+                                            <strong>Используемые материалы:</strong>
+                                            <ul className="work-parts-list">
+                                                {work.parts.map(part => (
+                                                    <li key={part.id} className="work-part-tag">
+                                                        {part.name}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </li>
                             ))}
                         </ul>
                     </div>

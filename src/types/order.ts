@@ -3,9 +3,8 @@ export interface Order {
     clientName: string;
     clientPhone: string;
     carBrand: CarBrand | null;
-    carModel: CarModel | null;
     vin: string;
-    workTypes: WorkType[];
+    works: Work[];
     masterIds: number[];
     executionDate: string;
     beforePhoto?: File;
@@ -23,19 +22,22 @@ export interface CalendarEvent {
     clientName: string;
     clientPhone: string;
     carBrand: CarBrand | null;
-    carModel: CarModel | null;
     status: string;
-    workTypes: WorkType[];
+    works: Work[];
 }
 export interface CarBrand {
     id: number;
     name: string;
 }
-export interface CarModel {
-    id: number;
-    name: string;
+export interface Work {
+    id?: number;
+    workType: WorkType;
+    parts: WorkType [];
+    comment?: string;
 }
+
 export interface WorkType {
     id: number;
+    code: string;
     name: string;
 }

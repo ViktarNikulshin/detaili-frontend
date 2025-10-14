@@ -106,23 +106,71 @@
 .take-button:hover {
     background-color: #218838;
 }
-
-/* Work types list styles */
-.work-types-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+.works-list-container {
     list-style: none;
     padding: 0;
-    margin: 8px 0 0 0;
+    margin: 10px 0 0 0;
 }
 
-.work-types-list li {
-    background-color: #f1f5f9;
-    border: 1px solid #e2e8f0;
-    color: #334155;
-    padding: 6px 10px;
-    border-radius: 16px;
-    font-size: 0.9em;
+.work-item {
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+}
+
+.work-header {
+    margin-bottom: 5px;
+}
+
+.work-title {
+    font-weight: bold;
+    color: #3174ad; /* Цвет заголовка работы */
+    font-size: 1.1em;
+}
+
+.work-comment {
+    font-style: italic;
+    color: #666;
+    border-left: 3px solid #ccc;
+    padding-left: 10px;
+    margin: 10px 0;
+}
+
+.work-comment strong {
+    font-style: normal;
+    color: #555;
+}
+
+.work-parts-section {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dotted #ddd;
+}
+
+.work-parts-section strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+.work-parts-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.work-part-tag {
+    /* Стиль для отдельного материала/детали */
+    background-color: #e6f7ff; /* Светло-голубой фон */
+    border: 1px solid #91d5ff;
+    color: #0050b3; /* Синий текст */
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
     white-space: nowrap;
 }

@@ -1,6 +1,5 @@
 import axios from 'axios';
 import {User} from "../types/user";
-import {CarBrand, CarModel} from "../types/order";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 

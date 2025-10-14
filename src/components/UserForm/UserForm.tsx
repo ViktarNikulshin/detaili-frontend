@@ -59,7 +59,6 @@ const UserForm: React.FC = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (validate()) {
-            // !!! ВАЖНО: Здесь будет логика отправки данных на сервер
             const dataToSend = {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
@@ -69,11 +68,8 @@ const UserForm: React.FC = () => {
             }
             const userId = user?.id || 0
             if (user){
-                userAPI.updateUser(userId, dataToSend)
+                userAPI.updateUser(userId, dataToSend).then(r => alert('Профиль успешно обновлен!'))
             }
-
-            alert('Профиль успешно обновлен! (Это заглушка, данные не отправлены)');
-            // Очистить поля паролей после "успешной" отправки
             setFormData(prev => ({
                 ...prev,
                 currentPassword: '',

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {CarBrand, CarModel, Order} from "../types/order";
+import {CarBrand, Order, Work} from "../types/order";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
@@ -13,6 +13,21 @@ interface CalendarFilters {
     masterId?: string;
     status?: string;
 }
+
+
+export interface OrderPayload {
+    clientName: string;
+    clientPhone: string;
+    carBrand: CarBrand | null;
+    vin: string;
+    works: Work[]; // ИСПОЛЬЗУЕМ `works` вместо `workTypeIds`
+    masterIds?: number[];
+    executionDate: string;
+    orderCost: number;
+    executionTimeByMaster?: string | null;
+}
+
+
 // Интерцептор для добавления токена
 orderApi.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
@@ -23,24 +38,12 @@ orderApi.interceptors.request.use((config) => {
 });
 
 export const orderAPI = {
-    create: (order: {
-        clientName: string;
-        clientPhone: string;
-        carBrand: CarBrand | null;
-        carModel: CarModel | null;
-        vin: string;
-        workTypeIds: number[];
-        executionDate: string
-    }) => orderApi.post('/orders', order),
-    update: (id: string, order: {
-        clientName: string;
-        clientPhone: string;
-        carBrand: CarBrand | null;
-        carModel: CarModel | null;
-        vin: string;
-        workTypeIds: number[];
-        executionDate: string
-    }) => orderApi.put(`/orders/${id}`, order),
+    // ИСПРАВЛЕНО: Обновляем тип для `create`
+    create: (order: OrderPayload) => orderApi.post('/orders', order),
+
+    // ИСПРАВЛЕНО: Обновляем тип для `update`
+    update: (id: string, order: OrderPayload) => orderApi.put(`/orders/${id}`, order),
+
     getCalendar: (start: string, end: string, filters?: CalendarFilters) =>{
         let url = `/orders/calendar?start=${start}&end=${end}`;
 
@@ -57,7 +60,6 @@ export const orderAPI = {
     },
     getById: (id: string) => orderApi.get<Order>(`orders/${id}`),
     getCarBrands: () => orderApi.get('/car/car-brands'),
-    getCarModel: (id: string) => orderApi.get(`/car/car-models/${id}`),
     getDictionaryByType: (code: string) => orderApi.get(`/dictionary/type/${code}`),
     changeStatus: (id: string, code: string, masterId: string) => orderApi.get(`/orders/change/${id}?code=${code}&master=${masterId}`)
 }
