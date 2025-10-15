@@ -32,6 +32,8 @@ jobs:
         run: npm install
 
       - name: Build React App (creates 'build/' folder)
+        env:
+          REACT_APP_API_URL: /detailing/api
         run: npm run build
 
       # ==================================

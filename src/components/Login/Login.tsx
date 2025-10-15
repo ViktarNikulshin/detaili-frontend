@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { authAPI } from '../../services/authApi';
+import React, {useEffect, useState} from 'react';
+import {useLocation, useNavigate} from 'react-router-dom';
+import {useAuth} from '../../contexts/AuthContext';
+import {authAPI} from '../../services/authApi';
 import './Login.css';
 import logo from "../asserts/a593d73d858fdafbbe4065de23f69533.jpg";
+
+// Определяем типы демо-доступа
+type DemoRole = 'admin' | 'manager' | 'master';
 
 const Login: React.FC = () => {
     const [credentials, setCredentials] = useState({
@@ -14,7 +17,7 @@ const Login: React.FC = () => {
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
-    const { login, isAuthenticated } = useAuth();
+    const {login, isAuthenticated} = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -22,12 +25,12 @@ const Login: React.FC = () => {
     useEffect(() => {
         if (isAuthenticated) {
             const from = location.state?.from?.pathname || '/';
-            navigate(from, { replace: true });
+            navigate(from, {replace: true});
         }
     }, [isAuthenticated, navigate, location]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setCredentials(prev => ({
             ...prev,
             [name]: value
@@ -36,6 +39,19 @@ const Login: React.FC = () => {
         // Очищаем ошибку при изменении поля
         if (error) setError('');
     };
+
+    // ✅ НОВАЯ ФУНКЦИЯ: Демо-логин
+    const handleDemoLogin = (role: DemoRole) => {
+        // Устанавливаем учетные данные для выбранной роли
+        setCredentials({
+            username: `${role}_user`, // Пример: admin_user, manager_user
+            password: 'demo_password', // Пример: общий демо-пароль
+        });
+        // Очищаем ошибку
+        setError('');
+        // Позволяем пользователю увидеть введенные данные и нажать "Войти"
+    };
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -55,7 +71,7 @@ const Login: React.FC = () => {
 
             // Перенаправляем на предыдущую страницу или на главную
             const from = location.state?.from?.pathname || '/';
-            navigate(from, { replace: true });
+            navigate(from, {replace: true});
 
         } catch (err: any) {
             console.error('Login error:', err);
@@ -72,7 +88,7 @@ const Login: React.FC = () => {
         <div className="login-container">
             <div className="login-card">
                 <div className="login-header">
-                    <img src={logo} alt="Cristal Car Logo" className="nav-logo" />
+                    <img src={logo} alt="Cristal Car Logo" className="nav-logo"/>
                     <h1>Crystal car</h1>
                     <p>Войдите в свою учетную запись</p>
                 </div>
