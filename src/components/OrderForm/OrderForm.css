@@ -11,11 +11,13 @@
     box-shadow: 0 6px 20px rgba(100, 180, 220, 0.25);
     font-family: "Segoe UI", sans-serif;
     color: #1a3c47;
+    position: relative; /* Добавлено для корректного z-index уведомления */
 }
 
-/* Поля */
+/* Поля, Текстовые области и Select */
 .order-form input,
-.order-form textarea {
+.order-form textarea,
+.order-form select {
     padding: 14px 16px;
     border-radius: 14px;
     border: 1px solid rgba(90, 200, 250, 0.4);
@@ -24,23 +26,29 @@
     transition: all 0.3s ease;
     background: rgba(255, 255, 255, 0.6);
     color: #1a3c47;
+    width: 100%; /* Убеждаемся, что поля занимают всю ширину */
+    box-sizing: border-box;
 }
 
 .order-form input:focus,
-.order-form textarea:focus {
+.order-form textarea:focus,
+.order-form select:focus {
     border-color: #00c3ff;
     box-shadow: 0 0 8px rgba(0, 195, 255, 0.4);
     background: rgba(255, 255, 255, 0.95);
 }
 
-/* Стилизация DatePicker для соответствия остальным input'ам */
+.order-form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Стилизация DatePicker */
 .order-form .react-datepicker-wrapper,
 .order-form .react-datepicker__input-container {
     width: 100%;
 }
-
 .order-form .react-datepicker__input-container input {
-    /* Переопределяем стили для инпута DatePicker */
     width: 100%;
     padding: 14px 16px;
     border-radius: 14px;
@@ -50,7 +58,7 @@
     transition: all 0.3s ease;
     background: rgba(255, 255, 255, 0.6);
     color: #1a3c47;
-    box-sizing: border-box; /* Важно, чтобы padding не увеличивал ширину */
+    box-sizing: border-box;
 }
 
 .order-form .react-datepicker__input-container input:focus {
@@ -59,14 +67,8 @@
     background: rgba(255, 255, 255, 0.95);
 }
 
-/* Текстовая область */
-.order-form textarea {
-    min-height: 100px;
-    resize: vertical;
-}
-
 /* Кнопка */
-.order-form button {
+.order-form button[type="submit"] {
     background: linear-gradient(135deg, #5ac8fa, #00c3ff);
     border: none;
     color: white;
@@ -78,10 +80,17 @@
     transition: all 0.3s ease;
 }
 
-.order-form button:hover {
+.order-form button[type="submit"]:hover:not(:disabled) {
     background: linear-gradient(135deg, #00c3ff, #5ac8fa);
     transform: translateY(-2px);
     box-shadow: 0 4px 14px rgba(0, 195, 255, 0.4);
+}
+
+.order-form button[type="submit"]:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 /* Ошибки */
@@ -95,57 +104,27 @@
     margin-top: -10px;
 }
 
+/* Группировка полей */
 .form-group {
-    margin-bottom: 15px; /* Уменьшаем отступ, так как в order-form уже есть gap */
-    /* Удаляем общую margin-bottom, так как контейнер order-form уже управляет промежутками */
-}
-
-.form-group select {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid rgba(90, 200, 250, 0.4);
-    border-radius: 14px;
-    font-size: 16px;
-    background-color: white;
-    font-family: inherit;
-    color: #1a3c47;
-    box-sizing: border-box;
-}
-
-.form-group select:disabled {
-    background-color: #f5f5f5;
-    opacity: 0.7;
-}
-
-.form-group select.error {
-    border-color: #ff4444;
-}
-
-/* Checkbox group container */
-.checkbox-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 8px;
 }
 
-/* Label for the checkbox group */
+/* Чекбоксы и радиокнопки */
 .checkbox-group label,
 .form-group label,
-.date-time-label { /* Добавляем новый класс для label */
+.date-time-label {
     color: #1a3c47;
     font-size: 16px;
     font-weight: 600;
 }
 
-/* Container for individual checkboxes */
 .checkbox-container {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
 }
 
-/* Individual checkbox item */
 .checkbox-item {
     display: flex;
     align-items: center;
@@ -153,8 +132,8 @@
     cursor: pointer;
 }
 
-/* Style for the checkbox input itself */
-.checkbox-item input[type="checkbox"] {
+.checkbox-item input[type="checkbox"],
+.checkbox-item input[type="radio"] { /* Добавлено радио */
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -168,14 +147,17 @@
     position: relative;
     outline: none;
 }
-
-/* Checkbox checked state */
-.checkbox-item input[type="checkbox"]:checked {
+/* Радиокнопки имеют круглую форму */
+.checkbox-item input[type="radio"] {
+    border-radius: 50%;
+}
+/* Отмеченное состояние */
+.checkbox-item input:checked {
     background-color: #00c3ff;
     border-color: #00c3ff;
 }
 
-/* Checkmark inside the checkbox */
+/* Отметка внутри чекбокса */
 .checkbox-item input[type="checkbox"]:checked::before {
     content: '';
     position: absolute;
@@ -187,8 +169,19 @@
     border-width: 0 2px 2px 0;
     transform: translate(-50%, -60%) rotate(45deg);
 }
+/* Точка внутри радиокнопки */
+.checkbox-item input[type="radio"]:checked::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    background-color: white;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
 
-/* Checkbox label text */
 .checkbox-item label {
     font-size: 15px;
     color: #1a3c47;
@@ -196,101 +189,40 @@
     cursor: pointer;
 }
 
-/* Error state for checkbox group */
-.checkbox-group.error .checkbox-item input[type="checkbox"] {
-    border-color: #dc3545;
-}
-
-/* Styles for the selected masters display */
-.selected-masters-display {
-    padding: 12px;
-    background: rgba(90, 200, 250, 0.1);
-    border-radius: 14px;
-    font-size: 14px;
-    color: #1a3c47;
-    border: 1px solid rgba(90, 200, 250, 0.4);
-}
-
-.selected-masters-display p {
-    margin: 0;
-    font-weight: 500;
-}
-
-/* ------------------------------------------- */
-/* НОВЫЕ СТИЛИ ДЛЯ ДАТЫ И СТОИМОСТИ (В ОДНУ СТРОКУ) */
-/* ------------------------------------------- */
-
+/* Стили для даты и стоимости */
 .order-form-date-cost {
     display: flex;
-    gap: 18px; /* Используем тот же gap, что и в order-form */
+    gap: 18px;
     width: 100%;
 }
 
 .order-form-date-cost .form-group-half {
-    flex: 1; /* Обеспечивает 50% ширины */
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 8px; /* Отступ между label и input внутри половины */
+    gap: 8px;
 }
 
-/* Убеждаемся, что инпут стоимости тоже соответствует стилю */
-.order-form-date-cost .form-group-half input[type="number"] {
-    /* Наследует общие стили .order-form input, но добавляем box-sizing */
-    box-sizing: border-box;
-    width: 100%;
-}
-
-/* Адаптивность для мобильных устройств */
 @media (max-width: 550px) {
     .order-form-date-cost {
-        flex-direction: column; /* На маленьких экранах переносим в столбец */
+        flex-direction: column;
     }
 }
-.checkbox-item-with-comment {
-    display: flex;
-    align-items: center;
-    gap: 8px; /* Расстояние между чекбоксом и кнопкой */
-    width: 100%;
-}
 
-.checkbox-item-with-comment .checkbox-item {
-    flex-grow: 1; /* Позволяет элементу с чекбоксом занимать доступное пространство */
-}
-
-.edit-comment-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    color: #007bff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.edit-comment-btn:hover {
-    color: #0056b3;
-}
-
-.indented-group {
-    margin-left: 20px; /* Отступ для вложенной группы */
-    border-left: 2px solid #eee;
-    padding-left: 15px;
-}
-/* В OrderForm.css */
-
+/* Стили для добавления комментария */
 .work-type-wrapper {
     width: 100%;
     display: flex;
     flex-direction: column;
-    margin-bottom: 5px; /* Небольшой отступ между работами */
+    margin-bottom: 5px;
 }
 
 .checkbox-item-with-comment {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: space-between; /* Чтобы кнопка была справа */
     width: 100%;
+    gap: 8px;
 }
 
 .checkbox-item-with-comment .checkbox-item {
@@ -306,28 +238,29 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .edit-comment-btn:hover {
     color: #0056b3;
 }
 
-/* НОВЫЕ СТИЛИ */
 .comment-input-container {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-top: 8px;
-    padding-left: 24px; /* Отступ, чтобы выровнять с текстом чекбокса */
+    padding-left: 24px;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .comment-input {
     flex-grow: 1;
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
+    /* Переопределяем стили для более компактного вида */
+    padding: 8px 12px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
 }
 
 .comment-save-btn {
@@ -335,17 +268,86 @@
     border: none;
     background-color: #28a745;
     color: white;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 14px;
+    flex-shrink: 0;
 }
 
 .comment-save-btn:hover {
     background-color: #218838;
 }
 
-.indented-group {
-    margin-left: 20px;
-    border-left: 2px solid #eee;
-    padding-left: 15px;
+/* Стили для динамических частей */
+.dynamic-parts-group {
+    margin-top: -10px;
+    margin-bottom: 10px;
+    padding-left: 20px;
+    border-left: 3px solid #f0f0f0;
+}
+
+.dynamic-parts-label {
+    font-size: 0.9em;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.small-checkbox-container {
+    padding-top: 5px;
+}
+
+.small-checkbox-item label {
+    font-size: 0.9em;
+    color: #444;
+}
+
+/* ------------------------------------------- */
+/* СТИЛИ ДЛЯ УВЕДОМЛЕНИЙ (ПУШ) ПЕРЕНЕСЕННЫХ НАВЕРХ */
+/* ------------------------------------------- */
+
+.notification {
+    position: fixed;
+    top: 20px; /* Перенос наверх */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 30px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    z-index: 10000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    /* Обновленная анимация для плавного появления сверху */
+    animation: fadeInTop 0.3s ease-out, fadeOutTop 0.3s ease-in 1.7s;
+}
+
+.notification.success {
+    background-color: #28a745;
+}
+
+.notification.error {
+    background-color: #dc3545;
+}
+
+/* АНИМАЦИИ ДЛЯ ПОЯВЛЕНИЯ СВЕРХУ */
+@keyframes fadeInTop {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px); /* Появляется немного выше */
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes fadeOutTop {
+    from {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px); /* Исчезает наверх */
+    }
 }

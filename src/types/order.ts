@@ -12,6 +12,7 @@ export interface Order {
     status: 'NEW' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
     orderCost: number;
     executionTimeByMaster?: string | null;
+    infoSource?: null
 }
 
 export interface CalendarEvent {
