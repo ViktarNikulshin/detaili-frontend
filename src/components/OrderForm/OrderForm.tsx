@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {Controller, FieldValues, SubmitHandler, useForm} from "react-hook-form";
 import * as Yup from "yup";
 import {yupResolver} from "@hookform/resolvers/yup";
@@ -28,7 +28,6 @@ const PencilIcon = () => (
     </svg>
 );
 
-// ✅ ИСПРАВЛЕНИЕ: Схема для infoSource изменена на объект (WorkType) или null
 const InfoSourceSchema = Yup.object().shape({
     id: Yup.number().required(),
     name: Yup.string().optional(),
@@ -60,10 +59,7 @@ const schema = Yup.object().shape({
         .min(1, "Выберите хотя бы один тип работ")
         .required(),
     masterIds: Yup.array().of(Yup.number().required()).optional().default([]),
-
-    // ✅ ИСПРАВЛЕНИЕ: Используем новую схему для одного объекта или null
     infoSource: InfoSourceSchema.optional().default(null),
-
     executionDate: Yup.string().required("Укажите дату выполнения"),
     orderCost: Yup.number().typeError("Введите стоимость заказа").required("Введите стоимость заказа").min(0, "Стоимость не может быть отрицательной"),
     executionTimeByMaster: Yup.string().nullable().default(null),
@@ -79,9 +75,7 @@ const OrderForm: React.FC = () => {
     const [allWorkTypes, setAllWorkTypes] = useState<WorkType[]>([]);
     const [masters, setMasters] = useState<User[]>([]);
     const [editingCommentForWork, setEditingCommentForWork] = useState<number | null>(null);
-
     const [infoSourcesDict, setInfoSourcesDict] = useState<WorkType[]>([]);
-
     const [dynamicWorkParts, setDynamicWorkParts] = useState<Record<number, WorkType[]>>({});
     const [loadingParts, setLoadingParts] = useState<Record<number, boolean>>({});
     const [notification, setNotification] = useState<Notification>({
@@ -89,13 +83,10 @@ const OrderForm: React.FC = () => {
         type: 'success',
         visible: false,
     });
+    const [dictionariesLoaded, setDictionariesLoaded] = useState(false);
+    const dynamicWorkPartsRef = useRef(dynamicWorkParts);
+    dynamicWorkPartsRef.current = dynamicWorkParts;
 
-    const showNotification = (message: string, type: 'success' | 'error') => {
-        setNotification({message, type, visible: true});
-        setTimeout(() => {
-            setNotification(prev => ({...prev, visible: false}));
-        }, 2000);
-    };
 
     const {
         control,
@@ -114,7 +105,6 @@ const OrderForm: React.FC = () => {
             vin: null,
             works: [],
             masterIds: [],
-            // ✅ ИСПРАВЛЕНИЕ: Значение по умолчанию для одного объекта
             infoSource: null,
             executionDate: "",
             orderCost: 0,
@@ -123,16 +113,21 @@ const OrderForm: React.FC = () => {
     });
 
     const selectedWorks = watch("works");
-    // ✅ ИСПРАВЛЕНИЕ: watch теперь возвращает один объект или null
     const selectedInfoSource = watch("infoSource");
 
+    const showNotification = (message: string, type: 'success' | 'error') => {
+        setNotification({message, type, visible: true});
+        setTimeout(() => {
+            setNotification(prev => ({...prev, visible: false}));
+        }, 2000);
+    };
 
     const fetchPartsForWork = useCallback(async (workType: WorkType) => {
-        if (dynamicWorkParts[workType.id] !== undefined) {
-            return dynamicWorkParts[workType.id] || [];
+        if (dynamicWorkPartsRef.current[workType.id] !== undefined) {
+            return;
         }
 
-        if (!workType.code) return [];
+        if (!workType.code) return;
 
         setLoadingParts(prev => ({...prev, [workType.id]: true}));
         try {
@@ -143,16 +138,14 @@ const OrderForm: React.FC = () => {
                 ...prev,
                 [workType.id]: parts
             }));
-            return parts;
         } catch (error) {
             console.error(`Ошибка загрузки частей для типа работы ${workType.code}:`, error);
             setDynamicWorkParts(prev => ({...prev, [workType.id]: []}));
-            return [];
         } finally {
             setLoadingParts(prev => ({...prev, [workType.id]: false}));
         }
-    }, [dynamicWorkParts, setLoadingParts, setDynamicWorkParts]);
 
+    }, []);
 
     useEffect(() => {
         const loadDictionaries = async () => {
@@ -167,6 +160,7 @@ const OrderForm: React.FC = () => {
                 setAllWorkTypes(workTypesRes.data);
                 setMasters(Array.isArray(mastersRes.data) ? mastersRes.data : [mastersRes.data]);
                 setInfoSourcesDict(infoSourcesRes.data);
+                setDictionariesLoaded(true); // Устанавливаем флаг, что справочники загружены
             } catch (error) {
                 console.error("Ошибка при загрузке справочников:", error);
             }
@@ -175,50 +169,50 @@ const OrderForm: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (!id) return;
+        if (!id || !dictionariesLoaded) return;
+
         const loadOrder = async () => {
             setLoading(true);
             try {
-                // Предполагаем, что API возвращает infoSource как объект или null
                 const response = await orderAPI.getById(id);
                 const order: Order & { infoSource?: WorkType | null } = response.data;
 
-                const partsLoadingPromises = order.works.map(work =>
-                    fetchPartsForWork(work.workType)
-                );
+                const partsLoadingPromises = order.works
+                    .map(work => fetchPartsForWork(work.workType))
+                    .filter(promise => promise !== undefined);
+
                 await Promise.all(partsLoadingPromises);
 
                 const executionDate = order.executionDate ? format(parseISO(order.executionDate), "yyyy-MM-dd'T'HH:mm") : "";
+
                 reset({
                     ...order,
                     carBrand: order.carBrand?.id.toString() || "",
-                    infoSource: order.infoSource || null, // ✅ ЗАГРУЗКА ОДНОГО ИСТОЧНИКА
+                    infoSource: order.infoSource || null,
                     executionDate,
                 } as OrderFormValues);
+
             } catch (e) {
                 console.error("Ошибка загрузки заказа:", e);
             } finally {
                 setLoading(false);
             }
         };
-        if (allWorkTypes.length > 0) {
-            loadOrder();
-        }
-    }, [id, reset, allWorkTypes, fetchPartsForWork]);
+
+        loadOrder();
+    }, [id, dictionariesLoaded, reset, fetchPartsForWork]);
 
     const onSubmit: SubmitHandler<OrderFormValues> = async (data) => {
         try {
             const carBrandObj = brands.find(brand => brand.id.toString() === data.carBrand) || null;
-
             const transformedWorks = data.works;
 
-            // ✅ ИСПРАВЛЕНИЕ: infoSource уже является объектом WorkType | null
             const dataToSend: OrderPayload & { infoSource: WorkType | null } = {
                 ...data,
                 works: transformedWorks as Work[],
                 carBrand: carBrandObj,
                 vin: data.vin || "",
-                infoSource: data.infoSource, // Передаем один объект или null
+                infoSource: data.infoSource,
             } as OrderPayload & { infoSource: WorkType | null };
 
             if (id) {
@@ -239,6 +233,7 @@ const OrderForm: React.FC = () => {
         }
     };
 
+
     const handleWorkTypeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const workTypeId = Number(e.target.value);
         const isChecked = e.target.checked;
@@ -247,26 +242,15 @@ const OrderForm: React.FC = () => {
         if (isChecked) {
             const workTypeToAdd = allWorkTypes.find(wt => wt.id === workTypeId);
             if (workTypeToAdd) {
-                const newWork: Work = {
-                    workType: workTypeToAdd,
-                    parts: [],
-                    comment: "",
-                };
+                const newWork: Work = {workType: workTypeToAdd, parts: [], comment: ""};
                 setValue("works", [...currentWorks, newWork], {shouldValidate: true});
-
-                if (workTypeToAdd.code) {
+                if (workTypeToAdd.code && !dynamicWorkParts[workTypeToAdd.id]) {
                     await fetchPartsForWork(workTypeToAdd);
                 }
             }
         } else {
             const updatedWorks = currentWorks.filter(w => w.workType.id !== workTypeId);
             setValue("works", updatedWorks, {shouldValidate: true});
-
-            setDynamicWorkParts(prev => {
-                const newState = {...prev};
-                delete newState[workTypeId];
-                return newState;
-            });
         }
     };
 
@@ -298,18 +282,10 @@ const OrderForm: React.FC = () => {
         setValue("works", updatedWorks, {shouldValidate: true});
     };
 
-    // ✅ ИСПРАВЛЕНИЕ: НОВАЯ ФУНКЦИЯ ДЛЯ ОБРАБОТКИ РАДИОКНОПОК ИСТОЧНИКОВ ИНФОРМАЦИИ
     const handleInfoSourceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const infoId = Number(e.target.value);
         const sourceObject = infoSourcesDict.find(s => s.id === infoId);
-
-        if (sourceObject) {
-            // Устанавливаем выбранный объект
-            setValue("infoSource", sourceObject, {shouldValidate: true});
-        } else {
-            // Устанавливаем null, если объект не найден или нужна логика сброса (хотя для радиокнопок это редкость)
-            setValue("infoSource", null, {shouldValidate: true});
-        }
+        setValue("infoSource", sourceObject || null, {shouldValidate: true});
     };
 
     const handleCommentChange = (workTypeId: number, newComment: string) => {
@@ -335,21 +311,17 @@ const OrderForm: React.FC = () => {
     if (loading && id) return <p>Загрузка заказа...</p>;
 
     return (
-        <> {/* Оберните все во фрагмент */}
-            {/* 1. УВЕДОМЛЕНИЕ ВЫНЕСЕНО ИЗ ФОРМЫ */}
+        <>
             {notification.visible && (
                 <div className={`notification ${notification.type}`}>
                     {notification.message}
                 </div>
             )}
             <form onSubmit={handleSubmit(onSubmit as SubmitHandler<FieldValues>)} className="order-form">
-
-
                 <input type="text" placeholder="Имя клиента" {...register("clientName")}
                        className={errors.clientName ? "error" : ""}/>
                 {errors.clientName && <span className="error-text">{errors.clientName.message}</span>}
 
-                {/* ГРУППА ТЕЛЕФОНА */}
                 <div className="form-group">
                     <Controller name="clientPhone" control={control} render={({field}) => (
                         <PhoneInput {...field} country={"by"} onlyCountries={["by", "ru", "ua", "pl", "lt"]}
@@ -358,7 +330,6 @@ const OrderForm: React.FC = () => {
                     {errors.clientPhone && <span className="error-text">{errors.clientPhone.message}</span>}
                 </div>
 
-                {/* ✅ СЕКЦИЯ: ИСТОЧНИКИ ИНФОРМАЦИИ (RADIO BUTTONS) */}
                 {infoSourcesDict.length > 0 && (
                     <div className="checkbox-group info-source-group">
                         <label>Откуда узнали о нас (выберите один вариант):</label>
@@ -366,12 +337,10 @@ const OrderForm: React.FC = () => {
                             {infoSourcesDict.map((source) => (
                                 <div key={source.id} className="checkbox-item">
                                     <input
-                                        // ✅ ИСПРАВЛЕНИЕ: Используем radio вместо checkbox
                                         type="radio"
-                                        name="infoSource" // Важно: одинаковый name для группы радиокнопок
+                                        name="infoSource"
                                         id={`info-source-${source.id}`}
                                         value={source.id}
-                                        // ✅ Проверяем, совпадает ли ID текущего источника с ID выбранного объекта
                                         checked={selectedInfoSource?.id === source.id}
                                         onChange={handleInfoSourceChange}
                                     />
@@ -381,17 +350,15 @@ const OrderForm: React.FC = () => {
                         </div>
                     </div>
                 )}
-                {/* КОНЕЦ ИСПРАВЛЕННОЙ СЕКЦИИ */}
 
-                {/* ГРУППА МАРКИ АВТО */}
                 <div className="form-group">
                     <select {...register("carBrand")} className={errors.carBrand ? "error" : ""}>
                         <option value="">Выберите марку автомобиля</option>
                         {brands.map((brand) => (<option key={brand.id} value={brand.id}>{brand.name}</option>))}
                     </select>
                     {errors.carBrand && <span className="error-text">{errors.carBrand.message}</span>}
-
                 </div>
+
                 <input type="text" placeholder="VIN (необязательно)" {...register("vin")} />
 
                 <div className="checkbox-group">
@@ -436,7 +403,6 @@ const OrderForm: React.FC = () => {
                                         </div>
                                     )}
 
-                                    {/* ДИНАМИЧЕСКИЕ ЧЕКБОКСЫ ДЛЯ ЧАСТЕЙ */}
                                     {isChecked && (dynamicWorkParts[workType.id] || []).length > 0 && (
                                         <div className="checkbox-group dynamic-parts-group">
                                             <br/>

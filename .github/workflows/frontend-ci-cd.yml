@@ -56,17 +56,18 @@ jobs:
           target: "${{ env.REMOTE_DIR }}/front/"
 
       # ==================================
-      # 3. ПЕРЕЗАПУСК NGINX
+      # 3. ПЕРЕЗАПУСК DOCKER
       # ==================================
-      - name: Restart Nginx container only
+      - name: Restart dockers containers
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST_IP }}
           username: ${{ secrets.HOST_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "Restarting Nginx container..."
+            echo "Restarting all containers..."
             cd ${{ env.REMOTE_DIR }}
-            # Перезапускаем только Nginx. --no-deps предотвращает перезапуск Tomcat.
-            docker compose up -d --no-deps nginx
-            echo "Nginx service restarted."
+            # Перезапускаем весех компонентов
+            docker compose down 
+            docker compose up -d 
+            echo "All services restarted."
