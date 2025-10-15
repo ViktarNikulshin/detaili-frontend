@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import './EventModal.css';
-import { CalendarEvent } from '../../types/order';
+import {CalendarEvent} from '../../types/order';
 import moment from 'moment';
-import { useAuth } from '../../contexts/AuthContext';
-import { orderAPI } from '../../services/orderApi';
+import {useAuth} from '../../contexts/AuthContext';
+import {orderAPI} from '../../services/orderApi';
 
 interface EventModalProps {
     isOpen: boolean;
@@ -21,7 +21,7 @@ const EventModal: React.FC<EventModalProps> = ({
                                                    onEdit,
                                                    onStatusChanged
                                                }) => {
-    const { user } = useAuth();
+    const {user} = useAuth();
     const [isTaking, setIsTaking] = useState(false);
     const [isCompleting, setIsCompleting] = useState(false);
 
@@ -145,7 +145,7 @@ const EventModal: React.FC<EventModalProps> = ({
                             {isCompleting ? 'Завершаем…' : 'Завершить'}
                         </button>
                     )}
-                    <button className="edit-button" onClick={onEdit}>Редактировать</button>
+                    {!isMaster && <button className="edit-button" onClick={onEdit}>Редактировать</button>}
                     <button className="close-button-footer" onClick={onClose}>Закрыть</button>
                 </div>
             </div>

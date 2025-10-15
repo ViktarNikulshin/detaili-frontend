@@ -70,7 +70,7 @@
     padding-top: 15px;
 }
 
-.edit-button, .close-button-footer, .take-button {
+.edit-button, .close-button-footer, .take-button, .complete-button {
     padding: 10px 15px;
     border: none;
     border-radius: 5px;
@@ -99,6 +99,10 @@
 
 /* MASTER-only take button */
 .take-button {
+    background-color: #9aca06;
+    color: white;
+}
+.complete-button {
     background-color: #28a745;
     color: white;
 }
