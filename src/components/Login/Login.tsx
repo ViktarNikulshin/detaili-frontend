@@ -83,7 +83,7 @@ const Login: React.FC = () => {
             <div className="login-card">
                 <div className="login-header">
                     <img src={logo} alt="Cristal Car Logo" className="nav-logo" />
-                    <h1>Cristal car</h1>
+                    <h1>Crystal car</h1>
                     <p>Войдите в свою учетную запись</p>
                 </div>
 

@@ -1,0 +1,70 @@
+name: Frontend CI/CD (React)
+
+on:
+  push:
+    branches:
+      - master
+    # Опционально: можно указать путь к коду фронтенда, чтобы не запускать при изменении только бэкенда
+    # paths:
+    #   - 'front/**'
+
+jobs:
+  build-and-deploy-front:
+    runs-on: ubuntu-latest
+
+    env:
+      REMOTE_DIR: /opt/detailing # Рабочая директория на сервере
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ==================================
+      # 1. СБОРКА REACT-ПРИЛОЖЕНИЯ
+      # ==================================
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build React App (creates 'build/' folder)
+        run: npm run build
+
+      # ==================================
+      # 2. ПЕРЕДАЧА ФАЙЛОВ НА СЕРВЕР (SCP)
+      # ==================================
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      # Передача React-билда в папку /opt/order-app/front/
+      # Соответствует: ./front/build:/usr/share/nginx/html
+      - name: Transfer React build (build/ -> front/build/)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST_IP }}
+          username: ${{ secrets.HOST_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "build/"
+          target: "${{ env.REMOTE_DIR }}/front/"
+
+      # ==================================
+      # 3. ПЕРЕЗАПУСК NGINX
+      # ==================================
+      - name: Restart Nginx container only
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST_IP }}
+          username: ${{ secrets.HOST_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "Restarting Nginx container..."
+            cd ${{ env.REMOTE_DIR }}
+            # Перезапускаем только Nginx. --no-deps предотвращает перезапуск Tomcat.
+            docker compose up -d --no-deps nginx
+            echo "Nginx service restarted."
