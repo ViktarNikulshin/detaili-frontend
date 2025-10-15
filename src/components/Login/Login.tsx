@@ -68,16 +68,6 @@ const Login: React.FC = () => {
         }
     };
 
-    const handleDemoLogin = (role: 'MANAGER' | 'ADMIN' | 'MASTER') => {
-        const demoCredentials = {
-            MANAGER: { username: 'manager', password: 'manager123' },
-            ADMIN: { username: 'admin', password: 'admin123' },
-            MASTER: { username: 'master', password: 'master123' },
-        };
-
-        setCredentials(demoCredentials[role]);
-    };
-
     return (
         <div className="login-container">
             <div className="login-card">

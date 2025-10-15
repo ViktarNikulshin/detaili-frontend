@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {Controller, FieldValues, SubmitHandler, useForm} from "react-hook-form";
 import * as Yup from "yup";
 import {yupResolver} from "@hookform/resolvers/yup";
@@ -127,7 +127,7 @@ const OrderForm: React.FC = () => {
     const selectedInfoSource = watch("infoSource");
 
 
-    const fetchPartsForWork = async (workType: WorkType) => {
+    const fetchPartsForWork = useCallback(async (workType: WorkType) => {
         if (dynamicWorkParts[workType.id] !== undefined) {
             return dynamicWorkParts[workType.id] || [];
         }
@@ -151,7 +151,7 @@ const OrderForm: React.FC = () => {
         } finally {
             setLoadingParts(prev => ({...prev, [workType.id]: false}));
         }
-    };
+    }, [dynamicWorkParts, setLoadingParts, setDynamicWorkParts]);
 
 
     useEffect(() => {
@@ -204,7 +204,7 @@ const OrderForm: React.FC = () => {
         if (allWorkTypes.length > 0) {
             loadOrder();
         }
-    }, [id, reset, allWorkTypes]);
+    }, [id, reset, allWorkTypes, fetchPartsForWork]);
 
     const onSubmit: SubmitHandler<OrderFormValues> = async (data) => {
         try {
