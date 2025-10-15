@@ -5,9 +5,6 @@ import {authAPI} from '../../services/authApi';
 import './Login.css';
 import logo from "../asserts/a593d73d858fdafbbe4065de23f69533.jpg";
 
-// Определяем типы демо-доступа
-type DemoRole = 'admin' | 'manager' | 'master';
-
 const Login: React.FC = () => {
     const [credentials, setCredentials] = useState({
         username: '',
@@ -38,18 +35,6 @@ const Login: React.FC = () => {
 
         // Очищаем ошибку при изменении поля
         if (error) setError('');
-    };
-
-    // ✅ НОВАЯ ФУНКЦИЯ: Демо-логин
-    const handleDemoLogin = (role: DemoRole) => {
-        // Устанавливаем учетные данные для выбранной роли
-        setCredentials({
-            username: `${role}_user`, // Пример: admin_user, manager_user
-            password: 'demo_password', // Пример: общий демо-пароль
-        });
-        // Очищаем ошибку
-        setError('');
-        // Позволяем пользователю увидеть введенные данные и нажать "Войти"
     };
 
 
