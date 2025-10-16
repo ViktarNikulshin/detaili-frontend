@@ -1,0 +1,200 @@
+/* UserForm.css */
+
+/* ------------------------------------------- */
+/* БАЗОВЫЙ КОНТЕЙНЕР ФОРМЫ (как в OrderForm.css) */
+/* ------------------------------------------- */
+
+.order-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 520px;
+    margin: 40px auto;
+    padding: 28px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px);
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(100, 180, 220, 0.25);
+    font-family: "Segoe UI", sans-serif;
+    color: #1a3c47;
+    position: relative;
+}
+
+.order-form h2, .order-form h3 {
+    color: #1a3c47;
+    margin-bottom: 5px;
+}
+
+.order-form hr {
+    border: 0;
+    height: 1px;
+    background: rgba(90, 200, 250, 0.2);
+    margin: 10px 0;
+}
+
+/* ------------------------------------------- */
+/* ПОЛЯ ВВОДА И ГРУППЫ (как в OrderForm.css) */
+/* ------------------------------------------- */
+
+.order-form input,
+.order-form textarea,
+.order-form select {
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(90, 200, 250, 0.4);
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.6);
+    color: #1a3c47;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.order-form input:focus {
+    border-color: #00c3ff;
+    box-shadow: 0 0 8px rgba(0, 195, 255, 0.4);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+/* Стили для неактивного (disabled/readOnly) поля */
+.order-form input:disabled,
+.order-form input[readonly] {
+    background: rgba(90, 200, 250, 0.1);
+    border-color: rgba(90, 200, 250, 0.2);
+    color: #5a7d88;
+    cursor: default;
+}
+
+/* Ошибки */
+.error {
+    border-color: #dc3545 !important;
+}
+
+.error-text {
+    color: #dc3545;
+    font-size: 13px;
+    margin-top: -10px;
+}
+
+/* Группировка полей */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Уменьшаем стандартный gap формы для элементов внутри группы */
+}
+
+/* Лейблы */
+.form-group label {
+    color: #1a3c47;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+
+/* ------------------------------------------- */
+/* СТИЛИЗАЦИЯ КНОПОК */
+/* ------------------------------------------- */
+
+/* Общий стиль для всех кнопок в UserForm */
+.order-form button {
+    background: linear-gradient(135deg, #5ac8fa, #00c3ff);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 14px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    margin-top: 5px; /* Добавим небольшой отступ сверху */
+    width: 100%; /* Занимают всю ширину */
+}
+
+.order-form button:hover:not(:disabled) {
+    background: linear-gradient(135deg, #00c3ff, #5ac8fa);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0, 195, 255, 0.4);
+}
+
+.order-form button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Специфический стиль для кнопки смены пароля (когда секция скрыта) */
+.order-form button.show-password-btn {
+    margin-top: 10px;
+    background: none;
+    border: 1px solid #00c3ff;
+    color: #00c3ff;
+    font-weight: 500;
+    padding: 10px;
+}
+
+.order-form button.show-password-btn:hover {
+    background: rgba(0, 195, 255, 0.1);
+    transform: none;
+    box-shadow: none;
+}
+
+/* Стили для кнопок "Сохранить пароль" и "Отмена" */
+.section-password button {
+    width: auto; /* Возвращаем к кнопкам стандартную ширину, чтобы они могли быть рядом */
+    margin-top: 15px;
+    flex-grow: 1; /* Кнопки будут равномерно распределены */
+}
+
+/* Контейнер для кнопок в секции пароля */
+.section-password-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 5px;
+}
+
+/* Кнопка отмены - делаем её менее акцентной */
+.section-password button:nth-child(2) { /* Вторая кнопка (Отмена) */
+    background: #e9ecef;
+    color: #6c757d;
+    border: 1px solid #ced4da;
+    box-shadow: none;
+}
+
+.section-password button:nth-child(2):hover {
+    background: #ced4da;
+    color: #495057;
+    transform: none;
+}
+
+
+/* ------------------------------------------- */
+/* СЕКЦИИ ФОРМЫ (для организации) */
+/* ------------------------------------------- */
+
+.section-password {
+    border: 1px solid rgba(0, 195, 255, 0.2);
+    padding: 15px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.section-password p {
+    font-size: 14px;
+    color: #495057;
+    margin-bottom: 5px;
+}
+
+/* Изменяем стили заголовка для кликабельности (Сменить пароль) */
+.order-form h3 {
+    margin-top: 10px;
+    padding: 5px;
+    display: inline-block;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 700;
+}

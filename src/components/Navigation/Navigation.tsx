@@ -1,16 +1,15 @@
-// src/components/Navigation/Navigation.tsx
 
 import React, {useState} from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import logo from '../asserts/a593d73d858fdafbbe4065de23f69533.jpg'
 import './Navigation.css'
-// import {useState} from "react";
 
 const Navigation: React.FC = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const isMaster = !!user?.roles?.some(role => role.name === 'MASTER');
 
     const handleLogoutAndClose = () => {
         setIsMenuOpen(false);
@@ -18,7 +17,6 @@ const Navigation: React.FC = () => {
         navigate('/login');
     };
 
-    // НОВЫЙ ОБРАБОТЧИК для перехода в профиль
     const handleProfile = () => {
         setIsMenuOpen(false);
         navigate('/profile'); // Переход на новую страницу
@@ -47,13 +45,13 @@ const Navigation: React.FC = () => {
             </div>
 
             <div className="calendar-actions">
-                <button
+                {!isMaster && (<button
                     className="btn btn-primary create-order-btn"
                     onClick={handleCreateOrder}
                 >
                     <span className="button-text-desktop">+ Создать заказ</span>
                     <span className="button-icon-mobile">+</span>
-                </button>
+                </button>)}
             </div>
 
             <div className="nav-user">
@@ -71,7 +69,6 @@ const Navigation: React.FC = () => {
                                 Отчет
                             </div>
                         )}
-                        {/* НОВЫЙ ПУНКТ МЕНЮ "Профиль" */}
                         <div className="menu-item" onClick={handleProfile}>
                             Профиль
                         </div>
