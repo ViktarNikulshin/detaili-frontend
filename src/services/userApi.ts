@@ -25,5 +25,5 @@ export const userAPI = {
         lastName: string;
     }) => userApi.put(`/users/${id}`, user),
     changePassword: (username: string, oldPassword: string, newPassword: string) =>
-        userApi.get(`/users/change/${username}?oldPassword=${oldPassword}&newPassword=${newPassword}`)
+        userApi.get(`/users/changePassword/${username}?oldPassword=${oldPassword}&newPassword=${newPassword}`)
 }
