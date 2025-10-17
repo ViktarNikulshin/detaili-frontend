@@ -24,6 +24,7 @@ const EventModal: React.FC<EventModalProps> = ({
     const {user} = useAuth();
     const [isTaking, setIsTaking] = useState(false);
     const [isCompleting, setIsCompleting] = useState(false);
+    const [isCancelling, setIsCancelling] = useState(false);
 
     const isMaster = !!user?.roles?.some(role => role.name === 'MASTER');
     const isAdmin = !!user?.roles?.some(role => role.name === 'ADMIN');
@@ -65,6 +66,30 @@ const EventModal: React.FC<EventModalProps> = ({
 
     const formatDateTime = (date: Date) => {
         return moment(date).format('DD.MM.YYYY HH:mm');
+    };
+    const handleCancel = async () => {
+        if (!event || !user) return;
+
+        // Добавляем подтверждение перед отменой
+        if (!window.confirm("Вы уверены, что хотите отменить этот заказ?")) {
+            return;
+        }
+
+        try {
+            setIsCancelling(true);
+            // Изменяем статус на CANCELLED (предполагая, что такой статус есть в API)
+            await orderAPI.changeStatus(String(event.id), 'CANCELLED', String(user.id));
+
+            if (onStatusChanged) {
+                onStatusChanged();
+            }
+            onClose();
+        } catch (error) {
+            console.error("Ошибка при отмене заказа:", error);
+            alert("Не удалось отменить заказ.");
+        } finally {
+            setIsCancelling(false);
+        }
     };
 
     return (
@@ -143,6 +168,15 @@ const EventModal: React.FC<EventModalProps> = ({
                             disabled={isCompleting}
                         >
                             {isCompleting ? 'Завершаем…' : 'Завершить'}
+                        </button>
+                    )}
+                    {isAdmin && event.status !== 'COMPLETED' && event.status !== 'CANCELLED' && event.status !== 'IN_PROGRESS' && (
+                        <button
+                            className="cancel-button" // <-- Новый класс для стилей
+                            onClick={handleCancel}
+                            disabled={isCancelling}
+                        >
+                            {isCancelling ? 'Отмена…' : 'Отменить заказ'}
                         </button>
                     )}
                     {!isMaster && <button className="edit-button" onClick={onEdit}>Редактировать</button>}

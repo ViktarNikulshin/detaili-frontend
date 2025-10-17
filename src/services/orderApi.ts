@@ -10,7 +10,7 @@ export const orderApi = axios.create({
     },
 });
 interface CalendarFilters {
-    masterId?: string;
+    masterId?: string | number | null;
     status?: string;
 }
 

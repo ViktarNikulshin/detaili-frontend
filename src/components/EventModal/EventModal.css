@@ -178,3 +178,54 @@
     font-size: 0.85em;
     white-space: nowrap;
 }
+/* В секцию кнопок модального окна */
+/* ... (после .complete-button) ... */
+
+/* Стили для кнопки "Отменить заказ" (Admin) */
+.cancel-button {
+    background-color: #dc3545; /* Красный цвет */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+
+.cancel-button:hover:not(:disabled) {
+    background-color: #c82333; /* Темнее при наведении */
+}
+
+.cancel-button:disabled {
+    background-color: #f1a9b2;
+    cursor: not-allowed;
+}
+
+/* Обновление modal-footer, чтобы кнопки располагались в строку */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end; /* Выравнивание кнопок вправо */
+    gap: 10px; /* Расстояние между кнопками */
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+    flex-wrap: wrap; /* Для адаптивности, чтобы кнопки переносились */
+}
+
+/* Убедимся, что все кнопки в футере используют одинаковый стиль по умолчанию */
+.modal-footer button {
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-size: 1em;
+}
+
+/* Немного подправим остальные кнопки в футере, чтобы они были одинакового размера */
+.take-button,
+.complete-button,
+.edit-button,
+.close-button-footer {
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-weight: 600;
+}

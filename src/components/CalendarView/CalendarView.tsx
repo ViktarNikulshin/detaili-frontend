@@ -1,15 +1,18 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Calendar, momentLocalizer, View } from 'react-big-calendar';
 import moment from 'moment';
+import 'moment/locale/ru';
 import { useNavigate } from 'react-router-dom';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { orderAPI } from '../../services/orderApi';
-import { userAPI } from '../../services/userApi'; // <--- Импортируем userAPI
+import { userAPI } from '../../services/userApi';
 import { CalendarEvent, Order } from '../../types/order';
-import { User } from '../../types/user'; // <--- Импортируем тип User
+import { User } from '../../types/user';
 import './CalendarView.css';
 import EventModal from "../EventModal/EventModal";
+import {useAuth} from "../../contexts/AuthContext";
 
+moment.locale('ru');
 const localizer = momentLocalizer(moment);
 
 // Массив всех возможных статусов для фильтра
@@ -21,49 +24,63 @@ const allStatuses = [
     { value: 'CANCELLED', label: 'Отменены' },
 ];
 
+
 const CalendarView: React.FC = () => {
+    const navigate = useNavigate();
+    const {user} = useAuth();
+    const isMaster = user?.roles?.length === 1 && user.roles[0].name === 'MASTER';
+    const userIdString = user?.id ? String(user.id) : '';
+
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string>('');
-    const [currentView, setCurrentView] = useState<View>('month');
+
+    // Начальное представление: 'week' или 'day' для Мастера, 'month' для других
+    const initialView: View = isMaster ? 'week' : 'month';
+    const [currentView, setCurrentView] = useState<View>(initialView);
+
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
     const [showModal, setShowModal] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-
-    // --- НОВОЕ СОСТОЯНИЕ ДЛЯ СПИСКА МАСТЕРОВ ---
     const [masters, setMasters] = useState<User[]>([]);
-    const [mastersLoading, setMastersLoading] = useState(true);
-    // ---------------------------------------------
+    const [mastersLoading, setMastersLoading] = useState(false); // Установим false, так как мастеру они не нужны
 
-    // --- СОСТОЯНИЯ ДЛЯ ФИЛЬТРОВ ---
-    const [selectedMasterId, setSelectedMasterId] = useState<string>('all');
+    // Если Мастер, то его ID, иначе 'all'
+    const initialMasterId = isMaster ? userIdString : 'all';
+    const [selectedMasterId, setSelectedMasterId] = useState<string>(initialMasterId);
+
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
 
-    const navigate = useNavigate();
-
-
-    // Загрузка списка мастеров при монтировании компонента
     useEffect(() => {
-        const loadMasters = async () => {
-            try {
-                setMastersLoading(true);
-                const response = await userAPI.getUsersByRole('MASTER');
-                // Добавляем опцию "Все мастера" в начало списка
-                setMasters([
-                    { id: 'all', firstName: 'Все', lastName: 'мастера', role: { code: 'ALL', name: 'All' } } as unknown as User,
-                    ...response.data
-                ]);
-            } catch (err) {
-                console.error('Ошибка загрузки мастеров:', err);
-                // Продолжаем работу, даже если мастера не загрузились
-            } finally {
-                setMastersLoading(false);
-            }
-        };
+        // Если пользователь не Мастер, загружаем список мастеров
+        if (!isMaster) {
+            const loadMasters = async () => {
+                try {
+                    setMastersLoading(true);
+                    const response = await userAPI.getUsersByRole('MASTER');
+                    // Добавляем опцию "Все мастера" в начало списка
+                    setMasters([
+                        { id: 'all', firstName: 'Все', lastName: 'мастера', role: { code: 'ALL', name: 'All' } } as unknown as User,
+                        ...response.data
+                    ]);
+                } catch (err) {
+                    console.error('Ошибка загрузки мастеров:', err);
+                    // Продолжаем работу, даже если мастера не загрузились
+                } finally {
+                    setMastersLoading(false);
+                }
+            };
 
-        loadMasters();
-    }, []);
+            loadMasters();
+        }
+    }, [isMaster]);
+
+    // Определяем доступные представления календаря
+    const availableViews: View[] = useMemo(() => {
+        return isMaster ? ['week', 'day'] : ['month', 'week', 'day', 'agenda'];
+    }, [isMaster]);
+
 
     // Оборачиваем loadCalendarEvents в useCallback
     const loadCalendarEvents = useCallback(async () => {
@@ -71,10 +88,13 @@ const CalendarView: React.FC = () => {
             setLoading(true);
             setError('');
 
+            // Проверяем, что выбранное представление доступно
+            const viewToUse = availableViews.includes(currentView) ? currentView : availableViews[0];
+
             let start: Date;
             let end: Date;
 
-            switch (currentView) {
+            switch (viewToUse) {
                 case 'month':
                     start = moment(currentDate).startOf('month').toDate();
                     end = moment(currentDate).endOf('month').toDate();
@@ -88,16 +108,19 @@ const CalendarView: React.FC = () => {
                     end = moment(currentDate).endOf('day').toDate();
                     break;
                 default:
+                    // Для других представлений (например, agenda) или дефолта
                     start = moment(currentDate).startOf('month').toDate();
                     end = moment(currentDate).endOf('month').toDate();
             }
 
-            // *** ВАЖНО: Адаптируйте orderAPI.getCalendar для передачи фильтров на БЭКЕНД! ***
-            // Сейчас фильтры передаются только для демонстрации, что они используются.
-            const masterFilter = selectedMasterId !== 'all' ? selectedMasterId : undefined;
+            // Фильтр по мастеру: либо выбранный (если не 'all'), либо ID текущего мастера (если isMaster)
+            const masterFilter = isMaster
+                ? user?.id
+                : (selectedMasterId !== 'all' ? selectedMasterId : undefined);
+
             const statusFilter = selectedStatus !== 'all' ? selectedStatus : undefined;
 
-            // Пример идеального вызова API с фильтрами:
+            // Вызов API с фильтрами:
             const response = await orderAPI.getCalendar(
                 moment(start).format('YYYY-MM-DDTHH:mm'),
                 moment(end).format('YYYY-MM-DDTHH:mm'),
@@ -124,7 +147,7 @@ const CalendarView: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [currentView, currentDate, selectedMasterId, selectedStatus]); // <--- Все зависимости для запуска
+    }, [currentView, currentDate, selectedMasterId, selectedStatus, isMaster, user?.id, availableViews]); // <--- Все зависимости для запуска
 
     // Обновляем зависимость: теперь хук запускается при изменении фильтров
     useEffect(() => {
@@ -132,13 +155,17 @@ const CalendarView: React.FC = () => {
     }, [loadCalendarEvents]); // Запускаем при изменении loadCalendarEvents (т.е. при смене фильтров/даты)
 
     const handleViewChange = (view: View) => {
-        setCurrentView(view);
+        // Убедимся, что мастер не может выбрать недоступное представление
+        if (availableViews.includes(view)) {
+            setCurrentView(view);
+        }
     };
 
     const handleDateChange = (date: Date) => {
         setCurrentDate(date);
     };
 
+    // ... (eventStyleGetter, handleSelectEvent, handleCloseModal, handleStatusChanged - остаются без изменений)
     const eventStyleGetter = (event: CalendarEvent) => {
         let backgroundColor = '#3174ad';
         let borderColor = '#1a5a8a';
@@ -189,9 +216,13 @@ const CalendarView: React.FC = () => {
     const handleStatusChanged = async () => {
         await loadCalendarEvents();
     };
+    // ...
 
-    if (loading || mastersLoading) {
-        return <div className="loading">Загрузка календаря и мастеров...</div>;
+    // Комбинированный loading
+    const overallLoading = loading || (!isMaster && mastersLoading);
+
+    if (overallLoading) {
+        return <div className="loading">Загрузка календаря{isMaster ? '...' : ' и мастеров...'}</div>;
     }
 
     if (error) {
@@ -204,21 +235,30 @@ const CalendarView: React.FC = () => {
                 <h1>Календарь заказов</h1>
 
                 <div className="calendar-filters">
-                    {/* Фильтр по Мастеру */}
-                    <label htmlFor="master-filter">Мастер:</label>
-                    <select
-                        id="master-filter"
-                        value={selectedMasterId}
-                        onChange={(e) => setSelectedMasterId(e.target.value)}
-                    >
-                        {masters.map((master) => (
-                            <option key={master.id} value={master.id}>
-                                {master.firstName} {master.lastName}
-                            </option>
-                        ))}
-                    </select>
+                    {/* Фильтр по Мастеру - отображается ТОЛЬКО для не-Мастеров */}
+                    {!isMaster && (
+                        <>
+                            <label htmlFor="master-filter">Мастер:</label>
+                            <select
+                                id="master-filter"
+                                value={selectedMasterId}
+                                onChange={(e) => setSelectedMasterId(e.target.value)}
+                            >
+                                {masters.map((master) => (
+                                    <option key={master.id} value={master.id}>
+                                        {master.firstName} {master.lastName}
+                                    </option>
+                                ))}
+                            </select>
+                        </>
+                    )}
 
-                    <label htmlFor="status-filter" style={{ marginLeft: '15px' }}>Статус:</label>
+                    <label
+                        htmlFor="status-filter"
+                        style={isMaster ? {} : { marginLeft: '15px' }} // Убираем отступ, если нет фильтра мастеров
+                    >
+                        Статус:
+                    </label>
                     <select
                         id="status-filter"
                         value={selectedStatus}
@@ -245,7 +285,8 @@ const CalendarView: React.FC = () => {
                     endAccessor="end"
                     style={{ height: 'calc(100vh - 200px)' }}
                     eventPropGetter={eventStyleGetter}
-                    views={['month', 'week', 'day', 'agenda']}
+                    // Используем ограниченный набор views
+                    views={availableViews}
                     view={currentView}
                     date={currentDate}
                     onView={handleViewChange}
