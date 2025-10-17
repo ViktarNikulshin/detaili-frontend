@@ -8,6 +8,8 @@ import OrderForm from "./components/OrderForm/OrderForm";
 import Layout from './components/Layout/Layout';
 import './App.css';
 import UserForm from "./components/UserForm/UserForm";
+import Users from "./components/Users/Users";
+import UserRoleForm from "./components/UserRoleForm/UserRoleForm";
 
 function App() {
     return (
@@ -28,6 +30,9 @@ function App() {
                                 <Route path="orders/new" element={<OrderForm />} />
                                 <Route path="orders/:id" element={<OrderForm />} />
                                 <Route path="/profile" element={<UserForm />} />
+                                <Route path="/users/new" element={<UserForm />} />
+                                <Route path="/users" element={<Users />} />
+                                <Route path="/users/:id" element={<UserRoleForm />} />
                             </Route>
                         </Route>
 

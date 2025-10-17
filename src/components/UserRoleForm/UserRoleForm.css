@@ -1,0 +1,190 @@
+.user-role-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 32px;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(16px);
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(100, 180, 220, 0.25);
+    font-family: "Segoe UI", sans-serif;
+    color: #1a3c47;
+}
+
+.user-role-form h2 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.roles-label {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a3c47;
+}
+
+.checkbox-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 15px;
+    border: 1px solid rgba(90, 200, 250, 0.4);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.checkbox-item input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    border: 1px solid rgba(90, 200, 250, 0.6);
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.7);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    outline: none;
+}
+
+.checkbox-item input[type="checkbox"]:checked {
+    background-color: #00c3ff;
+    border-color: #00c3ff;
+}
+
+.checkbox-item input[type="checkbox"]:checked::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -60%) rotate(45deg);
+}
+
+.checkbox-item label {
+    font-size: 16px;
+    color: #1a3c47;
+    cursor: pointer;
+    user-select: none;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    justify-content: flex-end;
+}
+
+.form-actions button {
+    border: none;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.submit-btn {
+    background: linear-gradient(135deg, #28a745, #218838);
+    color: white;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(40, 167, 69, 0.4);
+}
+
+.cancel-btn {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.cancel-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.error-text {
+    color: #dc3545;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.form-message {
+    text-align: center;
+    margin-top: 50px;
+    font-size: 1.2em;
+    color: #1a3c47;
+}
+
+.form-message.error {
+    color: #dc3545;
+}
+/* ... (существующие стили) ... */
+
+/* ------------------------------------------- */
+/* СТИЛИ ДЛЯ УВЕДОМЛЕНИЙ (ПУШ)                 */
+/* ------------------------------------------- */
+
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 30px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    z-index: 10000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    animation: fadeInTop 0.3s ease-out, fadeOutTop 0.3s ease-in 1.7s;
+}
+
+.notification.success {
+    background-color: #28a745;
+}
+
+.notification.error {
+    background-color: #dc3545;
+}
+
+/* АНИМАЦИИ ДЛЯ ПОЯВЛЕНИЯ СВЕРХУ */
+@keyframes fadeInTop {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes fadeOutTop {
+    from {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+}

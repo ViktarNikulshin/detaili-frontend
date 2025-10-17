@@ -1,0 +1,112 @@
+.users-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 28px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px);
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(100, 180, 220, 0.25);
+    font-family: "Segoe UI", sans-serif;
+    color: #1a3c47;
+}
+
+.users-container h1 {
+    text-align: center;
+    margin-bottom: 24px;
+    color: #1a3c47;
+}
+
+.users-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.users-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.users-container h1 {
+    margin-bottom: 0; /* Убираем лишний отступ у h1 */
+}
+
+.add-user-btn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #28a745, #218838);
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.add-user-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(40, 167, 69, 0.4);
+}
+
+
+.user-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 14px;
+    border: 1px solid rgba(90, 200, 250, 0.4);
+    transition: all 0.3s ease;
+}
+
+.user-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 195, 255, 0.2);
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.user-name {
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+.user-roles {
+    font-size: 0.9em;
+    color: #555;
+}
+
+.user-edit-link {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #5ac8fa, #00c3ff);
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.user-edit-link:hover {
+    background: linear-gradient(135deg, #00c3ff, #5ac8fa);
+    box-shadow: 0 4px 14px rgba(0, 195, 255, 0.4);
+}
+
+.users-message {
+    text-align: center;
+    margin-top: 50px;
+    font-size: 1.2em;
+    color: #1a3c47;
+}
+
+.users-message.error {
+    color: #dc3545;
+}

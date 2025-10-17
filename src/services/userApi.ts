@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {User} from "../types/user";
+import {Role, User} from "../types/user";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
@@ -25,5 +25,16 @@ export const userAPI = {
         lastName: string;
     }) => userApi.put(`/users/${id}`, user),
     changePassword: (username: string, oldPassword: string, newPassword: string) =>
-        userApi.get(`/users/changePassword/${username}?oldPassword=${oldPassword}&newPassword=${newPassword}`)
+        userApi.get(`/users/changePassword/${username}?oldPassword=${oldPassword}&newPassword=${newPassword}`),
+    getAllUsers: () => userApi.get<Array<User>>(`/users`),
+    getUserById: (id: string) => userApi.get<User>(`/users/${id}`),
+    getAllRoles: () => userApi.get<Array<Role>>(`users/roles`),
+    updateUserRoles: (id: string, roleIds: number[])=> userApi.get(`/users/updateRoles/${id}?roleIds=${roleIds}`),
+    createUser: (newUser: {
+        firstName: string;
+        lastName: string;
+        phone: string;
+        username: string;
+        roles: Role []
+    }) => userApi.post(`/users`, newUser)
 }

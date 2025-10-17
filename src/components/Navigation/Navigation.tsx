@@ -1,4 +1,3 @@
-
 import React, {useState} from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -10,6 +9,7 @@ const Navigation: React.FC = () => {
     const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const isMaster = !!user?.roles?.some(role => role.name === 'MASTER');
+    const isAdmin = user?.roles?.some(r => r.name === 'ADMIN');
 
     const handleLogoutAndClose = () => {
         setIsMenuOpen(false);
@@ -19,13 +19,19 @@ const Navigation: React.FC = () => {
 
     const handleProfile = () => {
         setIsMenuOpen(false);
-        navigate('/profile'); // Переход на новую страницу
+        navigate('/profile');
     };
 
     const handleReport = () => {
         setIsMenuOpen(false);
         alert("Переход к странице отчетов (в разработке).");
     }
+
+    // New handler for the users page
+    const handleUsersAndRoles = () => {
+        setIsMenuOpen(false);
+        navigate('/users');
+    };
 
     const handleCreateOrder = () => {
         navigate('/orders/new');
@@ -34,8 +40,6 @@ const Navigation: React.FC = () => {
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
     }
-
-    const isAdmin = user?.roles?.some(r => r.name === 'ADMIN');
 
     return (
         <nav className="navigation">
@@ -65,9 +69,14 @@ const Navigation: React.FC = () => {
                 {isMenuOpen && (
                     <div className="dropdown-menu">
                         {isAdmin && (
-                            <div className="menu-item" onClick={handleReport}>
-                                Отчет
-                            </div>
+                            <>
+                                <div className="menu-item" onClick={handleReport}>
+                                    Отчет
+                                </div>
+                                <div className="menu-item" onClick={handleUsersAndRoles}>
+                                    Пользователи и роли
+                                </div>
+                            </>
                         )}
                         <div className="menu-item" onClick={handleProfile}>
                             Профиль
