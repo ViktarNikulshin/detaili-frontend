@@ -322,7 +322,7 @@ const OrderForm: React.FC = () => {
                        className={errors.clientName ? "error" : ""}/>
                 {errors.clientName && <span className="error-text">{errors.clientName.message}</span>}
 
-                <div className="form-group">
+                <div className="form-group phone-input-container">
                     <Controller name="clientPhone" control={control} render={({field}) => (
                         <PhoneInput {...field} country={"by"} onlyCountries={["by", "ru", "ua", "pl", "lt"]}
                                     placeholder="Телефон" inputStyle={{width: "100%", height: "52px"}}/>

@@ -56,7 +56,7 @@ const UserForm: React.FC = () => {
                 ...prev,
                 firstName: user.firstName || '',
                 lastName: user.lastName || '',
-                phone: user.username || '' // Используем username, который является телефоном
+                phone: user.phone || ''
             }));
         }
     }, [user, isCreateMode]);
@@ -154,7 +154,7 @@ const UserForm: React.FC = () => {
         return (
             <>
                 {notification.visible && <div className={`notification ${notification.type}`}>{notification.message}</div>}
-                <form onSubmit={handleCreateUser} className="order-form">
+                <form onSubmit={handleCreateUser} className="user-form">
                     <h2>Создание нового пользователя</h2>
                     <div className="form-group">
                         <label>Имя</label>
@@ -198,7 +198,7 @@ const UserForm: React.FC = () => {
     return (
         <>
             {notification.visible && <div className={`notification ${notification.type}`}>{notification.message}</div>}
-            <form className="order-form">
+            <form className="user-form">
                 <h2>Редактирование профиля</h2>
                 <div className="section-data">
                     <h3>Личные данные</h3>

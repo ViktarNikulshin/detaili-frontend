@@ -1,65 +1,89 @@
-/* UserForm.css */
+/* UserForm.css - РЕФАКТОРИНГ ПОД СТИЛЬ OrderForm.css */
 
-/* ------------------------------------------- */
-/* БАЗОВЫЙ КОНТЕЙНЕР ФОРМЫ (как в OrderForm.css) */
-/* ------------------------------------------- */
-
-.order-form {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    max-width: 520px;
-    margin: 40px auto;
-    padding: 28px;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(16px);
-    border-radius: 20px;
-    box-shadow: 0 6px 20px rgba(100, 180, 220, 0.25);
-    font-family: "Segoe UI", sans-serif;
-    color: #1a3c47;
-    position: relative;
+/* =================================================== */
+/* 1. ПЕРЕМЕННЫЕ (Синхронизированы с OrderForm.css) */
+/* =================================================== */
+:root {
+    --primary-color: #007bff;          /* Основной синий */
+    --primary-light: #5ac8fa;          /* Светлый синий */
+    --accent-color: #28a745;           /* Зеленый для успеха */
+    --error-color: #dc3545;            /* Красный для ошибок */
+    --text-color: #1a3c47;             /* Темный текст */
+    --bg-light: rgba(255, 255, 255, 0.7); /* Светлый фон формы */
+    --bg-input: rgba(255, 255, 255, 0.6); /* Фон для полей */
+    --border-color: rgba(90, 200, 250, 0.4);
+    --shadow-light: 0 4px 12px rgba(100, 180, 220, 0.15);
+    --shadow-heavy: 0 0 10px rgba(0, 123, 255, 0.4); /* Фокусная тень */
 }
 
-.order-form h2, .order-form h3 {
-    color: #1a3c47;
+
+/* ------------------------------------------- */
+/* БАЗОВЫЙ КОНТЕЙНЕР ФОРМЫ (Glassmorphism) */
+/* ------------------------------------------- */
+
+.user-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Увеличиваем разрыв, как в OrderForm.css */
+    max-width: 520px;
+    margin: 50px auto; /* Увеличиваем отступ, как в OrderForm.css */
+    padding: 35px; /* Увеличиваем паддинг, как в OrderForm.css */
+
+    /* Стили Glassmorphism из OrderForm.css */
+    background: var(--bg-light);
+    backdrop-filter: blur(25px) saturate(150%);
+    border-radius: 25px; /* Увеличиваем радиус, как в OrderForm.css */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: var(--shadow-light);
+
+    font-family: 'Inter', 'Segoe UI', sans-serif; /* Меняем шрифт для консистентности */
+    color: var(--text-color);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.user-form h2, .user-form h3 {
+    color: var(--text-color);
     margin-bottom: 5px;
 }
 
-.order-form hr {
+.user-form hr {
     border: 0;
     height: 1px;
-    background: rgba(90, 200, 250, 0.2);
+    background: var(--border-color);
     margin: 10px 0;
 }
 
 /* ------------------------------------------- */
-/* ПОЛЯ ВВОДА И ГРУППЫ (как в OrderForm.css) */
+/* ПОЛЯ ВВОДА И ГРУППЫ */
 /* ------------------------------------------- */
 
-.order-form input,
-.order-form textarea,
-.order-form select {
-    padding: 14px 16px;
-    border-radius: 14px;
-    border: 1px solid rgba(90, 200, 250, 0.4);
+.user-form input:not([type="checkbox"]),
+.user-form textarea,
+.user-form select {
+    padding: 16px 18px; /* Увеличиваем паддинг */
+    border-radius: 16px; /* Увеличиваем радиус */
+    border: 1px solid var(--border-color);
     font-size: 16px;
     outline: none;
     transition: all 0.3s ease;
-    background: rgba(255, 255, 255, 0.6);
-    color: #1a3c47;
+    background: var(--bg-input);
+    color: var(--text-color);
     width: 100%;
     box-sizing: border-box;
 }
 
-.order-form input:focus {
-    border-color: #00c3ff;
-    box-shadow: 0 0 8px rgba(0, 195, 255, 0.4);
+.user-form input:focus,
+.user-form textarea:focus,
+.user-form select:focus {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-heavy);
     background: rgba(255, 255, 255, 0.95);
 }
 
 /* Стили для неактивного (disabled/readOnly) поля */
-.order-form input:disabled,
-.order-form input[readonly] {
+.user-form input:disabled,
+.user-form input[readonly] {
     background: rgba(90, 200, 250, 0.1);
     border-color: rgba(90, 200, 250, 0.2);
     color: #5a7d88;
@@ -68,26 +92,28 @@
 
 /* Ошибки */
 .error {
-    border-color: #dc3545 !important;
+    border-color: var(--error-color) !important;
 }
 
 .error-text {
-    color: #dc3545;
-    font-size: 13px;
-    margin-top: -10px;
+    color: var(--error-color);
+    font-size: 14px; /* Увеличиваем шрифт */
+    margin-top: -15px; /* Корректируем отступ */
+    padding-left: 5px;
+    font-weight: 500;
 }
 
 /* Группировка полей */
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 5px; /* Уменьшаем стандартный gap формы для элементов внутри группы */
+    gap: 8px; /* Увеличиваем gap */
 }
 
 /* Лейблы */
 .form-group label {
-    color: #1a3c47;
-    font-size: 16px;
+    color: var(--text-color);
+    font-size: 15px;
     font-weight: 600;
 }
 
@@ -96,45 +122,49 @@
 /* СТИЛИЗАЦИЯ КНОПОК */
 /* ------------------------------------------- */
 
-/* Общий стиль для всех кнопок в UserForm */
-.order-form button {
-    background: linear-gradient(135deg, #5ac8fa, #00c3ff);
+/* Общий стиль для всех кнопок в UserForm (основной цвет) */
+.user-form button {
+    /* Градиент из OrderForm.css */
+    background: linear-gradient(135deg, var(--primary-color), #00c3ff);
     border: none;
     color: white;
-    font-weight: 600;
-    padding: 14px;
-    border-radius: 16px;
+    font-weight: 700; /* Увеличиваем вес */
+    padding: 16px; /* Увеличиваем паддинг */
+    border-radius: 18px; /* Увеличиваем радиус */
     cursor: pointer;
-    font-size: 16px;
+    font-size: 17px; /* Увеличиваем шрифт */
     transition: all 0.3s ease;
-    margin-top: 5px; /* Добавим небольшой отступ сверху */
-    width: 100%; /* Занимают всю ширину */
+    margin-top: 5px;
+    width: 100%;
+    letter-spacing: 0.5px;
 }
 
-.order-form button:hover:not(:disabled) {
-    background: linear-gradient(135deg, #00c3ff, #5ac8fa);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 14px rgba(0, 195, 255, 0.4);
+.user-form button:hover:not(:disabled) {
+    background: linear-gradient(135deg, #00c3ff, var(--primary-color));
+    transform: translateY(-3px); /* Увеличиваем эффект */
+    box-shadow: 0 8px 25px rgba(0, 195, 255, 0.3);
 }
 
-.order-form button:disabled {
-    opacity: 0.6;
+.user-form button:disabled {
+    opacity: 0.5;
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
 }
 
-/* Специфический стиль для кнопки смены пароля (когда секция скрыта) */
-.order-form button.show-password-btn {
+/* Специфический стиль для кнопки смены пароля (Show/Hide) */
+.user-form button.show-password-btn {
     margin-top: 10px;
     background: none;
-    border: 1px solid #00c3ff;
-    color: #00c3ff;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
     font-weight: 500;
-    padding: 10px;
+    padding: 12px;
+    border-radius: 16px;
+    font-size: 16px;
 }
 
-.order-form button.show-password-btn:hover {
+.user-form button.show-password-btn:hover {
     background: rgba(0, 195, 255, 0.1);
     transform: none;
     box-shadow: none;
@@ -142,9 +172,12 @@
 
 /* Стили для кнопок "Сохранить пароль" и "Отмена" */
 .section-password button {
-    width: auto; /* Возвращаем к кнопкам стандартную ширину, чтобы они могли быть рядом */
+    width: auto;
     margin-top: 15px;
-    flex-grow: 1; /* Кнопки будут равномерно распределены */
+    flex-grow: 1;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 16px;
 }
 
 /* Контейнер для кнопок в секции пароля */
@@ -160,6 +193,7 @@
     color: #6c757d;
     border: 1px solid #ced4da;
     box-shadow: none;
+    font-weight: 600;
 }
 
 .section-password button:nth-child(2):hover {
@@ -175,11 +209,11 @@
 
 .section-password {
     border: 1px solid rgba(0, 195, 255, 0.2);
-    padding: 15px;
-    border-radius: 16px;
+    padding: 20px; /* Увеличиваем паддинг */
+    border-radius: 20px; /* Увеличиваем радиус */
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
     margin-top: 10px;
 }
 
@@ -189,8 +223,8 @@
     margin-bottom: 5px;
 }
 
-/* Изменяем стили заголовка для кликабельности (Сменить пароль) */
-.order-form h3 {
+/* Заголовок "Сменить пароль" */
+.user-form h3 {
     margin-top: 10px;
     padding: 5px;
     display: inline-block;
@@ -198,19 +232,25 @@
     font-size: 18px;
     font-weight: 700;
 }
-/* ... (существующие стили) ... */
 
-/* --- Новые стили для секции ролей --- */
+
+/* ------------------------------------------- */
+/* СТИЛИЗАЦИЯ РОЛЕЙ (ЧЕКБОКСЫ) */
+/* ------------------------------------------- */
+
+/* Контейнер списка ролей */
 .checkbox-container-vertical {
     display: flex;
     flex-direction: column;
     gap: 12px;
     padding: 15px;
-    border: 1px solid rgba(90, 200, 250, 0.4);
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.6);
+    /* Убираем рамку и фон, чтобы это выглядело как стандартная секция формы */
+    border: none;
+    border-radius: 0;
+    background: transparent;
 }
 
+/* Отдельный элемент чекбокса */
 .checkbox-item {
     display: flex;
     align-items: center;
@@ -219,22 +259,26 @@
 }
 
 .checkbox-item input[type="checkbox"] {
+    /* Кастомная стилизация (как в OrderForm.css) */
     appearance: none;
     -webkit-appearance: none;
-    width: 22px;
-    height: 22px;
-    border: 1px solid rgba(90, 200, 250, 0.6);
-    border-radius: 6px;
-    background-color: rgba(255, 255, 255, 0.7);
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--primary-color);
+    border-radius: 4px;
+    background-color: white;
     transition: all 0.2s ease;
     cursor: pointer;
     position: relative;
     outline: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
 }
 
 .checkbox-item input[type="checkbox"]:checked {
-    background-color: #00c3ff;
-    border-color: #00c3ff;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.6);
 }
 
 .checkbox-item input[type="checkbox"]:checked::before {
@@ -242,8 +286,8 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 8px;
-    height: 12px;
+    width: 5px;
+    height: 10px;
     border: solid white;
     border-width: 0 2px 2px 0;
     transform: translate(-50%, -60%) rotate(45deg);
@@ -251,7 +295,7 @@
 
 .checkbox-item label {
     font-size: 16px;
-    color: #1a3c47;
+    color: var(--text-color);
     cursor: pointer;
     user-select: none;
 }
