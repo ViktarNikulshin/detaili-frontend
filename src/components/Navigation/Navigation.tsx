@@ -59,16 +59,17 @@ const Navigation: React.FC = () => {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [isMenuOpen]); // Зависимость от isMenuOpen гарантирует, что хук переподключается при изменении состояния
+    }, [isMenuOpen]);
 
     return (
         <nav className="navigation">
             <div className="nav-brand">
-                <Link to="/">AutoService</Link>
+                <img src={logo} alt="Crystal Car Logo" className="nav-logo" />
+                <Link to="/">CRYSTAL CAR</Link>
             </div>
 
             <div className="nav-actions">
-                {isMaster && (<button className="create-order-btn" onClick={handleCreateOrder}>
+                {!isMaster && (<button className="create-order-btn" onClick={handleCreateOrder}>
                     <span className="button-text-desktop">+ Создать заказ</span>
                     <span className="button-icon-mobile">+</span>
                 </button>)}

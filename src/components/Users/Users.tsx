@@ -33,12 +33,12 @@ const Users: React.FC = () => {
         <div className="users-container">
             <div className="users-header">
                 <h1>Пользователи и роли</h1>
-                {/* --- Новая кнопка --- */}
                 <button
                     className="add-user-btn"
                     onClick={() => navigate('/users/new')}
                 >
-                    + Добавить пользователя
+                    <span className="button-text-desktop">+ Добавить пользователя</span>
+                    <span className="button-icon-mobile">+</span>
                 </button>
             </div>
             <div className="users-list">
