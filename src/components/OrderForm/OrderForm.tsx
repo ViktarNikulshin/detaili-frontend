@@ -8,7 +8,7 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import "./OrderForm.css";
 import {userAPI} from "../../services/userApi";
-import {Role, User} from "../../types/user";
+import {User} from "../../types/user";
 import {CarBrand, InfoSource, MasterAssignment, Order, Work, WorkType} from "../../types/order";
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';

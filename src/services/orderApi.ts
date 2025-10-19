@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {CarBrand, InfoSource, Order, Work, WorkType} from "../types/order";
+import {CarBrand, InfoSource, Order, Work} from "../types/order";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
