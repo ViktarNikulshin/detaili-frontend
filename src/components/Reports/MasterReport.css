@@ -1,0 +1,102 @@
+/* Используем те же переменные, что и в OrderForm.css */
+:root {
+    --primary-color: #007bff;
+    --primary-light: #5ac8fa;
+    --accent-color: #28a745;
+    --error-color: #dc3545;
+    --text-color: #1a3c47;
+    --bg-light: rgba(255, 255, 255, 0.7);
+    --border-color: rgba(90, 200, 250, 0.4);
+    --shadow-light: 0 4px 12px rgba(100, 180, 220, 0.15);
+}
+
+.report-container {
+    max-width: 1200px; /* Таблицам нужно больше места */
+    margin: 50px auto;
+    padding: 35px;
+    background: var(--bg-light);
+    backdrop-filter: blur(25px) saturate(150%);
+    border-radius: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: var(--shadow-light);
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: var(--text-color);
+}
+
+.report-container h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 24px;
+}
+
+/* Обертка для таблицы для возможности горизонтального скролла на малых экранах */
+.table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
+}
+
+.report-container table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.report-container th,
+.report-container td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap; /* Запрещаем перенос строк в ячейках */
+}
+
+.report-container thead th {
+    background-color: rgba(0, 123, 255, 0.1);
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+}
+
+.report-container tbody td {
+    font-size: 15px;
+    text-align: center;
+}
+
+.report-container tbody tr:nth-child(even) {
+    background-color: rgba(0, 123, 255, 0.03);
+}
+
+.report-container tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.07);
+}
+
+/* Ссылка на детальный отчет */
+.master-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.master-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* Ссылка "назад" в детальном отчете */
+.back-link {
+    display: inline-block;
+    margin-bottom: 25px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.back-link:hover {
+    color: var(--primary-color);
+}
+
+.error-message {
+    color: var(--error-color);
+    text-align: center;
+    font-weight: 500;
+}
