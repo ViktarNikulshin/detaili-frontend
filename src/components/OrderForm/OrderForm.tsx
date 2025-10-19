@@ -8,8 +8,8 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import "./OrderForm.css";
 import {userAPI} from "../../services/userApi";
-import {User} from "../../types/user";
-import {CarBrand, Order, Work, WorkType} from "../../types/order";
+import {Role, User} from "../../types/user";
+import {CarBrand, InfoSource, MasterAssignment, Order, Work, WorkType} from "../../types/order";
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import {format, parseISO} from 'date-fns';
@@ -34,6 +34,21 @@ const InfoSourceSchema = Yup.object().shape({
     code: Yup.string().optional(),
 }).nullable();
 
+// --- FIXED: Define detailed schemas for User and Role for correct type inference ---
+const RoleSchema = Yup.object().shape({
+    id: Yup.number().required(),
+    name: Yup.string().required(),
+});
+
+const UserSchema = Yup.object().shape({
+    id: Yup.number().required(),
+    username: Yup.string().required(),
+    firstName: Yup.string().required(),
+    lastName: Yup.string().required(),
+    phone: Yup.string().required(),
+    roles: Yup.array().of(RoleSchema).required(),
+});
+
 const schema = Yup.object().shape({
     clientName: Yup.string().required("Введите имя клиента"),
     clientPhone: Yup.string().required("Введите телефон"),
@@ -51,19 +66,35 @@ const schema = Yup.object().shape({
                 parts: Yup.array().of(
                     Yup.object().shape({
                         id: Yup.number().required(),
+                        name: Yup.string().required(),
+                        code: Yup.string().required(),
                     })
                 ).required(),
                 comment: Yup.string().nullable().optional(),
+                cost: Yup.number()
+                    .typeError("Укажите стоимость")
+                    .required("Укажите стоимость работы")
+                    .min(0, "Стоимость не может быть отрицательной"),
+                assignments: Yup.array().of(
+                    Yup.object().shape({
+                        master: UserSchema.required("Выберите мастера"), // UPDATED: Use the full UserSchema
+                        salaryPercent: Yup.number()
+                            .typeError("Укакажите %")
+                            .required("Укажите процент")
+                            .min(0, "Процент не может быть отрицательным")
+                            .max(100, "Процент не может быть больше 100"),
+                    })
+                ).optional().default([]),
             })
         )
         .min(1, "Выберите хотя бы один тип работ")
         .required(),
-    masterIds: Yup.array().of(Yup.number().required()).optional().default([]),
-    infoSource: InfoSourceSchema.optional().default(null),
+    infoSource: InfoSourceSchema, // This is correct, no changes needed here.
     executionDate: Yup.string().required("Укажите дату выполнения"),
     orderCost: Yup.number().typeError("Введите стоимость заказа").required("Введите стоимость заказа").min(0, "Стоимость не может быть отрицательной"),
     executionTimeByMaster: Yup.string().nullable().default(null),
 });
+
 
 type OrderFormValues = Yup.InferType<typeof schema>;
 
@@ -75,7 +106,7 @@ const OrderForm: React.FC = () => {
     const [allWorkTypes, setAllWorkTypes] = useState<WorkType[]>([]);
     const [masters, setMasters] = useState<User[]>([]);
     const [editingCommentForWork, setEditingCommentForWork] = useState<number | null>(null);
-    const [infoSourcesDict, setInfoSourcesDict] = useState<WorkType[]>([]);
+    const [infoSourcesDict, setInfoSourcesDict] = useState<InfoSource[]>([]);
     const [dynamicWorkParts, setDynamicWorkParts] = useState<Record<number, WorkType[]>>({});
     const [loadingParts, setLoadingParts] = useState<Record<number, boolean>>({});
     const [notification, setNotification] = useState<Notification>({
@@ -104,7 +135,6 @@ const OrderForm: React.FC = () => {
             carBrand: "",
             vin: null,
             works: [],
-            masterIds: [],
             infoSource: null,
             executionDate: "",
             orderCost: 0,
@@ -160,7 +190,7 @@ const OrderForm: React.FC = () => {
                 setAllWorkTypes(workTypesRes.data);
                 setMasters(Array.isArray(mastersRes.data) ? mastersRes.data : [mastersRes.data]);
                 setInfoSourcesDict(infoSourcesRes.data);
-                setDictionariesLoaded(true); // Устанавливаем флаг, что справочники загружены
+                setDictionariesLoaded(true);
             } catch (error) {
                 console.error("Ошибка при загрузке справочников:", error);
             }
@@ -175,9 +205,21 @@ const OrderForm: React.FC = () => {
             setLoading(true);
             try {
                 const response = await orderAPI.getById(id);
-                const order: Order & { infoSource?: WorkType | null } = response.data;
+                const order: Order = response.data;
 
-                const partsLoadingPromises = order.works
+                const processedWorks = order.works.map(work => ({
+                    ...work,
+                    assignments: work.assignments?.map(assignment => {
+                        const masterId = (assignment.master as User)?.id || (assignment.master as unknown as number);
+                        const masterUser = masters.find(m => m.id === masterId);
+                        return {
+                            ...assignment,
+                            master: masterUser || assignment.master,
+                        }
+                    }) || []
+                }));
+
+                const partsLoadingPromises = processedWorks
                     .map(work => fetchPartsForWork(work.workType))
                     .filter(promise => promise !== undefined);
 
@@ -187,10 +229,11 @@ const OrderForm: React.FC = () => {
 
                 reset({
                     ...order,
+                    works: processedWorks,
                     carBrand: order.carBrand?.id.toString() || "",
                     infoSource: order.infoSource || null,
                     executionDate,
-                } as OrderFormValues);
+                } as unknown as OrderFormValues);
 
             } catch (e) {
                 console.error("Ошибка загрузки заказа:", e);
@@ -200,20 +243,18 @@ const OrderForm: React.FC = () => {
         };
 
         loadOrder();
-    }, [id, dictionariesLoaded, reset, fetchPartsForWork]);
+    }, [id, dictionariesLoaded, reset, fetchPartsForWork, masters]);
 
     const onSubmit: SubmitHandler<OrderFormValues> = async (data) => {
         try {
             const carBrandObj = brands.find(brand => brand.id.toString() === data.carBrand) || null;
-            const transformedWorks = data.works;
 
-            const dataToSend: OrderPayload & { infoSource: WorkType | null } = {
+            const dataToSend: OrderPayload = {
                 ...data,
-                works: transformedWorks as Work[],
                 carBrand: carBrandObj,
                 vin: data.vin || "",
                 infoSource: data.infoSource,
-            } as OrderPayload & { infoSource: WorkType | null };
+            };
 
             if (id) {
                 await orderAPI.update(id, dataToSend);
@@ -225,7 +266,7 @@ const OrderForm: React.FC = () => {
 
             setTimeout(() => {
                 navigate('/');
-            }, 2000);
+            }, 1000);
 
         } catch (error) {
             console.error("Ошибка сохранения:", error);
@@ -242,7 +283,13 @@ const OrderForm: React.FC = () => {
         if (isChecked) {
             const workTypeToAdd = allWorkTypes.find(wt => wt.id === workTypeId);
             if (workTypeToAdd) {
-                const newWork: Work = {workType: workTypeToAdd, parts: [], comment: ""};
+                const newWork: Work = {
+                    workType: workTypeToAdd,
+                    parts: [],
+                    comment: "",
+                    cost: 0,
+                    assignments: []
+                };
                 setValue("works", [...currentWorks, newWork], {shouldValidate: true});
                 if (workTypeToAdd.code && !dynamicWorkParts[workTypeToAdd.id]) {
                     await fetchPartsForWork(workTypeToAdd);
@@ -265,7 +312,7 @@ const OrderForm: React.FC = () => {
 
         const updatedWorks = selectedWorks.map(work => {
             if (work.workType.id === workTypeId) {
-                let updatedParts = work.parts;
+                let updatedParts: WorkType[] = work.parts;
 
                 if (isChecked) {
                     if (!updatedParts.some(p => p.id === partId)) {
@@ -295,16 +342,45 @@ const OrderForm: React.FC = () => {
         setValue("works", updatedWorks, {shouldValidate: true});
     };
 
-    const handleMasterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const masterId = Number(e.target.value);
-        const isChecked = e.target.checked;
-        const currentMasterIds = watch("masterIds") || [];
+    const handleMasterAssignmentChange = (workIndex: number, master: User, isChecked: boolean) => {
+        const currentWorks = [...watch("works")];
+        const work = currentWorks[workIndex];
+        if (!work) return;
 
-        const newMasterIds = isChecked
-            ? [...currentMasterIds, masterId]
-            : currentMasterIds.filter(id => id !== masterId);
+        let newAssignments: MasterAssignment[];
 
-        setValue("masterIds", newMasterIds);
+        if (isChecked) {
+            const fullMaster = masters.find(m => m.id === master.id);
+
+            if (!fullMaster) {
+                console.error("Master not found:", master.id);
+                return;
+            }
+            // All type errors are resolved now because the schema correctly infers the `master` type.
+            newAssignments = [...work.assignments, {
+                master: fullMaster,
+                salaryPercent: 0
+            }];
+        } else {
+            newAssignments = work.assignments.filter(a => a.master.id !== master.id);
+        }
+
+        currentWorks[workIndex] = {...work, assignments: newAssignments};
+        setValue("works", currentWorks, {shouldValidate: true});
+    };
+
+
+    const handleSalaryPercentChange = (workIndex: number, masterId: number, percent: string) => {
+        const currentWorks = [...watch("works")];
+        const work = currentWorks[workIndex];
+        if (!work) return;
+
+        const newAssignments = work.assignments.map(a =>
+            a.master.id === masterId ? {...a, salaryPercent: Number(percent)} : a
+        );
+
+        currentWorks[workIndex] = {...work, assignments: newAssignments};
+        setValue("works", currentWorks, {shouldValidate: true});
     };
 
 
@@ -318,6 +394,7 @@ const OrderForm: React.FC = () => {
                 </div>
             )}
             <form onSubmit={handleSubmit(onSubmit as SubmitHandler<FieldValues>)} className="order-form">
+                {/* ... rest of the JSX is unchanged ... */}
                 <input type="text" placeholder="Имя клиента" {...register("clientName")}
                        className={errors.clientName ? "error" : ""}/>
                 {errors.clientName && <span className="error-text">{errors.clientName.message}</span>}
@@ -359,14 +436,17 @@ const OrderForm: React.FC = () => {
                     {errors.carBrand && <span className="error-text">{errors.carBrand.message}</span>}
                 </div>
 
-                <input type="text" placeholder="VIN (необязательно)" {...register("vin")} />
+                <input type="text" placeholder="VIN (необязательно)" {...register("vin")}/>
 
                 <div className="checkbox-group">
                     <label>Тип работ:</label>
                     <div className="checkbox-container">
                         {allWorkTypes.map((workType) => {
-                            const workInForm = selectedWorks.find(w => w.workType.id === workType.id);
+                            const workIndex = selectedWorks.findIndex(w => w.workType.id === workType.id);
+                            const workInForm = workIndex !== -1 ? selectedWorks[workIndex] : null;
                             const isChecked = !!workInForm;
+                            const workErrors = errors.works?.[workIndex] as any;
+
                             return (
                                 <div key={workType.id} className="work-type-wrapper">
                                     <div className="checkbox-item-with-comment">
@@ -403,30 +483,85 @@ const OrderForm: React.FC = () => {
                                         </div>
                                     )}
 
-                                    {isChecked && (dynamicWorkParts[workType.id] || []).length > 0 && (
-                                        <div className="checkbox-group dynamic-parts-group">
-                                            <br/>
-                                            <label className="dynamic-parts-label">
-                                                Выберите детали ({workType.name}):
-                                            </label>
-                                            {loadingParts[workType.id] ? (
-                                                <p className="dynamic-parts-loading">Загрузка деталей...</p>
-                                            ) : (
-                                                <div className="checkbox-container small-checkbox-container">
-                                                    {(dynamicWorkParts[workType.id] || []).map((part) => (
-                                                        <div key={part.id}
-                                                             className="checkbox-item small-checkbox-item">
-                                                            <input
-                                                                type="checkbox"
-                                                                id={`part-${workType.id}-${part.id}`}
-                                                                value={part.id}
-                                                                checked={workInForm.parts.some(p => p.id === part.id)}
-                                                                onChange={(e) => handleWorkPartChange(workType.id, part.id, e.target.checked)}
-                                                            />
-                                                            <label
-                                                                htmlFor={`part-${workType.id}-${part.id}`}>{part.name}</label>
+                                    {isChecked && workInForm && (
+                                        <div className="work-details-container">
+                                            <div className="form-group work-cost-container">
+                                                <label htmlFor={`work-cost-${workType.id}`}>Стоимость работы:</label>
+                                                <input
+                                                    id={`work-cost-${workType.id}`}
+                                                    type="number"
+                                                    placeholder="0"
+                                                    {...register(`works.${workIndex}.cost`, {valueAsNumber: true})}
+                                                    className={workErrors?.cost ? "error" : ""}
+                                                />
+                                                {workErrors?.cost &&
+                                                    <span className="error-text">{workErrors.cost.message}</span>}
+                                            </div>
+
+                                            {(dynamicWorkParts[workType.id] || []).length > 0 && (
+                                                <div className="checkbox-group dynamic-parts-group">
+                                                    <label className="dynamic-parts-label">
+                                                        Выберите детали ({workType.name}):
+                                                    </label>
+                                                    {loadingParts[workType.id] ? (
+                                                        <p className="dynamic-parts-loading">Загрузка деталей...</p>
+                                                    ) : (
+                                                        <div className="checkbox-container small-checkbox-container">
+                                                            {(dynamicWorkParts[workType.id] || []).map((part) => (
+                                                                <div key={part.id}
+                                                                     className="checkbox-item small-checkbox-item">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        id={`part-${workType.id}-${part.id}`}
+                                                                        value={part.id}
+                                                                        checked={workInForm.parts.some(p => p.id === part.id)}
+                                                                        onChange={(e) => handleWorkPartChange(workType.id, part.id, e.target.checked)}
+                                                                    />
+                                                                    <label
+                                                                        htmlFor={`part-${workType.id}-${part.id}`}>{part.name}</label>
+                                                                </div>
+                                                            ))}
                                                         </div>
-                                                    ))}
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {masters.length > 0 && (
+                                                <div className="master-assignment-section">
+                                                    <label>Назначить мастеров:</label>
+                                                    {masters.map(master => {
+                                                        const assignment = workInForm.assignments.find(a => a.master.id === master.id);
+                                                        const isMasterChecked = !!assignment;
+                                                        const assignmentIndex = workInForm.assignments.findIndex(a => a.master.id === master.id);
+                                                        const assignmentErrors = workErrors?.assignments?.[assignmentIndex] as any;
+
+                                                        return (
+                                                            <div key={master.id} className="master-assignment-item">
+                                                                <div className="checkbox-item">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        id={`master-${workType.id}-${master.id}`}
+                                                                        checked={isMasterChecked}
+                                                                        onChange={(e) => handleMasterAssignmentChange(workIndex, master, e.target.checked)}
+                                                                    />
+                                                                    <label
+                                                                        htmlFor={`master-${workType.id}-${master.id}`}>{master.firstName} {master.lastName}</label>
+                                                                </div>
+                                                                <div className="percentage-input-container">
+                                                                    <input
+                                                                        type="number"
+                                                                        placeholder="%"
+                                                                        disabled={!isMasterChecked}
+                                                                        className={assignmentErrors?.salaryPercent ? "error" : ""}
+                                                                        {...register(`works.${workIndex}.assignments.${assignmentIndex}.salaryPercent`, {
+                                                                            valueAsNumber: true,
+                                                                            onChange: (e) => handleSalaryPercentChange(workIndex, master.id, e.target.value)
+                                                                        })}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
                                                 </div>
                                             )}
                                         </div>
@@ -435,26 +570,11 @@ const OrderForm: React.FC = () => {
                             );
                         })}
                     </div>
-                    {errors.works && <span className="error-text">{(errors.works as any).message}</span>}
+                    {errors.works && typeof errors.works.message === 'string' && (
+                        <span className="error-text">{errors.works.message}</span>
+                    )}
                 </div>
 
-                <div className="checkbox-group">
-                    <label>Мастера (необязательно):</label>
-                    <div className="checkbox-container">
-                        {masters.map((master) => (
-                            <div key={master.id} className="checkbox-item">
-                                <input
-                                    type="checkbox"
-                                    id={`master-${master.id}`}
-                                    value={master.id}
-                                    checked={(watch("masterIds") || []).includes(master.id)}
-                                    onChange={handleMasterChange}
-                                />
-                                <label htmlFor={`master-${master.id}`}>{master.firstName} {master.lastName}</label>
-                            </div>
-                        ))}
-                    </div>
-                </div>
 
                 <div className="form-group order-form-date-cost">
                     <div className="form-group-half">
@@ -480,9 +600,10 @@ const OrderForm: React.FC = () => {
                 </div>
 
                 <input type="text"
-                       placeholder="Время выполнения (например, 2 часа)" {...register("executionTimeByMaster")} />
+                       placeholder="Время выполнения (например, 2 часа)" {...register("executionTimeByMaster")}/>
 
                 <button type="submit" disabled={loading}>{id ? "Обновить заказ" : "Сохранить заказ"}</button>
+
             </form>
         </>
     );

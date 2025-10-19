@@ -10,6 +10,8 @@ import './App.css';
 import UserForm from "./components/UserForm/UserForm";
 import Users from "./components/Users/Users";
 import UserRoleForm from "./components/UserRoleForm/UserRoleForm";
+import MasterReport from "./components/Reports/MasterReport";
+import MasterDetailReport from "./components/Reports/MasterDetailReport";
 
 function App() {
     return (
@@ -33,6 +35,8 @@ function App() {
                                 <Route path="/users/new" element={<UserForm />} />
                                 <Route path="/users" element={<Users />} />
                                 <Route path="/users/:id" element={<UserRoleForm />} />
+                                <Route path="/reports/masters" element={<MasterReport />} />
+                                <Route path="/reports/master/:masterId" element={<MasterDetailReport />} />
                             </Route>
                         </Route>
 

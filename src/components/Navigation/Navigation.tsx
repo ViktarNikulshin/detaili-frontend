@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'; // <-- Импортируем useRef и useEffect
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import logo from '../asserts/a593d73d858fdafbbe4065de23f69533.jpg'
@@ -11,7 +11,6 @@ const Navigation: React.FC = () => {
     const isMaster = !!user?.roles?.some(role => role.name === 'MASTER');
     const isAdmin = user?.roles?.some(r => r.name === 'ADMIN');
 
-    // 1. Создаем ref для контейнера меню
     const menuRef = useRef<HTMLDivElement>(null);
 
     const handleLogoutAndClose = () => {
@@ -25,9 +24,10 @@ const Navigation: React.FC = () => {
         navigate('/profile');
     };
 
+    // --- ИЗМЕНЕНО ---
     const handleReport = () => {
         setIsMenuOpen(false);
-        alert("Переход к странице отчетов (в разработке).");
+        navigate('/reports/masters'); // <-- Переход на страницу отчетов
     }
 
     const handleUsersAndRoles = () => {
@@ -43,19 +43,13 @@ const Navigation: React.FC = () => {
         setIsMenuOpen(prev => !prev);
     };
 
-    // 2. Логика закрытия меню при клике вне его
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            // Если меню открыто И клик был вне элемента, на который ссылается menuRef
             if (isMenuOpen && menuRef.current && !menuRef.current.contains(event.target as Node)) {
                 setIsMenuOpen(false);
             }
         };
-
-        // Добавляем обработчик события при монтировании/открытии
         document.addEventListener('mousedown', handleClickOutside);
-
-        // Очищаем обработчик события при размонтировании/закрытии
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
@@ -75,7 +69,6 @@ const Navigation: React.FC = () => {
                 </button>)}
             </div>
 
-            {/* 3. Оборачиваем навигационный блок в div с ref */}
             <div className="nav-user" ref={menuRef}>
                 <span>{user?.firstName}</span>
                 <span className="user-role">({user?.roles.map(r => r.name).join(', ')})</span>

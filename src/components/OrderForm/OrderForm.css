@@ -314,6 +314,77 @@
 }
 
 /* ------------------------------------------- */
+/* NEW STYLES for Work Details */
+/* ------------------------------------------- */
+
+.work-details-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding-left: 25px; /* Indent details under the main work type */
+    margin-top: 15px;
+}
+
+.work-cost-container {
+    gap: 5px;
+}
+
+.work-cost-container label {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.work-cost-container input {
+    padding: 10px 15px !important;
+    font-size: 14px !important;
+    border-radius: 10px !important;
+}
+
+.master-assignment-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.master-assignment-section > label {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 5px;
+}
+
+.master-assignment-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.master-assignment-item .checkbox-item {
+    flex-grow: 1; /* Label takes up available space */
+}
+
+.percentage-input-container {
+    width: 70px; /* Fixed width for percentage input */
+    flex-shrink: 0;
+}
+
+.percentage-input-container input {
+    width: 100%;
+    padding: 8px 10px !important;
+    font-size: 14px !important;
+    border-radius: 8px !important;
+    text-align: center;
+}
+
+.percentage-input-container input:disabled {
+    background-color: #e9ecef !important;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+
+/* ------------------------------------------- */
 /* Адаптивность */
 /* ------------------------------------------- */
 @media (max-width: 550px) {

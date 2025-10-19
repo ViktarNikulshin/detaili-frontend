@@ -1,3 +1,5 @@
+import {User} from "./user";
+
 export interface Order {
     id?: number;
     clientName: string;
@@ -5,14 +7,20 @@ export interface Order {
     carBrand: CarBrand | null;
     vin: string;
     works: Work[];
-    masterIds: number[];
     executionDate: string;
     beforePhoto?: File;
     afterPhoto?: File;
     status: 'NEW' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
     orderCost: number;
     executionTimeByMaster?: string | null;
-    infoSource?: null
+    infoSource?: InfoSource | null; // UPDATED: Use the new InfoSource type
+}
+
+// --- NEW: A dedicated type for Information Source ---
+export interface InfoSource {
+    id: number;
+    name?: string;
+    code?: string;
 }
 
 export interface CalendarEvent {
@@ -34,11 +42,18 @@ export interface Work {
     id?: number;
     workType: WorkType;
     parts: WorkType [];
-    comment?: string;
+    assignments: MasterAssignment [];
+    cost: number;
+    comment?: string | null; // UPDATED: Allow null for comment
 }
 
 export interface WorkType {
     id: number;
     code: string;
     name: string;
+}
+
+export interface MasterAssignment {
+    master: User;
+    salaryPercent: number;
 }
