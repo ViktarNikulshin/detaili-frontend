@@ -13,6 +13,7 @@ import {CarBrand, InfoSource, MasterAssignment, Order, Work, WorkType} from "../
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import {format, parseISO} from 'date-fns';
+import { ru } from 'date-fns/locale';
 
 type Notification = {
     message: string;
@@ -582,6 +583,7 @@ const OrderForm: React.FC = () => {
                         <Controller name="executionDate" control={control} render={({field}) => (
                             <DatePicker
                                 selected={field.value ? parseISO(field.value) : null}
+                                locale={ru}
                                 onChange={(date: Date | null) => field.onChange(date ? format(date, "yyyy-MM-dd'T'HH:mm") : "")}
                                 showTimeSelect timeFormat="HH:mm" dateFormat="dd.MM.yyyy HH:mm"
                                 placeholderText="Выберите дату"

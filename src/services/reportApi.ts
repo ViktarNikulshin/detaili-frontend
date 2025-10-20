@@ -23,12 +23,13 @@ export const reportAPI = {
     /**
      * Получает сводный отчет по заработку всех мастеров за последнюю неделю.
      */
-    getMastersWeeklyReport: () => reportApi.get<MasterWeeklyReport[]>(`/reports/masters-weekly`),
+    getMastersWeeklyReport: (start: string, end: string) =>
+        reportApi.get<MasterWeeklyReport[]>(`/reports/masters-weekly?start=${start}&end=${end}`),
 
     /**
      * Получает детальный отчет по конкретному мастеру за последнюю неделю.
      * @param masterId - ID мастера
      */
-    getMasterDetailReport: (masterId: number | string) =>
-        reportApi.get<MasterDetailReport>(`/reports/master-detail/${masterId}`),
+    getMasterDetailReport: (masterId: number | string, start: string | null, end: string | null) =>
+        reportApi.get<MasterDetailReport>(`/reports/master-detail/${masterId}?start=${start}&end=${end}`),
 };

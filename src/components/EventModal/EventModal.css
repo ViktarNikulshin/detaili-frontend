@@ -42,144 +42,157 @@
     border: none;
     font-size: 2em;
     cursor: pointer;
-    color: #aaa;
-    line-height: 1;
-    padding: 0;
-    margin: 0;
+    color: #999;
 }
 
 .close-button:hover {
-    color: #666;
+    color: #333;
 }
 
 .modal-body p {
-    margin: 8px 0;
-    font-size: 1em;
+    margin: 5px 0;
+    font-size: 0.95em;
 }
 
-.modal-body p strong {
-    color: #555;
+/* Статусные метки */
+.status-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.8em;
+    margin-left: 5px;
 }
 
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
+.status-new {
+    background-color: #f0ad4e;
+    color: white;
+}
+
+.status-in_progress {
+    background-color: #5bc0de;
+    color: white;
+}
+
+.status-completed {
+    background-color: #5cb85c;
+    color: white;
+}
+
+.status-cancelled {
+    background-color: #d9534f;
+    color: white;
+}
+
+/* СЕКЦИЯ РАБОТ */
+.event-works {
     margin-top: 20px;
-    border-top: 1px solid #eee;
+    border-top: 1px dashed #ddd;
     padding-top: 15px;
 }
 
-.edit-button, .close-button-footer, .take-button, .complete-button {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s;
-}
-
-.edit-button {
-    background-color: #3174ad;
-    color: white;
-}
-
-.edit-button:hover {
-    background-color: #215a8c;
-}
-
-.close-button-footer {
-    background-color: #dc3545;
-    color: white;
-}
-
-.close-button-footer:hover {
-    background-color: #c82333;
-}
-
-/* MASTER-only take button */
-.take-button {
-    background-color: #9aca06;
-    color: white;
-}
-.complete-button {
-    background-color: #28a745;
-    color: white;
-}
-
-.take-button:hover {
-    background-color: #218838;
-}
-.works-list-container {
-    list-style: none;
-    padding: 0;
-    margin: 10px 0 0 0;
-}
-
-.work-item {
-    padding: 10px 15px;
-    margin-bottom: 15px;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    background-color: #f9f9f9;
-}
-
-.work-header {
-    margin-bottom: 5px;
-}
-
-.work-title {
-    font-weight: bold;
-    color: #3174ad; /* Цвет заголовка работы */
+.event-works h3 {
     font-size: 1.1em;
+    color: #3174ad;
+    margin-bottom: 10px;
 }
 
-.work-comment {
-    font-style: italic;
-    color: #666;
-    border-left: 3px solid #ccc;
-    padding-left: 10px;
-    margin: 10px 0;
-}
-
-.work-comment strong {
-    font-style: normal;
-    color: #555;
-}
-
-.work-parts-section {
-    margin-top: 10px;
-    padding-top: 8px;
-    border-top: 1px dotted #ddd;
-}
-
-.work-parts-section strong {
-    display: block;
-    margin-bottom: 5px;
-    color: #555;
-}
-
-.work-parts-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+.work-list {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-.work-part-tag {
-    /* Стиль для отдельного материала/детали */
-    background-color: #e6f7ff; /* Светло-голубой фон */
-    border: 1px solid #91d5ff;
-    color: #0050b3; /* Синий текст */
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.85em;
-    white-space: nowrap;
+.work-item {
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    border: 1px solid #eee;
 }
-/* В секцию кнопок модального окна */
-/* ... (после .complete-button) ... */
+
+.work-item p {
+    margin: 0;
+    font-size: 0.9em;
+}
+
+/* Метка стоимости работы */
+.work-cost-tag {
+    display: inline-block;
+    background-color: #e6f7ff; /* Светло-голубой */
+    color: #0050b3; /* Синий текст */
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    white-space: nowrap;
+    margin-left: 10px;
+    font-weight: normal;
+}
+
+.master-assignments {
+    margin-top: 5px;
+    padding-left: 10px;
+    border-left: 2px solid #5bc0de;
+}
+
+.master-earning-detail {
+    margin: 3px 0;
+    font-size: 0.85em;
+    color: #555;
+}
+
+.salary-info {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.9em;
+    color: #28a745; /* Зеленый для ЗП */
+    font-weight: 600;
+}
+
+.salary-info strong {
+    font-weight: 700;
+}
+/* Стили для кнопки "Взять в работу" */
+.take-work-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+
+.take-work-button:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.take-work-button:disabled {
+    background-color: #a8c2e6;
+    cursor: not-allowed;
+}
+
+/* Стили для кнопки "Завершить" */
+.complete-button {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+
+.complete-button:hover:not(:disabled) {
+    background-color: #1e7e34;
+}
+
+.complete-button:disabled {
+    background-color: #98e6a9;
+    cursor: not-allowed;
+}
 
 /* Стили для кнопки "Отменить заказ" (Admin) */
 .cancel-button {
@@ -202,30 +215,44 @@
     cursor: not-allowed;
 }
 
+/* Стили для кнопки "Редактировать" */
+.edit-button {
+    background-color: #6c757d;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+
+.edit-button:hover {
+    background-color: #5a6268;
+}
+
+.close-button-footer {
+    background-color: #e9ecef;
+    color: #333;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+
+.close-button-footer:hover {
+    background-color: #d3d9df;
+}
+
+
 /* Обновление modal-footer, чтобы кнопки располагались в строку */
 .modal-footer {
     display: flex;
     justify-content: flex-end; /* Выравнивание кнопок вправо */
     gap: 10px; /* Расстояние между кнопками */
     margin-top: 15px;
-    padding-top: 10px;
+    padding-top: 15px;
     border-top: 1px solid #eee;
-    flex-wrap: wrap; /* Для адаптивности, чтобы кнопки переносились */
-}
-
-/* Убедимся, что все кнопки в футере используют одинаковый стиль по умолчанию */
-.modal-footer button {
-    padding: 10px 15px;
-    border-radius: 6px;
-    font-size: 1em;
-}
-
-/* Немного подправим остальные кнопки в футере, чтобы они были одинакового размера */
-.take-button,
-.complete-button,
-.edit-button,
-.close-button-footer {
-    padding: 10px 15px;
-    border-radius: 6px;
-    font-weight: 600;
 }

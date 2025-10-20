@@ -49,7 +49,7 @@ const EventModal: React.FC<EventModalProps> = ({
         if (!event || !user) return;
         try {
             setIsCompleting(true);
-            await orderAPI.changeStatus(String(event.id), 'COMPLETED', String(user.id));
+            await orderAPI.changeStatus(String(event.id), 'COMPLETED', String(user?.id));
             if (onStatusChanged) {
                 onStatusChanged();
             }
@@ -60,101 +60,92 @@ const EventModal: React.FC<EventModalProps> = ({
             setIsCompleting(false);
         }
     };
-    if (!isOpen || !event) {
-        return null;
-    }
 
-    const formatDateTime = (date: Date) => {
-        return moment(date).format('DD.MM.YYYY HH:mm');
-    };
     const handleCancel = async () => {
-        if (!event || !user) return;
-
-        // Добавляем подтверждение перед отменой
-        if (!window.confirm("Вы уверены, что хотите отменить этот заказ?")) {
-            return;
-        }
-
+        if (!event || !window.confirm('Вы уверены, что хотите отменить этот заказ?')) return;
         try {
             setIsCancelling(true);
             // Изменяем статус на CANCELLED (предполагая, что такой статус есть в API)
-            await orderAPI.changeStatus(String(event.id), 'CANCELLED', String(user.id));
+            await orderAPI.changeStatus(String(event.id), 'CANCELLED', String(user?.id));
 
             if (onStatusChanged) {
                 onStatusChanged();
             }
-            onClose();
         } catch (error) {
-            console.error("Ошибка при отмене заказа:", error);
-            alert("Не удалось отменить заказ.");
+            console.error('Error cancelling order:', error);
+            alert('Не удалось отменить заказ.');
         } finally {
             setIsCancelling(false);
         }
     };
 
+    if (!isOpen || !event) return null;
+
     return (
-        <div className="modal-overlay">
-            <div className="modal-content">
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h2>{event.title}</h2>
+                    <h2>Заказ №{event.id}</h2>
                     <button className="close-button" onClick={onClose}>&times;</button>
                 </div>
+
                 <div className="modal-body">
-                    {/* ... (Ваш предыдущий код модального окна) ... */}
-                    <p><strong>Клиент:</strong> {event.clientName}</p>
-                    <p>
-                        <strong>Марка авто:</strong>{" "}
-                        {event.carBrand?.name}
-                    </p>
-                    <p>
-                        <strong>Телефон:</strong> {" "}
-                        <a href={`tel:${event.clientPhone}`} className="phone-link">
-                            {event.clientPhone}
-                        </a>
-                    </p>
-                    <p>
-                        <strong>Начало работ:</strong>{" "}
-                        {formatDateTime(event.start)}
-                    </p>
-                    <p><strong>Статус:</strong> {event.status}</p>
-                    <div>
-                        <strong>Список работ:</strong>
-                        <ul className="works-list-container">
-                            {event.works.map((work, index) => (
-                                <li key={work.id} className="work-item">
-                                    <div className="work-header">
-                                        <span className="work-title">
-                                            {index + 1}. {work.workType.name}
-                                        </span>
-                                    </div>
+                    {/* Основная информация о заказе */}
+                    <p>Клиент: <strong>{event.clientName}</strong> ({event.clientPhone})</p>
+                    <p>Автомобиль: <strong>{event.carBrand?.name || '—'}</strong></p>
+                    <p>Статус: <span className={`status-tag status-${event.status.toLowerCase()}`}>{event.status}</span></p>
+                    <p>Время: <strong>{moment(event.start).format('DD.MM.YYYY HH:mm')} - {moment(event.end).format('HH:mm')}</strong></p>
 
-                                    {work.comment && (
-                                        <p className="work-comment">
-                                            <strong>Комментарий:</strong> {work.comment}
+                    {/* NEW SECTION: Работы и ЗП мастеров */}
+                    {event.works && event.works.length > 0 && (
+                        <div className="event-works">
+                            <h3>Работы:</h3>
+                            <ul>
+                                {event.works.map((work, workIndex) => (
+                                    <li key={workIndex}>
+                                        <p>
+                                            <strong>{work.workType.name}</strong>
+                                            {work.comment && ` (${work.comment})`}
                                         </p>
-                                    )}
 
-                                    {work.parts && work.parts.length > 0 && (
-                                        <div className="work-parts-section">
-                                            <strong>Используемые материалы:</strong>
-                                            <ul className="work-parts-list">
-                                                {work.parts.map(part => (
-                                                    <li key={part.id} className="work-part-tag">
-                                                        {part.name}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                                        {work.assignments && work.assignments.length > 0 && (
+                                            <div className="master-assignments">
+                                                {work.assignments.map((assignment, assignmentIndex) => {
+                                                    // Расчет: (work.cost * assignment.salaryPercent) / 100
+                                                    const cost = work.cost || 0;
+                                                    const percent = assignment.salaryPercent || 0;
+                                                    const masterSalary = ((cost * percent) / 100).toFixed(2);
+
+                                                    return (
+                                                        <p key={assignmentIndex} className="master-earning-detail">
+                                                        Мастер: **{assignment.master.firstName} {assignment.master.lastName}**
+
+                                                    {/* Детали ЗП видны только Admin */}
+                                                    {isAdmin && (
+                                                        <small className="salary-info">
+                                                            Процент: **{percent}%** (ЗП: <strong>{masterSalary}</strong>)
+                                                        </small>
+                                                    )}
+                                                    {!isAdmin && <small className="salary-info-hidden">Назначен</small>}
+                                                </p>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                    {/* END NEW SECTION */}
+
                 </div>
+
                 <div className="modal-footer">
-                    {isMaster && event.status === 'NEW' && (
+                    {(isMaster || isAdmin) && event.status === 'NEW' && (
                         <button
-                            className="take-button"
+                            className="take-work-button"
                             onClick={handleTakeToWork}
                             disabled={isTaking}
                         >
