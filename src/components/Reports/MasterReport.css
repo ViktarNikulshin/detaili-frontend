@@ -176,16 +176,6 @@
     color: #0056b3;
 }
 
-/* Фиксация первой колонки */
-.sticky-column {
-    position: sticky;
-    left: 0;
-    z-index: 5;
-    background-color: white; /* Фон для перекрытия прокручиваемых столбцов */
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
-    text-align: left !important; /* Левое выравнивание для названия работы */
-}
-
 .report-table tbody tr:nth-child(even) .sticky-column {
     background-color: rgba(0, 123, 255, 0.03); /* Сохраняем полосатость */
 }
@@ -206,4 +196,73 @@
     min-width: 120px;
     vertical-align: top;
     padding-top: 15px;
+}
+/* --- АДАПТИВНОСТЬ для MasterReport и MasterDetailReport (Mobile Styles) --- */
+
+@media (max-width: 768px) {
+    /* Основной контейнер */
+    .report-container {
+        margin: 20px 10px; /* Уменьшаем внешние отступы */
+        padding: 15px; /* Уменьшаем внутренние отступы */
+        border-radius: 15px;
+    }
+
+    /* Заголовок отчета */
+    .report-container h2 {
+        font-size: 1.5em;
+    }
+
+    /* Навигация по датам */
+    .date-navigation {
+        /* Стек кнопок и диапазона дат */
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .date-navigation span {
+        /* Делаем диапазон дат более заметным */
+        font-size: 1.1em;
+        text-align: center;
+    }
+
+    .date-navigation button {
+        /* Делаем кнопки навигации на всю ширину */
+        width: 100%;
+        min-width: unset;
+        padding: 12px;
+    }
+
+    /* Таблица */
+    .report-container th,
+    .report-container td {
+        padding: 8px 10px; /* Уменьшаем отступы в ячейках */
+        font-size: 12px; /* Уменьшаем размер шрифта */
+    }
+
+    /* Заголовки (th) */
+    .report-container thead th {
+        font-size: 12px;
+        white-space: normal; /* Разрешаем перенос строк в заголовках */
+    }
+
+    /* Ссылки на мастеров */
+    .master-link {
+        font-size: 13px;
+        white-space: normal;
+    }
+
+    /* Для детального отчета (MasterDetailReport) - малый текст в заголовке */
+    .report-container thead th small {
+        display: block; /* Перенос даты на новую строку */
+        font-size: 10px;
+        white-space: nowrap;
+    }
+
+    /* Фиксация первой колонки в детальном отчете */
+    .sticky-column {
+        /* На мобильных устройствах делаем фон первой колонки более заметным */
+        background-color: #f7f9fc;
+        box-shadow: 1px 0 3px rgba(0, 0, 0, 0.1);
+    }
 }

@@ -512,3 +512,136 @@
 .phone-input-container .form-control.error {
     border-color: var(--error-color) !important;
 }
+/* ------------------------------------------- */
+/* 📱 МОБИЛЬНАЯ АДАПТАЦИЯ (до 550px) */
+/* ------------------------------------------- */
+@media (max-width: 550px) {
+    .order-form {
+        margin: 20px 10px;
+        padding: 18px;
+        gap: 16px;
+        border-radius: 18px;
+    }
+
+    .form-group label,
+    .checkbox-group > label {
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .order-form input,
+    .order-form select,
+    .order-form textarea {
+        font-size: 15px;
+        padding: 12px 14px;
+        border-radius: 10px;
+    }
+
+    .order-form button[type="submit"] {
+        font-size: 16px;
+        padding: 14px;
+        border-radius: 12px;
+    }
+
+    .order-form-date-cost {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .checkbox-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .checkbox-item {
+        gap: 8px;
+        align-items: flex-start;
+    }
+
+    .checkbox-item label {
+        font-size: 15px;
+    }
+
+    .comment-input-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding-left: 0;
+    }
+
+    .comment-save-btn {
+        width: 100%;
+        text-align: center;
+        padding: 10px;
+        border-radius: 10px;
+        font-size: 15px;
+    }
+
+    .master-assignment-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .master-assignment-item .checkbox-item {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .percentage-input-container {
+        width: 100%;
+    }
+
+    .percentage-input-container input {
+        width: 100%;
+        padding: 10px;
+        font-size: 15px !important;
+        border-radius: 10px !important;
+    }
+
+    .work-type-wrapper {
+        padding: 8px 0;
+    }
+
+    .work-details-container {
+        padding-left: 10px;
+        gap: 10px;
+    }
+
+    .work-cost-container label {
+        font-size: 14px;
+    }
+
+    .work-cost-container input {
+        font-size: 15px !important;
+        padding: 10px 12px !important;
+    }
+
+    /* Итоговые суммы — делаем видимыми и аккуратными */
+    .master-assignment-section > div:last-child {
+        margin-top: 8px;
+        font-size: 15px;
+        color: #0a3a56;
+        background: rgba(0, 123, 255, 0.05);
+        padding: 6px 10px;
+        border-radius: 8px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Телефонный ввод адаптируем */
+    .phone-input-container input.form-control {
+        font-size: 15px !important;
+        padding: 12px 14px 12px 52px !important;
+        height: 46px !important;
+    }
+
+    .notification {
+        top: 10px;
+        width: calc(100% - 30px);
+        left: 15px;
+        transform: none;
+        font-size: 15px;
+        padding: 12px 15px;
+    }
+}
