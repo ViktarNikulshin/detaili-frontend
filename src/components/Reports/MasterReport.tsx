@@ -16,8 +16,9 @@ import {
 import moment from "moment/moment";
 
 declare module '@tanstack/react-table' {
-    interface ColumnMeta<TData, TValue> { // **ИСПРАВЛЕНИЕ ЗДЕСЬ:** Теперь без extends object
-        className?: string; // Добавляем наше кастомное свойство
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface ColumnMeta<TData, TValue> {
+        className?: string;
     }
 }
 

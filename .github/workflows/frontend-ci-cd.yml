@@ -34,7 +34,7 @@ jobs:
       - name: Build React App (creates 'build/' folder)
         env:
           REACT_APP_API_URL: /detailing/api
-        run: npm run build
+        run: CI=false npm run build
 
       # ==================================
       # 2. ПЕРЕДАЧА ФАЙЛОВ НА СЕРВЕР (SCP)
