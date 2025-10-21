@@ -93,8 +93,10 @@ const EventModal: React.FC<EventModalProps> = ({
                     {/* Основная информация о заказе */}
                     <p>Клиент: <strong>{event.clientName}</strong> ({event.clientPhone})</p>
                     <p>Автомобиль: <strong>{event.carBrand?.name || '—'}</strong></p>
-                    <p>Статус: <span className={`status-tag status-${event.status.toLowerCase()}`}>{event.status}</span></p>
-                    <p>Время: <strong>{moment(event.start).format('DD.MM.YYYY HH:mm')} - {moment(event.end).format('HH:mm')}</strong></p>
+                    <p>Статус: <span className={`status-tag status-${event.status.toLowerCase()}`}>{event.status}</span>
+                    </p>
+                    <p>Время: <strong>{moment(event.start).format('DD.MM.YYYY HH:mm')} - {moment(event.end).format('HH:mm')}</strong>
+                    </p>
 
                     {/* NEW SECTION: Работы и ЗП мастеров */}
                     {event.works && event.works.length > 0 && (
@@ -107,6 +109,9 @@ const EventModal: React.FC<EventModalProps> = ({
                                             <strong>{work.workType.name}</strong>
                                             {work.comment && ` (${work.comment})`}
                                         </p>
+                                        <p>
+                                            <strong>Стоимость: {work.cost}</strong>
+                                        </p>
 
                                         {work.assignments && work.assignments.length > 0 && (
                                             <div className="master-assignments">
@@ -118,16 +123,19 @@ const EventModal: React.FC<EventModalProps> = ({
 
                                                     return (
                                                         <p key={assignmentIndex} className="master-earning-detail">
-                                                        Мастер: **{assignment.master.firstName} {assignment.master.lastName}**
+                                                            Мастер:
+                                                            **{assignment.master.firstName} {assignment.master.lastName}**
 
-                                                    {/* Детали ЗП видны только Admin */}
-                                                    {isAdmin && (
-                                                        <small className="salary-info">
-                                                            Процент: **{percent}%** (ЗП: <strong>{masterSalary}</strong>)
-                                                        </small>
-                                                    )}
-                                                    {!isAdmin && <small className="salary-info-hidden">Назначен</small>}
-                                                </p>
+                                                            {/* Детали ЗП видны только Admin */}
+                                                            {isAdmin && (
+                                                                <small className="salary-info">
+                                                                    Процент: **{percent}%**
+                                                                    (ЗП: <strong>{masterSalary}</strong>)
+                                                                </small>
+                                                            )}
+                                                            {!isAdmin &&
+                                                                <small className="salary-info-hidden">Назначен</small>}
+                                                        </p>
                                                     );
                                                 })}
                                             </div>
@@ -138,7 +146,6 @@ const EventModal: React.FC<EventModalProps> = ({
                             </ul>
                         </div>
                     )}
-                    {/* END NEW SECTION */}
 
                 </div>
 

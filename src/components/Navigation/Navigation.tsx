@@ -35,17 +35,21 @@ const Navigation: React.FC = () => {
         navigate('/users');
     };
 
+    // --- НОВАЯ ФУНКЦИЯ ДЛЯ ПЕРЕХОДА НА СТРАНИЦУ СПРАВОЧНИКА ---
+    const handleWorkDictionary = () => {
+        setIsMenuOpen(false);
+        // Предполагаемый путь для формы управления справочником
+        navigate('/dictionaries/work-types');
+    };
+
     const handleCreateOrder = () => {
         navigate('/orders/new');
     };
 
-    const toggleMenu = () => {
-        setIsMenuOpen(prev => !prev);
-    };
-
+    // Логика закрытия меню при клике вне его (оставлена без изменений)
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (isMenuOpen && menuRef.current && !menuRef.current.contains(event.target as Node)) {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
                 setIsMenuOpen(false);
             }
         };
@@ -53,7 +57,11 @@ const Navigation: React.FC = () => {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [isMenuOpen]);
+    }, []);
+
+    const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
+    };
 
     return (
         <nav className="navigation">
@@ -79,19 +87,26 @@ const Navigation: React.FC = () => {
 
                 {isMenuOpen && (
                     <div className="dropdown-menu">
+
+                        <div className="menu-item" onClick={handleProfile}>
+                            Профиль
+                        </div>
                         {isAdmin && (
                             <>
+
                                 <div className="menu-item" onClick={handleReport}>
                                     Отчет
                                 </div>
                                 <div className="menu-item" onClick={handleUsersAndRoles}>
                                     Пользователи и роли
                                 </div>
+                                {/* НОВЫЙ ПУНКТ МЕНЮ ДЛЯ ADMIN */}
+                                <div className="menu-item" onClick={handleWorkDictionary}>
+                                    Справочник работ
+                                </div>
+
                             </>
                         )}
-                        <div className="menu-item" onClick={handleProfile}>
-                            Профиль
-                        </div>
                         <div className="menu-item logout-menu-item" onClick={handleLogoutAndClose}>
                             Выйти
                         </div>

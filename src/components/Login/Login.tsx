@@ -54,9 +54,9 @@ const Login: React.FC = () => {
             const response = await authAPI.login(credentials);
             login(response.token, response.user);
 
-            // Перенаправляем на предыдущую страницу или на главную
-            const from = location.state?.from?.pathname || '/';
-            navigate(from, {replace: true});
+            // Перенаправляем на главную страницу
+            const targetPath = '/';
+            navigate(targetPath, {replace: true});
 
         } catch (err: any) {
             console.error('Login error:', err);
