@@ -21,8 +21,8 @@ const Login: React.FC = () => {
     // Перенаправляем если уже авторизован
     useEffect(() => {
         if (isAuthenticated) {
-            const from = location.state?.from?.pathname || '/';
-            navigate(from, {replace: true});
+            const targetPath = '/';
+            navigate(targetPath, {replace: true});
         }
     }, [isAuthenticated, navigate, location]);
 

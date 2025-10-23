@@ -2,22 +2,36 @@ import axios from 'axios';
 import { WorkType } from '../types/order';
 
 // --- NEW: Interface for the raw flat response item from the backend ---
-// Добавляем поля description и type, которые есть в вашем ответе
 export interface DictionaryRawItem extends WorkType {
     description: string;
     type: 'WORK_TYPE' | 'PVC' | 'INFO' | string;
 }
 
-// --- Interface DTO for work types WITH parts (для состояния компонента) ---
-// Используется для отправки и получения иерархических данных.
+// --- Interface DTO for work types WITHOUT parts (для старых методов) ---
 export interface DictionaryItemDto extends WorkType {
     description?: string;
-    parts: WorkType[];
+    // Parts is removed from here if this DTO is only for WorkType metadata update
+    // If needed, it must be WorkType[], not DictionaryPartDto[]
+    parts?: WorkType[];
+}
+
+// --- NEW: Interface DTO for UPDATING WorkType and its Parts (combined save) ---
+export interface WorkTypeUpdateDto extends WorkType {
+    description?: string;
+    type: string; // <--- ДОБАВЛЕНО ЭТО ПОЛЕ
+    // Массив частей для отправки на сервер
+    parts: {
+        id?: number; // Optional for new parts
+        name: string;
+        code: string;
+        active: boolean; // Must be included
+        type: string; // Parent code (WorkType's code)
+    }[];
 }
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
-const GENERAL_DICTIONARY_ENDPOINT = '/dictionary'; // Используем для GET-запроса всех типов
-const DICTIONARY_ENDPOINT = '/dictionary/work-types'; // Предполагаемый эндпоинт для POST/PUT/DELETE
+const GENERAL_DICTIONARY_ENDPOINT = '/dictionary';
+const DICTIONARY_ENDPOINT = '/dictionary/work-types';
 
 // --- 1. Создание экземпляра Axios ---
 export const dictionaryAxios = axios.create({
@@ -39,10 +53,9 @@ dictionaryAxios.interceptors.request.use((config) => {
 // --- 3. API-методы ---
 export const dictionaryApi = {
     /**
-     * Получение всего списка словарей. Мы ожидаем плоский список.
+     * Получение всего списка словарей.
      */
     fetchWorkTypes: () => {
-        // Предполагаем, что этот эндпоинт возвращает все типы словарей, как в вашем примере
         return dictionaryAxios.get<DictionaryRawItem[]>(`${GENERAL_DICTIONARY_ENDPOINT}`);
     },
 
@@ -50,18 +63,21 @@ export const dictionaryApi = {
      * Добавление нового типа работы
      */
     addWorkType: (name: string, code: string) => {
-
         return dictionaryAxios.post<DictionaryItemDto>(DICTIONARY_ENDPOINT, { name, code, type: 'WORK_TYPE' });
     },
 
     /**
-     * Удаление типа работы
-     */
-    deleteWorkType: (id: number) => dictionaryAxios.delete(`${DICTIONARY_ENDPOINT}/${id}`),
-
-    /**
-     * Обновление типа работы (отправляем на сервер полную иерархическую структуру)
+     * Обновление типа работы (устаревший, обновляет только WorkType без частей)
      */
     updateWorkType: (workType: DictionaryItemDto) =>
-        dictionaryAxios.put<DictionaryItemDto>(`${DICTIONARY_ENDPOINT}/${workType.id}`, workType)
+        dictionaryAxios.put<DictionaryItemDto>(`${DICTIONARY_ENDPOINT}/${workType.id}`, workType),
+
+    /**
+     * НОВЫЙ МЕТОД: Обновление типа работы и его частей ОДНИМ запросом.
+     * Отправляем полную структуру WorkTypeUpdateDto.
+     */
+    updateWorkTypeAndParts: (workType: WorkTypeUpdateDto) =>
+        dictionaryAxios.put<WorkTypeUpdateDto>(`${DICTIONARY_ENDPOINT}/${workType.id}`, workType),
+
+    // Методы addPartToWorkType и updatePart больше не нужны, так как используется объединенный save.
 };

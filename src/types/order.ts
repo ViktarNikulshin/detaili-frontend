@@ -21,6 +21,7 @@ export interface InfoSource {
     id: number;
     name?: string;
     code?: string;
+    active?: boolean;
 }
 
 export interface CalendarEvent {
@@ -51,6 +52,7 @@ export interface WorkType {
     id: number;
     code: string;
     name: string;
+    active?: boolean
 }
 
 export interface MasterAssignment {

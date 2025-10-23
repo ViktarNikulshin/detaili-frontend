@@ -47,6 +47,7 @@ const InfoSourceSchema = Yup.object().shape({
     id: Yup.number().required(),
     name: Yup.string().optional(),
     code: Yup.string().optional(),
+    active: Yup.boolean().optional(),
 }).nullable();
 
 const schema = Yup.object().shape({

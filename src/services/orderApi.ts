@@ -55,6 +55,6 @@ export const orderAPI = {
     },
     getById: (id: string) => orderApi.get<Order>(`orders/${id}`),
     getCarBrands: () => orderApi.get('/car/car-brands'),
-    getDictionaryByType: (code: string) => orderApi.get(`/dictionary/type/${code}`),
+    getDictionaryByType: (code: string) => orderApi.get(`/dictionary/type/${code}/active`),
     changeStatus: (id: string, code: string, masterId: string) => orderApi.get(`/orders/change/${id}?code=${code}&master=${masterId}`)
 };
