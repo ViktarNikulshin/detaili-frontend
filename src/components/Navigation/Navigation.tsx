@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import logo from '../asserts/a593d73d858fdafbbe4065de23f69533.jpg'
+import logo from '../asserts/photo_2025-10-25_14-21-26.jpg'
 import './Navigation.css'
 
 const Navigation: React.FC = () => {
@@ -66,8 +66,8 @@ const Navigation: React.FC = () => {
     return (
         <nav className="navigation">
             <div className="nav-brand">
-                <img src={logo} alt="Crystal Car Logo" className="nav-logo" />
-                <Link to="/">CRYSTAL CAR</Link>
+                <img src={logo} alt="CGP" className="nav-logo" />
+                <Link to="/">CGP</Link>
             </div>
 
             <div className="nav-actions">

@@ -3,7 +3,7 @@ import {useLocation, useNavigate} from 'react-router-dom';
 import {useAuth} from '../../contexts/AuthContext';
 import {authAPI} from '../../services/authApi';
 import './Login.css';
-import logo from "../asserts/a593d73d858fdafbbe4065de23f69533.jpg";
+import logo from "../asserts/photo_2025-10-25_14-21-26.jpg";
 
 const Login: React.FC = () => {
     const [credentials, setCredentials] = useState({
@@ -74,7 +74,7 @@ const Login: React.FC = () => {
             <div className="login-card">
                 <div className="login-header">
                     <img src={logo} alt="Cristal Car Logo" className="nav-logo"/>
-                    <h1>Crystal car</h1>
+                    <h1>CGP</h1>
                     <p>Войдите в свою учетную запись</p>
                 </div>
 
@@ -146,7 +146,7 @@ const Login: React.FC = () => {
                 </form>
 
                 <div className="login-footer">
-                    <p>© 2025 Детейлинг Сервис CRYSTAL_CAR. Все права защищены.</p>
+                    <p>© 2025 Детейлинг Сервис CGP. Все права защищены.</p>
                 </div>
             </div>
         </div>
