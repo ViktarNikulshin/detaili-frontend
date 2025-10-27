@@ -81,8 +81,6 @@ const UserForm: React.FC = () => {
         if (!formData.lastName.trim()) newErrors.lastName = "Фамилия обязательна";
         if (isCreateMode) {
             if (!formData.phone.trim()) newErrors.phone = "Телефон обязателен";
-            if (formData.newPassword.length < 6) newErrors.newPassword = "Пароль должен быть не менее 6 символов";
-            if (formData.newPassword !== formData.confirmPassword) newErrors.confirmPassword = "Пароли не совпадают";
             if (formData.roleIds.length === 0) newErrors.roles = "Выберите хотя бы одну роль";
         }
         setErrors(newErrors);
