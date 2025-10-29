@@ -3,13 +3,13 @@
     justify-content: space-between;
     align-items: center;
     padding: 12px 24px;
-    background: rgba(255, 255, 255, 0.65);
+    background: rgba(51, 51, 51, 0.9); /* Темно-серый фон с легкой прозрачностью */
     backdrop-filter: blur(14px);
     border-radius: 0 0 20px 20px;
-    box-shadow: 0 4px 16px rgba(100, 170, 200, 0.25);
+    box-shadow: 0 4px 16px rgba(74, 130, 109, 0.2); /* Тень с оттенком #4a826d */
     font-family: "Segoe UI", sans-serif;
-    color: #1a3c47;
-    position: relative; /* Необходимо для работы z-index, хотя backdrop-filter уже создал контекст */
+    color: #e0e0e0; /* Светлый текст для контраста */
+    position: relative;
     z-index: 1000;
 }
 
@@ -18,7 +18,7 @@
     font-size: 20px;
     font-weight: 700;
     text-decoration: none;
-    background: linear-gradient(90deg, #5ac8fa, #007aff);
+    background: linear-gradient(90deg, #4a826d, #5babff); /* Градиент из основных цветов */
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     letter-spacing: 0.5px;
@@ -28,6 +28,7 @@
 .nav-brand a:hover {
     opacity: 0.8;
 }
+
 .nav-brand {
     display: flex;
     align-items: center;
@@ -39,26 +40,27 @@
     display: flex;
     gap: 20px;
 }
+
 .nav-logo {
     width: 32px;
     height: 32px;
     object-fit: contain;
-    filter: drop-shadow(0 2px 6px rgba(0, 195, 255, 0.5));
+    filter: drop-shadow(0 2px 6px rgba(91, 171, 255, 0.5)); /* Тень с оттенком #5babff */
 }
 
 .nav-link {
     text-decoration: none;
     font-size: 15px;
     font-weight: 500;
-    color: #1a3c47;
+    color: #e0e0e0; /* Светлый текст для читаемости */
     padding: 6px 12px;
     border-radius: 10px;
     transition: all 0.3s ease;
 }
 
 .nav-link:hover {
-    background: linear-gradient(135deg, rgba(90, 200, 250, 0.2), rgba(0, 122, 255, 0.15));
-    color: #007aff;
+    background: linear-gradient(135deg, rgba(74, 130, 109, 0.3), rgba(91, 171, 255, 0.2)); /* Градиент для hover */
+    color: #5babff; /* Акцентный цвет */
 }
 
 /* Блок пользователя */
@@ -70,18 +72,18 @@
 }
 
 .nav-user span {
-    color: #1a3c47;
+    color: #e0e0e0; /* Светлый текст */
 }
 
 .user-role {
     font-size: 13px;
-    color: #3c6e71;
+    color: #b0b0b0; /* Чуть темнее для роли */
     opacity: 0.8;
 }
 
-/* Кнопка выхода */
+/* Кнопка выхода (скрыта, но обновим цвета) */
 .logout-btn {
-    background: linear-gradient(135deg, #ef476f, #d90429);
+    background: linear-gradient(135deg, #4a826d, #5babff);
     border: none;
     color: white;
     font-weight: 600;
@@ -92,18 +94,17 @@
 }
 
 .logout-btn:hover {
-    background: linear-gradient(135deg, #d90429, #ef476f);
+    background: linear-gradient(135deg, #5babff, #4a826d);
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(239, 71, 111, 0.35);
+    box-shadow: 0 4px 10px rgba(74, 130, 109, 0.3); /* Тень с оттенком #4a826d */
 }
+
 /* ------------------------------------------- */
 /* СТИЛИ КНОПКИ 'Создать заказ' */
 /* ------------------------------------------- */
 
-/* Общие стили для кнопки "Создать заказ" */
 .create-order-btn {
-    /* ... (оставляем существующие стили) ... */
-    background: linear-gradient(135deg, #5ac8fa, #00c3ff);
+    background: linear-gradient(135deg, #4a826d, #5babff);
     border: none;
     color: white;
     font-weight: 600;
@@ -112,16 +113,16 @@
     cursor: pointer;
     font-size: 15px;
     transition: all 0.3s ease;
-    display: flex; /* Обеспечивает центрирование на мобильных */
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 5px;
 }
 
 .create-order-btn:hover {
-    background: linear-gradient(135deg, #00c3ff, #5ac8fa);
+    background: linear-gradient(135deg, #5babff, #4a826d);
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 195, 255, 0.4);
+    box-shadow: 0 4px 10px rgba(91, 171, 255, 0.4); /* Тень с оттенком #5babff */
 }
 
 /* Скрываем мобильную иконку по умолчанию */
@@ -134,43 +135,35 @@
 /* ------------------------------------------- */
 
 @media (max-width: 550px) {
-    /* Скрываем полный текст кнопки */
     .create-order-btn .button-text-desktop {
         display: none;
     }
 
-    /* Отображаем иконку */
     .create-order-btn .button-icon-mobile {
         display: block;
         font-size: 20px;
         font-weight: 700;
     }
 
-    /* Изменяем саму кнопку: делаем компактной */
     .create-order-btn {
-        width: 40px;    /* Фиксированная ширина */
-        height: 40px;   /* Фиксированная высота */
-        padding: 0;     /* Убираем отступы */
-        border-radius: 50%; /* Делаем круглой */
-        /* Важно: Убедитесь, что flex-свойства из общих стилей применены,
-           чтобы центрировать "+" */
-
-        /* Дополнительно: чтобы навигация не сжималась */
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border-radius: 50%;
         flex-shrink: 0;
     }
 
-    /* Также скорректируем отступы навигации, чтобы оставить место для круглых кнопок */
     .navigation {
         padding: 8px 12px;
     }
 }
+
 /* ------------------------------------------- */
 /* СТИЛИ ДЛЯ БУРГЕРНОГО МЕНЮ */
 /* ------------------------------------------- */
 
-/* Кнопка переключения меню (гамбургер) */
 .menu-toggle-btn {
-    background: linear-gradient(135deg, #1a3c47, #3c6e71); /* Новый градиент для кнопки меню */
+    background: linear-gradient(135deg, #4a826d, #5babff);
     color: white;
     border: none;
     font-size: 18px;
@@ -179,33 +172,33 @@
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
-    line-height: 1; /* Для лучшего центрирования знака ☰ */
+    line-height: 1;
     margin-left: 10px;
 }
 
 .menu-toggle-btn:hover {
-    background: linear-gradient(135deg, #3c6e71, #1a3c47);
+    background: linear-gradient(135deg, #5babff, #4a826d);
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(60, 110, 113, 0.4);
+    box-shadow: 0 4px 10px rgba(74, 130, 109, 0.3); /* Тень с оттенком #4a826d */
 }
 
 /* Контейнер для выпадающего меню */
 .nav-user {
-    position: relative; /* Важно для позиционирования выпадающего списка */
+    position: relative;
 }
 
 /* Выпадающее меню */
 .dropdown-menu {
     position: absolute;
-    top: 100%; /* Располагаем под блоком nav-user */
+    top: 100%;
     right: 0;
-    margin-top: 10px; /* Отступ от навигационной панели */
+    margin-top: 10px;
     width: 150px;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(51, 51, 51, 0.95); /* Темно-серый фон */
     backdrop-filter: blur(10px);
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    z-index: 9999; /* Поверх всего */
+    box-shadow: 0 4px 15px rgba(74, 130, 109, 0.2); /* Тень с оттенком #4a826d */
+    z-index: 9999;
     padding: 5px 0;
     overflow: hidden;
 }
@@ -213,61 +206,58 @@
 .menu-item {
     padding: 10px 15px;
     font-size: 15px;
-    color: #1a3c47;
+    color: #e0e0e0; /* Светлый текст */
     cursor: pointer;
     transition: background-color 0.2s ease;
     font-weight: 500;
 }
 
 .menu-item:hover {
-    background-color: rgba(0, 195, 255, 0.1);
-    color: #00c3ff;
+    background-color: rgba(91, 171, 255, 0.2); /* Фон с оттенком #5babff */
+    color: #5babff; /* Акцентный цвет */
 }
 
 /* Специальный стиль для кнопки "Выйти" в меню */
 .logout-menu-item {
-    color: #272b2e;
+    color: #e0e0e0; /* Светлый текст */
     font-weight: 600;
-    border-top: 1px solid #f0f0f0;
+    border-top: 1px solid #4a4a4a; /* Темная граница для контраста */
     margin-top: 5px;
     padding-top: 10px;
 }
 
 .logout-menu-item:hover {
-    background-color: rgba(239, 71, 111, 0.1);
-    color: #d90429;
+    background-color: rgba(74, 130, 109, 0.2); /* Фон с оттенком #4a826d */
+    color: #5babff; /* Акцентный цвет */
 }
 
-
 /* УДАЛИТЬ СТАРУЮ КНОПКУ ВЫХОДА */
-/* Если она не нужна в старой форме, удалите этот блок из Navigation.css
-*/
 .logout-btn {
     display: none;
 }
 
 /* ------------------------------------------- */
-/* АДАПТИВНОСТЬ НАВИГАЦИИ                     */
+/* АДАПТИВНОСТЬ НАВИГАЦИИ */
 /* ------------------------------------------- */
 
 @media (max-width: 768px) {
     .user-role {
-        display: none; /* Скрываем роль пользователя, чтобы экономить место */
+        display: none;
     }
 
     .nav-brand a {
-        font-size: 18px; /* Чуть меньше заголовок */
+        font-size: 18px;
     }
 
     .nav-user {
-        gap: 6px; /* Компактнее блок пользователя */
+        gap: 6px;
     }
 }
 
 @media (max-width: 550px) {
     .navigation {
         padding: 8px 10px;
-        flex-wrap: wrap; /* Разрешаем перенос элементов */
+        flex-wrap: wrap;
         row-gap: 8px;
     }
 
@@ -281,7 +271,6 @@
         vertical-align: middle;
     }
 
-    /* На совсем маленьких скрываем имя, оставляем бургер и кнопку */
     .nav-user span {
         display: none;
     }

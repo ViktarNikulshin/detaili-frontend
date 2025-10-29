@@ -1,123 +1,146 @@
 /* Используем те же переменные, что и в OrderForm.css */
 :root {
-    --primary-color: #007bff;
-    --primary-light: #5ac8fa;
-    --accent-color: #28a745;
-    --error-color: #dc3545;
-    --text-color: #1a3c47;
-    --bg-light: rgba(255, 255, 255, 0.7);
-    --border-color: rgba(90, 200, 250, 0.4);
-    --shadow-light: 0 4px 12px rgba(100, 180, 220, 0.15);
+    --primary-color: #5babff;          /* Голубой акцент (как в EventModal) */
+    --secondary-color: #4a826d;        /* Зеленый акцент (как в EventModal) */
+    --error-color: #dc3545;            /* Красный для ошибок */
+    --text-color-light: #e0e0e0;       /* Исходный светлый текст */
+    --text-color-filled: #1a3c47;      /* Более темный светлый текст */
+    --text-color-dark: #333333;        /* Темный текст (редко) */
+    --bg-dark: rgba(51, 51, 51, 0.95);  /* Темный фон формы */
+    --bg-input: rgba(65, 65, 65, 0.9);  /* Фон для полей/контейнеров */
+    --border-color: rgba(74, 130, 109, 0.3); /* Граница с зеленым акцентом */
+    --shadow-light: 0 4px 12px rgba(74, 130, 109, 0.2);
 }
 
 .report-container {
-    max-width: 1200px; /* Таблицам нужно больше места */
-    margin: 50px auto; /* Центрирует контейнер отчета по горизонтали */
+    max-width: 1200px;
+    margin: 50px auto;
     padding: 35px;
-    background: var(--bg-light);
-    backdrop-filter: blur(25px) saturate(150%);
-    border-radius: 25px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    /* --- ИЗМЕНЕНИЕ: Стили контейнера из OrderForm.css --- */
+    background: var(--bg-dark);
+    background-image: linear-gradient(135deg, rgba(74, 130, 109, 0.1), rgba(91, 171, 255, 0.1));
+    backdrop-filter: none;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
     box-shadow: var(--shadow-light);
     font-family: 'Inter', 'Segoe UI', sans-serif;
-    color: var(--text-color);
+    color: var(--text-color-light); /* Светлый текст */
 }
 
 .report-container h2 {
     text-align: center;
-    color: var(--primary-color);
     margin-bottom: 30px;
     font-weight: 700;
+    /* --- ИЗМЕНЕНИЕ: Градиентный заголовок (как в EventModal/Login) --- */
+    background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: var(--primary-color); /* Fallback */
 }
 
+/* --- ИЗМЕНЕНИЕ: Стили ошибок и загрузки --- */
 .report-loading,
 .report-error,
 .report-empty {
     text-align: center;
     padding: 20px;
     margin-top: 20px;
-    border-radius: 10px;
+    border-radius: 6px;
 }
 
 .report-error {
-    background-color: rgba(220, 53, 69, 0.1);
-    color: var(--error-color);
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(204, 74, 74, 0.1));
+    color: #ff6b6b; /* Акцентный красный */
+    border: 1px solid rgba(220, 53, 69, 0.4);
 }
 
-/* Контейнер для горизонтального скролла на малых экранах */
+.report-loading {
+    background: rgba(74, 130, 109, 0.2); /* Зеленый акцент */
+    color: var(--primary-color);
+}
+
+.report-empty {
+    color: var(--text-color-filled);
+}
+
+/* Контейнер для горизонтального скролла */
 .table-wrapper {
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
-    /* Важно: table-wrapper сам должен быть центрирован, если он уже max-width */
+    -webkit-overflow-scrolling: touch;
     margin: 0 auto;
     max-width: 100%;
+    border-radius: 8px; /* Скругляем углы для обертки */
+    border: 1px solid var(--border-color);
+    background: var(--bg-input); /* Фон для таблицы */
 }
 
 .report-table {
     width: 100%;
-    /* Используем 'separate' для border-spacing и липких заголовков */
     border-collapse: separate;
     border-spacing: 0;
-    margin-top: 20px;
-    min-width: 1000px; /* Минимальная ширина, чтобы таблица не была слишком узкой */
+    margin-top: 0; /* Убираем, т.к. wrapper имеет отступ */
+    min-width: 1000px;
 }
 
 .report-table th,
 .report-table td {
     padding: 12px 15px;
     text-align: left;
-    border-bottom: 1px solid var(--border-color);
-    white-space: nowrap; /* Запрещаем перенос строк в ячейках */
+    border-bottom: 1px solid var(--border-color); /* Акцентная граница */
+    white-space: nowrap;
 }
 
-/* HEADER (TanStack) */
+/* --- ИЗМЕНЕНИЕ: Заголовок таблицы (как в CalendarView) --- */
 .report-table thead th {
-    position: sticky; /* Фиксирует заголовки при прокрутке */
+    position: sticky;
     top: 0;
     z-index: 10;
     text-transform: uppercase;
-    background-color: var(--primary-color);
-    color: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #333; /* Темный фон заголовка */
+    color: var(--primary-color); /* Акцентный текст */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     font-weight: 600;
     font-size: 14px;
     text-align: center;
+    border-bottom: 2px solid var(--secondary-color); /* Зеленый акцент */
 }
 
-/* BODY */
+/* --- ИЗМЕНЕНИЕ: Тело таблицы --- */
 .report-table tbody td {
     font-size: 15px;
     text-align: center;
+    color: var(--text-color-filled); /* Светлый текст для данных */
 }
 
 .report-table tbody tr:nth-child(even) {
-    background-color: rgba(0, 123, 255, 0.03);
+    background-color: rgba(0, 0, 0, 0.1); /* Темная "зебра" */
 }
 
 .report-table tbody tr:hover {
-    background-color: rgba(0, 123, 255, 0.07);
+    background-color: rgba(255, 255, 255, 0.05); /* Светлый hover */
 }
 
-/* FOOTER (Итоговая строка) */
+/* --- ИЗМЕНЕНИЕ: Футер таблицы (Итого) --- */
 .report-table tfoot td {
-    background-color: rgba(0, 123, 255, 0.15); /* Фон для итоговой строки */
+    background-color: #333; /* Темный фон (как у хедера) */
+    color: var(--text-color-light); /* Яркий светлый текст */
     font-weight: 700;
     position: sticky;
     bottom: 0;
     z-index: 10;
-    border-top: 2px solid var(--primary-color);
+    border-top: 2px solid var(--primary-color); /* Голубой акцент */
 }
 
 /* Стили для ссылок-мастеров */
 .master-link {
-    color: var(--primary-color);
+    color: var(--primary-color); /* Акцентный цвет */
     text-decoration: none;
     font-weight: 600;
     transition: color 0.2s ease;
 }
 
 .master-link:hover {
-    color: #0056b3;
+    color: #8ec3ff; /* Светлее при наведении */
     text-decoration: underline;
 }
 
@@ -128,10 +151,10 @@
 }
 
 .sortable:hover {
-    background-color: #0056b3;
+    background-color: #444; /* Темнее при наведении */
 }
 
-/* Стиль для навигации по датам */
+/* --- ИЗМЕНЕНИЕ: Навигация по датам --- */
 .date-navigation {
     display: flex;
     justify-content: center;
@@ -144,22 +167,27 @@
     font-weight: 600;
     font-size: 16px;
     white-space: nowrap;
+    color: var(--text-color-filled); /* Светлый текст */
 }
 
 .date-navigation button {
-    background-color: var(--primary-color);
-    color: white;
+    /* --- Стили кнопок из OrderForm --- */
+    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
     border: none;
-    padding: 10px 15px;
+    color: white;
+    font-weight: 600;
+    padding: 10px 18px;
     border-radius: 8px;
     cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.2s ease, opacity 0.2s ease;
+    transition: all 0.3s ease;
     min-width: 150px;
+    box-shadow: var(--shadow-light);
 }
 
 .date-navigation button:hover:not(:disabled) {
-    background-color: #0056b3;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(91, 171, 255, 0.4);
 }
 
 /* Утилитарные классы */
@@ -173,22 +201,32 @@
     text-align: center;
     font-size: 16px;
     margin-bottom: 20px;
-    color: #0056b3;
+    color: var(--primary-color); /* Акцентный цвет */
+}
+
+/* --- ИЗМЕНЕНИЕ: Стили липких колонок --- */
+.sticky-column {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--bg-input); /* Фон совпадает с фоном таблицы */
 }
 
 .report-table tbody tr:nth-child(even) .sticky-column {
-    background-color: rgba(0, 123, 255, 0.03); /* Сохраняем полосатость */
+    background-color: rgba(0, 0, 0, 0.1); /* Сохраняем "зебру" */
 }
 .report-table tbody tr:hover .sticky-column {
-    background-color: rgba(0, 123, 255, 0.07);
+    background-color: rgba(255, 255, 255, 0.05); /* Сохраняем hover */
 }
 
 .report-table thead th.sticky-column {
-    background-color: var(--primary-color);
+    background-color: #333; /* Совпадает с хедером */
+    z-index: 11; /* Выше чем хедер */
 }
 
 .report-table tfoot .sticky-column {
-    background-color: rgba(0, 123, 255, 0.15); /* Фон для футера */
+    background-color: #333; /* Совпадает с футером */
+    z-index: 11;
 }
 
 /* Стиль заголовков заказов в детальном отчете */
@@ -197,72 +235,61 @@
     vertical-align: top;
     padding-top: 15px;
 }
-/* --- АДАПТИВНОСТЬ для MasterReport и MasterDetailReport (Mobile Styles) --- */
+/* --- АДАПТИВНОСТЬ (Mobile Styles) --- */
 
 @media (max-width: 768px) {
-    /* Основной контейнер */
     .report-container {
-        margin: 20px 10px; /* Уменьшаем внешние отступы */
-        padding: 15px; /* Уменьшаем внутренние отступы */
-        border-radius: 15px;
+        margin: 20px 10px;
+        padding: 15px;
+        border-radius: 8px;
     }
 
-    /* Заголовок отчета */
     .report-container h2 {
         font-size: 1.5em;
     }
 
-    /* Навигация по датам */
     .date-navigation {
-        /* Стек кнопок и диапазона дат */
         flex-direction: column;
         gap: 15px;
         margin-bottom: 20px;
     }
 
     .date-navigation span {
-        /* Делаем диапазон дат более заметным */
         font-size: 1.1em;
         text-align: center;
     }
 
     .date-navigation button {
-        /* Делаем кнопки навигации на всю ширину */
         width: 100%;
         min-width: unset;
         padding: 12px;
     }
 
-    /* Таблица */
-    .report-container th,
-    .report-container td {
-        padding: 8px 10px; /* Уменьшаем отступы в ячейках */
-        font-size: 12px; /* Уменьшаем размер шрифта */
-    }
-
-    /* Заголовки (th) */
-    .report-container thead th {
+    .report-table th,
+    .report-table td {
+        padding: 8px 10px;
         font-size: 12px;
-        white-space: normal; /* Разрешаем перенос строк в заголовках */
     }
 
-    /* Ссылки на мастеров */
+    .report-table thead th {
+        font-size: 12px;
+        white-space: normal;
+    }
+
     .master-link {
         font-size: 13px;
         white-space: normal;
     }
 
-    /* Для детального отчета (MasterDetailReport) - малый текст в заголовке */
-    .report-container thead th small {
-        display: block; /* Перенос даты на новую строку */
+    .report-table thead th small {
+        display: block;
         font-size: 10px;
         white-space: nowrap;
     }
 
-    /* Фиксация первой колонки в детальном отчете */
     .sticky-column {
-        /* На мобильных устройствах делаем фон первой колонки более заметным */
-        background-color: #f7f9fc;
-        box-shadow: 1px 0 3px rgba(0, 0, 0, 0.1);
+        /* Делаем фон липкой колонки непрозрачным */
+        background-color: var(--bg-input);
+        box-shadow: 1px 0 3px rgba(0, 0, 0, 0.4); /* Более темная тень */
     }
 }

@@ -308,14 +308,25 @@ const OrderForm: React.FC = () => {
         setValue("works", works, { shouldValidate: true });
     };
 
-    const handleSalaryPercentChange = (workIndex: number, masterId: number, percentStr: string) => {
+    const handleSalaryPercentChange = (workIndex: number, masterId: number, rawPercentStr: string) => {
+        const regex = /^[0-9]*([.,])?[0-9]*$/;
+
+        if (rawPercentStr !== "" && !regex.test(rawPercentStr)) {
+            return;
+        }
+
+        const percentStr = rawPercentStr.replace(",", ".");
+
         const works = [...(watch("works") || [])];
         const work = works[workIndex];
         if (!work) return;
 
-        const newAssignments = work.assignments.map(a => a.master.id === masterId ? { ...a, salaryPercent: Number(percentStr) } : a);
+        const newAssignments = work.assignments.map(a =>
+            a.master.id === masterId ? { ...a, salaryPercent: percentStr as any } : a
+        );
         works[workIndex] = { ...work, assignments: newAssignments };
-        setValue("works", works, { shouldValidate: true });
+
+        setValue("works", works, { shouldValidate: false });
     };
 
     // Calculation helpers
@@ -502,7 +513,7 @@ const OrderForm: React.FC = () => {
                                                                             <div className="percentage-input-container">
                                                                                 {/* register percent only if assignment exists */}
                                                                                 <input
-                                                                                    type="number"
+                                                                                    type="text"
                                                                                     placeholder="%"
                                                                                     {...register(`works.${workIndex}.assignments.${assignmentIndex}.salaryPercent`, {
                                                                                         valueAsNumber: true,
@@ -519,7 +530,7 @@ const OrderForm: React.FC = () => {
                                                                     ) : (
                                                                         <>
                                                                             <div className="percentage-input-container">
-                                                                                <input type="number" placeholder="%" disabled />
+                                                                                <input type="text" placeholder="%" disabled />
                                                                             </div>
                                                                             <div style={{ minWidth: 110, textAlign: "right", color: "#6c757d" }}>
                                                                                 <div style={{ fontSize: 13, fontWeight: 600 }}>Сумма:</div>
@@ -574,8 +585,6 @@ const OrderForm: React.FC = () => {
                         {errors.orderCost && <span className="error-text">{errors.orderCost.message}</span>}
                     </div>
                 </div>
-
-                <input type="text" placeholder="Время выполнения (например, 2 часа)" {...register("executionTimeByMaster")} />
 
                 <button type="submit" disabled={loading}>{id ? "Обновить заказ" : "Сохранить заказ"}</button>
             </form>

@@ -4,7 +4,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.7); /* Темный фон с прозрачностью */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -12,21 +12,22 @@
 }
 
 .modal-content {
-    background: #fff;
+    background: rgba(51, 51, 51, 0.95); /* Темно-серый фон */
+    background-image: linear-gradient(135deg, rgba(74, 130, 109, 0.1), rgba(91, 171, 255, 0.1)); /* Акварельный эффект */
     padding: 20px;
     border-radius: 8px;
     width: 90%;
     max-width: 500px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(74, 130, 109, 0.2); /* Тень с оттенком #4a826d */
     position: relative;
-    color: #333;
+    color: #e0e0e0; /* Светлый текст */
 }
 
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid rgba(74, 130, 109, 0.3); /* Граница с акцентом */
     padding-bottom: 10px;
     margin-bottom: 15px;
 }
@@ -34,7 +35,10 @@
 .modal-header h2 {
     margin: 0;
     font-size: 1.5em;
-    color: #3174ad;
+    color: #5babff; /* Акцентный цвет */
+    background: linear-gradient(90deg, #4a826d, #5babff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .close-button {
@@ -42,16 +46,17 @@
     border: none;
     font-size: 2em;
     cursor: pointer;
-    color: #999;
+    color: #b0b0b0; /* Светло-серый для кнопки */
 }
 
 .close-button:hover {
-    color: #333;
+    color: #5babff; /* Акцент при наведении */
 }
 
 .modal-body p {
     margin: 5px 0;
     font-size: 0.95em;
+    color: #e0e0e0; /* Светлый текст */
 }
 
 /* Статусные метки */
@@ -80,20 +85,20 @@
 }
 
 .status-cancelled {
-    background-color: #d9534f;
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.7), rgba(204, 74, 74, 0.7)); /* Акварельный красный */
     color: white;
 }
 
 /* СЕКЦИЯ РАБОТ */
 .event-works {
     margin-top: 20px;
-    border-top: 1px dashed #ddd;
+    border-top: 1px dashed rgba(91, 171, 255, 0.3); /* Дашед линия с акцентом */
     padding-top: 15px;
 }
 
 .event-works h3 {
     font-size: 1.1em;
-    color: #3174ad;
+    color: #5babff; /* Акцентный цвет */
     margin-bottom: 10px;
 }
 
@@ -104,23 +109,25 @@
 }
 
 .work-item {
-    background-color: #f9f9f9;
+    background: rgba(51, 51, 51, 0.8); /* Темно-серый фон */
+    background-image: linear-gradient(135deg, rgba(74, 130, 109, 0.05), rgba(91, 171, 255, 0.05)); /* Акварельный эффект */
     padding: 10px;
     border-radius: 6px;
     margin-bottom: 10px;
-    border: 1px solid #eee;
+    border: 1px solid rgba(74, 130, 109, 0.2); /* Граница с акцентом */
 }
 
 .work-item p {
     margin: 0;
     font-size: 0.9em;
+    color: #e0e0e0; /* Светлый текст */
 }
 
 /* Метка стоимости работы */
 .work-cost-tag {
     display: inline-block;
-    background-color: #e6f7ff; /* Светло-голубой */
-    color: #0050b3; /* Синий текст */
+    background: rgba(91, 171, 255, 0.2); /* Светлый акварельный голубой */
+    color: #5babff; /* Акцентный цвет */
     padding: 2px 6px;
     border-radius: 4px;
     font-size: 0.8em;
@@ -132,29 +139,30 @@
 .master-assignments {
     margin-top: 5px;
     padding-left: 10px;
-    border-left: 2px solid #5bc0de;
+    border-left: 2px solid rgba(91, 171, 255, 0.5); /* Акварельный акцент */
 }
 
 .master-earning-detail {
     margin: 3px 0;
     font-size: 0.85em;
-    color: #555;
+    color: #b0b0b0; /* Светло-серый */
 }
 
 .salary-info {
     display: block;
     margin-top: 2px;
     font-size: 0.9em;
-    color: #28a745; /* Зеленый для ЗП */
+    color: #4a826d; /* Зеленый акцент */
     font-weight: 600;
 }
 
 .salary-info strong {
     font-weight: 700;
 }
+
 /* Стили для кнопки "Взять в работу" */
 .take-work-button {
-    background-color: #007bff;
+    background-color: #007bff; /* Стандартный синий */
     color: white;
     padding: 10px 15px;
     border: none;
@@ -165,17 +173,17 @@
 }
 
 .take-work-button:hover:not(:disabled) {
-    background-color: #0056b3;
+    background-color: #0056b3; /* Темнее при наведении */
 }
 
 .take-work-button:disabled {
-    background-color: #a8c2e6;
+    background-color: #a8c2e6; /* Ослабленный синий */
     cursor: not-allowed;
 }
 
 /* Стили для кнопки "Завершить" */
 .complete-button {
-    background-color: #28a745;
+    background-color: #28a745; /* Стандартный зеленый */
     color: white;
     padding: 10px 15px;
     border: none;
@@ -186,16 +194,17 @@
 }
 
 .complete-button:hover:not(:disabled) {
-    background-color: #1e7e34;
+    background-color: #1e7e34; /* Темнее при наведении */
 }
 
 .complete-button:disabled {
-    background-color: #98e6a9;
+    background-color: #98e6a9; /* Ослабленный зеленый */
     cursor: not-allowed;
 }
 
 /* Стили для кнопки "Отменить заказ" (Admin) */
-.cancel-button {
+/* Стили для кнопки "Отменить заказ" (Admin) */
+.modal-content .cancel-button {
     background-color: #dc3545; /* Красный цвет */
     color: white;
     padding: 10px 15px;
@@ -206,18 +215,18 @@
     transition: background-color 0.2s ease;
 }
 
-.cancel-button:hover:not(:disabled) {
+.modal-content .cancel-button:hover:not(:disabled) {
     background-color: #c82333; /* Темнее при наведении */
 }
 
-.cancel-button:disabled {
-    background-color: #f1a9b2;
+.modal-content .cancel-button:disabled {
+    background-color: #f1a9b2; /* Ослабленный красный */
     cursor: not-allowed;
 }
 
 /* Стили для кнопки "Редактировать" */
 .edit-button {
-    background-color: #6c757d;
+    background-color: #6c757d; /* Стандартный серый */
     color: white;
     padding: 10px 15px;
     border: none;
@@ -228,12 +237,13 @@
 }
 
 .edit-button:hover {
-    background-color: #5a6268;
+    background-color: #5a6268; /* Темнее при наведении */
 }
 
+/* Стили для кнопки закрытия в подвале */
 .close-button-footer {
-    background-color: #e9ecef;
-    color: #333;
+    background-color: #e9ecef; /* Светлый серый */
+    color: #333; /* Темный текст для контраста */
     padding: 10px 15px;
     border: none;
     border-radius: 6px;
@@ -243,54 +253,44 @@
 }
 
 .close-button-footer:hover {
-    background-color: #d3d9df;
+    background-color: #d3d9df; /* Более темный серый */
 }
-
 
 /* Обновление modal-footer, чтобы кнопки располагались в строку */
 .modal-footer {
     display: flex;
-    justify-content: flex-end; /* Выравнивание кнопок вправо */
-    gap: 10px; /* Расстояние между кнопками */
+    justify-content: flex-end;
+    gap: 10px;
     margin-top: 15px;
     padding-top: 15px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid rgba(91, 171, 255, 0.3); /* Акварельный акцент */
 }
+
 @media (max-width: 600px) {
-    /* Основное содержимое модального окна */
     .modal-content {
-        /* Увеличиваем ширину на мобильных, чтобы не было слишком узко */
         width: 95%;
-        /* Максимальная ширина уменьшается для средних устройств */
         max-width: 95%;
         padding: 15px;
     }
 
-    /* Заголовок модального окна */
     .modal-header h2 {
         font-size: 1.3em;
-        /* Уменьшаем размер шрифта для экономии места */
     }
 
-    /* Секция с деталями заказа */
     .modal-details p {
-        /* Уменьшаем отступы между строками */
         margin-bottom: 5px;
         font-size: 0.9em;
     }
 
-    /* Секция кнопок (подвал модального окна) */
     .modal-footer {
-        /* Стек кнопок вместо горизонтального расположения */
         flex-direction: column;
         justify-content: center;
-        gap: 10px; /* Расстояние между кнопками */
+        gap: 10px;
         margin-top: 20px;
     }
 
-    /* Все кнопки в подвале модального окна */
     .modal-footer button {
-        width: 100%; /* Растягиваем кнопки на всю ширину */
+        width: 100%;
         padding: 12px;
         font-size: 1em;
     }

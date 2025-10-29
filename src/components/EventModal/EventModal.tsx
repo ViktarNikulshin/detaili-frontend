@@ -124,12 +124,12 @@ const EventModal: React.FC<EventModalProps> = ({
                                                     return (
                                                         <p key={assignmentIndex} className="master-earning-detail">
                                                             Мастер:
-                                                            **{assignment.master.firstName} {assignment.master.lastName}**
+                                                            {assignment.master.firstName} {assignment.master.lastName}
 
                                                             {/* Детали ЗП видны только Admin */}
                                                             {isAdmin && (
                                                                 <small className="salary-info">
-                                                                    Процент: **{percent}%**
+                                                                    Процент: {percent}% :
                                                                     (ЗП: <strong>{masterSalary}</strong>)
                                                                 </small>
                                                             )}

@@ -168,13 +168,21 @@ const MasterReport: React.FC = () => {
 
             <div className="date-navigation">
                 <button
-                    onClick={() => setCurrentDate(prev => new Date(prev.setDate(prev.getDate() - 7)))}
+                    onClick={() => setCurrentDate(prev => {
+                        const newDate = new Date(prev); // 1. Создаем копию
+                        newDate.setDate(newDate.getDate() - 7); // 2. Изменяем копию
+                        return newDate; // 3. Возвращаем копию
+                    })}
                 >
                     &lt; Предыдущая неделя
                 </button>
                 <span>Отчет за неделю: **{dateRange.displayStart}** - **{dateRange.displayEnd}**</span>
                 <button
-                    onClick={() => setCurrentDate(prev => new Date(prev.setDate(prev.getDate() + 7)))}
+                    onClick={() => setCurrentDate(prev => {
+                        const newDate = new Date(prev); // 1. Создаем копию
+                        newDate.setDate(newDate.getDate() + 7); // 2. Изменяем копию
+                        return newDate; // 3. Возвращаем копию
+                    })}
                 >
                     Следующая неделя &gt;
                 </button>
