@@ -26,24 +26,38 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
 
+    // src/contexts/AuthContext.tsx
+
     useEffect(() => {
-        // Проверяем наличие токена и данных пользователя при загрузке
         const token = localStorage.getItem('token');
         const userDataStr = localStorage.getItem('user');
 
         if (token && userDataStr) {
-            try {
-                const userData = JSON.parse(userDataStr);
-                setUser(userData);
 
-                authAPI.validateToken(token);
+            const validate = async () => {
+                try {
+                    // 1. Ждем результат проверки
+                    const isValid = await authAPI.validateToken(token);
 
-            } catch (error) {
-                console.error('Error parsing user data:', error);
-                logout();
-            }
+                    if (isValid) {
+                        // 2. Только если токен валиден, устанавливаем пользователя
+                        const userData = JSON.parse(userDataStr);
+                        setUser(userData);
+                    } else {
+                        // 3. Если токен невалиден - выходим
+                        console.warn('Initial token validation failed.');
+                        logout(); // Вызовет authAPI.logout() и setUser(null)
+                    }
+                } catch (error) {
+                    console.error('Error parsing user data or validating token:', error);
+                    logout();
+                }
+            };
+
+            validate(); // Запускаем асинхронную проверку
+
         }
-    }, []);
+    }, []); // Пустой массив зависимостей - все верно
 
     const login = (token: string, userData: User) => {
         localStorage.setItem('token', token);

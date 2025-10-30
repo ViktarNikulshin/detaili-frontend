@@ -18,6 +18,28 @@ authApi.interceptors.request.use((config) => {
     return config;
 });
 
+authApi.interceptors.response.use(
+    (response) => {
+        return response;
+    },
+
+    async (error) => {
+        const originalRequest = error.config;
+        if (error.response?.status === 401 && !originalRequest._retry) {
+
+            console.warn("Токен просрочен или невалиден. Выполняется выход.");
+            originalRequest._retry = true; // Помечаем запрос как повторный
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+
+            // Вы можете также показать уведомление
+            // alert('Ваша сессия истекла. Пожалуйста, войдите снова.');
+        }
+
+        return Promise.reject(error);
+    }
+);
+
 
 export const authAPI = {
 
