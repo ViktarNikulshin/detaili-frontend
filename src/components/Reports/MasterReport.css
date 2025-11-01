@@ -26,6 +26,9 @@
     font-family: 'Inter', 'Segoe UI', sans-serif;
     color: var(--text-color-light); /* Светлый текст */
 }
+.report-container .date-range {
+    color: var(--text-color-light); /* Светлый текст */
+}
 
 .report-container h2 {
     text-align: center;

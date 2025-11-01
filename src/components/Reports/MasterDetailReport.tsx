@@ -94,8 +94,8 @@ const MasterDetailReportComponent: React.FC = () => {
 
     return (
         <div className="report-container">
-            <h2>Детальный отчет по мастеру: **{report.masterFirstName} {report.masterLastName}**</h2>
-            <p className="report-date-range">Отчетный период: **{displayDateRange}**</p>
+            <h2>Детальный отчет по мастеру: {report.masterFirstName} {report.masterLastName}</h2>
+            <p className="report-date-range">Отчетный период: {displayDateRange}</p>
 
             {/* Контейнер для прокрутки */}
             <div className="table-wrapper">
@@ -106,8 +106,7 @@ const MasterDetailReportComponent: React.FC = () => {
                         {/* Динамические колонки: Заказы */}
                         {orderHeaders.map(order => (
                             <th key={order.orderId} className="order-column">
-                                Заказ №{order.orderId} <br/>
-                                <small>({order.clientName}, {format(new Date(order.executionDate), 'dd.MM')})</small>
+                                <small>({order.clientName}, {order.clientCar} {format(new Date(order.executionDate), 'dd.MM')})</small>
                             </th>
                         ))}
                         <th>Всего по типу</th>

@@ -176,7 +176,7 @@ const MasterReport: React.FC = () => {
                 >
                     &lt; Предыдущая неделя
                 </button>
-                <span>Отчет за неделю: **{dateRange.displayStart}** - **{dateRange.displayEnd}**</span>
+                <span className="date-range">Отчет за неделю: {dateRange.displayStart} - {dateRange.displayEnd}</span>
                 <button
                     onClick={() => setCurrentDate(prev => {
                         const newDate = new Date(prev); // 1. Создаем копию

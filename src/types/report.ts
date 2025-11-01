@@ -26,6 +26,7 @@ export interface MasterWeeklyReport {
 export interface OrderEarning {
     orderId: number;
     clientName: string;
+    clientCar: string;
     executionDate: string; // Дата в формате ISO-строки
     earning: number;
 }
