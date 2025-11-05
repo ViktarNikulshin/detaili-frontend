@@ -14,6 +14,8 @@ import {useAuth} from "../../contexts/AuthContext";
 
 moment.locale('ru');
 const localizer = momentLocalizer(moment);
+const minTime = moment().hour(8).minute(0).toDate()
+const maxTime = moment().hour(20).minute(0).toDate()
 
 // Массив всех возможных статусов для фильтра
 const allStatuses = [
@@ -289,6 +291,10 @@ const CalendarView: React.FC = () => {
                     views={availableViews}
                     view={currentView}
                     date={currentDate}
+                    min={minTime}
+                    max={maxTime}
+                    step={60}
+                    timeslots={1}
                     onView={handleViewChange}
                     onNavigate={handleDateChange}
                     onSelectEvent={handleSelectEvent}

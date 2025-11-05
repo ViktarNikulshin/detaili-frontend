@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import logo from '../asserts/photo_2025-10-25_14-21-26.jpg'
+import logo from '../asserts/fd6cad63-cb26-4d08-bcf6-0c4f7d152eed.jpg'
 import './Navigation.css'
 
 const Navigation: React.FC = () => {
