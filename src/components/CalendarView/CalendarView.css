@@ -1,53 +1,52 @@
 /* ========================================================= */
-/*  ПЕРЕМЕННЫЕ – СЕРЫЙ АКЦЕНТ + СТАТУСЫ НЕ МЕНЯЮТСЯ      */
+/*  ПЕРЕМЕННЫЕ                                             */
 /* ========================================================= */
 :root {
-    /* Основные фоновые цвета */
-    --bg-primary: rgba(51, 51, 51, 0.95); /* тёмно-синий графит – фон страницы */
-    --bg-card: rgba(65, 65, 65, 0.9); /* карточки, панели */
-    --bg-hover: #2e2d2d; /* hover-эффекты */
-    --bg-toolbar: #3e3e41; /* панель навигации RBC */
+    --bg-primary: rgba(51, 51, 51, 0.95);
+    --bg-card: rgba(65, 65, 65, 0.9);
+    --bg-hover: #2e2d2d;
+    --bg-toolbar: #3e3e41;
 
-    /* Текст */
     --text-primary: #f5f5f5;
     --text-secondary: #aaaaaa;
-    --text-muted: #888888;
-
-    /* Серый акцент (заменяем прежний синий) */
-    --accent: #6c757d; /* основной серый */
-    --accent-light: #adb5bd; /* светлый вариант для hover/active */
+    --accent: #6c757d;
+    --accent-light: #adb5bd;
     --accent-shadow: rgba(108, 117, 125, 0.3);
 
-    /* Статусы – оставляем как в предыдущей версии */
-    --status-new: #4361ee; /* синий */
-    --status-in-progress: #e67e22; /* оранжевый */
-    --status-completed: #2d6a4f; /* зелёный */
-    --status-cancelled: #c1121f; /* красный */
+    --status-new: #4361ee;
+    --status-in-progress: #e67e22;
+    --status-completed: #2d6a4f;
+    --status-cancelled: #c1121f;
 
-    /* Дополнительные */
     --border: #16212b;
     --shadow: rgba(0, 0, 0, 0.3);
     --shadow-lg: rgba(0, 0, 0, 0.5);
 }
 
 /* ========================================================= */
-/*  ОБЩИЕ СТИЛИ                                            */
+/*  ГЛОБАЛЬНЫЕ СБРОСЫ                                      */
+/* ========================================================= */
+html, body, #root { height: 100%; margin: 0; }
+
+/* ========================================================= */
+/*  ОСНОВНАЯ РАЗМЕТКА                                      */
 /* ========================================================= */
 .calendar-container {
-    padding: 20px;
-    background: var(--bg-primary);
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
     gap: 20px;
-    font-family: "Segoe UI", sans-serif;
+    height: 100vh; /* <-- ИЗМЕНЕНИЕ 1: Задаем строгую высоту */
+    box-sizing: border-box; /* <-- ИЗМЕНЕНИЕ 2: Учитываем padding в высоте */
+    padding: 20px;
+    background: var(--bg-primary);
     color: var(--text-primary);
+    font-family: "Segoe UI", sans-serif;
 }
 
-/* Карточки / панели */
-.calendar-wrapper,
+.calendar-wrapper { flex: 1; min-height: 0; }
 .calendar-header,
-.calendar-legend {
+.calendar-legend,
+.calendar-wrapper {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 16px;
@@ -59,10 +58,9 @@
 /* ========================================================= */
 .calendar-header {
     display: flex;
-    flex-direction: row;
-    gap: 20px;
-    align-items: center;
     flex-wrap: wrap;
+    align-items: center;
+    gap: 20px;
     padding: 16px 20px;
 }
 
@@ -86,15 +84,14 @@
 }
 
 .calendar-filters label {
-    font-size: 14px;
-    font-weight: 600;
+    font: 600 14px/1 "Segoe UI", sans-serif;
     color: var(--text-secondary);
 }
 
 .calendar-filters select {
     padding: 8px 14px;
-    border-radius: 10px;
     border: 2px solid var(--border);
+    border-radius: 10px;
     background: var(--bg-hover);
     color: var(--text-primary);
     font-size: 14px;
@@ -108,9 +105,6 @@
     box-shadow: 0 0 0 4px var(--accent-shadow);
 }
 
-/* ========================================================= */
-/*  ИНФО                                                   */
-/* ========================================================= */
 .calendar-info {
     margin-left: auto;
     font-size: 14px;
@@ -142,110 +136,62 @@
     box-shadow: 0 1px 3px var(--shadow);
 }
 
-.legend-color.new {
-    background: linear-gradient(135deg, var(--status-new), #5e7bff);
-}
-
-.legend-color.in-progress {
-    background: linear-gradient(135deg, var(--status-in-progress), #f39c12);
-}
-
-.legend-color.completed {
-    background: linear-gradient(135deg, var(--status-completed), #27ae60);
-}
-
-.legend-color.cancelled {
-    background: linear-gradient(135deg, var(--status-cancelled), #e74c3c);
-}
+/* Градиенты легенд */
+.legend-color.new        { background: linear-gradient(135deg, var(--status-new), #5e7bff); }
+.legend-color.in-progress{ background: linear-gradient(135deg, var(--status-in-progress), #f39c12); }
+.legend-color.completed  { background: linear-gradient(135deg, var(--status-completed), #27ae60); }
+.legend-color.cancelled  { background: linear-gradient(135deg, var(--status-cancelled), #e74c3c); }
 
 /* ========================================================= */
-/*  RBC – ТУЛБАР                                           */
+/*  FULLCALENDAR — ОСНОВНОЕ                                */
 /* ========================================================= */
-.rbc-toolbar {
-    background: var(--bg-toolbar);
+.fc {
+    border-radius: 16px;
+    overflow: hidden;
+    /* УДАЛЕНО: height: 100% */
+}
+
+/* Тулбар */
+.fc .fc-toolbar {
+    background: var(--bg-toolbar) !important;
     padding: 12px 16px;
-    border-radius: 12px;
-    margin-bottom: 12px;
-    border: 1px solid var(--border);
+    border-bottom: 1px solid var(--border) !important;
+    border-radius: 12px 12px 0 0;
 }
 
-.rbc-toolbar-label {
+.fc .fc-toolbar-title {
     font-size: 18px;
     font-weight: 600;
-    color: var(--text-primary);
+    background: linear-gradient(90deg, var(--accent), var(--accent-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.rbc-btn-group button {
-    background: var(--bg-card);
-    color: var(--text-primary);
-    border: 1px solid var(--border);
-    padding: 6px 12px;
-    border-radius: 8px;
+/* Кнопки */
+.fc .fc-button-primary {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
     font-size: 14px;
+    padding: 6px 12px;
     transition: all .2s;
 }
 
-.rbc-btn-group button:hover {
-    background: var(--accent);
-    color: #fff;
-    border-color: var(--accent);
+.fc .fc-button-primary:hover {
+    background: var(--accent) !important;
+    color: #fff !important;
+    border-color: var(--accent) !important;
 }
 
-.rbc-btn-group button.rbc-active {
-    background: linear-gradient(135deg, var(--accent), var(--accent-light));
-    color: #fff;
-    border-color: var(--accent);
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+    background: linear-gradient(135deg, var(--accent), var(--accent-light)) !important;
+    color: #fff !important;
+    border-color: var(--accent) !important;
 }
 
-/* ========================================================= */
-/*  RBC – МЕСЯЧНЫЙ ВИД                                      */
-/* ========================================================= */
-
-.rbc-month-view {
-    border: 1px solid #5d5959;
-}
-
-.rbc-month-row {
-    border: 1px solid #3a3838 !important;
-}
-
-.rbc-row-bg {
-    border: 1px solid #3a3838 !important;
-}
-
-.rbc-row {
-    background: var(--bg-card);
-}
-
-.rbc-timeslot-group {
-    background: var(--bg-card);
-}
-
-.rbc-timeslot-group {
-    border: 1px solid #3a3838 !important;
-}
-
-.rbc-day-slot .rbc-time-slot {
-    border: 1px solid #3a3838 !important;
-}
-
-.rbc-time-view {
-    border: 1px solid #3a3838 !important;
-}
-
-.rbc-events-container {
-    border-left: 1px solid #3a3838 !important;
-}
-
-.rbc-time-header-content {
-    border-left: 1px solid #3a3838 !important;
-}
-
-.rbc-time-content {
-    border-left: 1px solid #3a3838 !important;
-}
-
-.rbc-month-view .rbc-header {
+/* Шапка дней */
+.fc .fc-col-header-cell {
     background: var(--bg-hover);
     border: 1px solid #363636 !important;
     color: var(--accent-light);
@@ -253,50 +199,59 @@
     padding: 10px 0;
 }
 
-.rbc-month-view .rbc-day-bg {
-    background: var(--bg-card);
-    border: 1px solid #363636 !important;
+/* Ячейки */
+.fc .fc-daygrid-day-frame,
+.fc .fc-timegrid-col {
+    position: relative; /* для событий */
 }
 
-.rbc-month-view .rbc-off-range-bg {
+.fc .fc-day-other {
     background: var(--bg-hover);
     opacity: .6;
 }
 
-.rbc-month-view .rbc-date-cell {
-    color: var(--text-primary);
-    text-align: right;
-    padding: 4px;
-    font-size: 13px;
-}
-
-.rbc-month-view .rbc-day-bg.rbc-today {
-    background: rgba(108, 117, 125, .2);
-    border: 2px solid var(--accent);
+.fc .fc-day-today {
+    background: rgba(108, 117, 125, .2) !important;
+    border: 2px solid var(--accent) !important;
     border-radius: 8px;
 }
 
+.fc .fc-timegrid-slot { border-color: #3a3838 !important; }
+.fc .fc-scrollgrid { border: 1px solid #5d5959 !important; }
+
 /* ========================================================= */
-/*  RBC – СОБЫТИЯ                                          */
+/*  СОБЫТИЯ                                                */
 /* ========================================================= */
-.rbc-event {
+.fc-event {
+    position: relative;
+    z-index: 2 !important;
+    border: none !important;
     border-radius: 6px;
     padding: 2px 6px;
-    font-size: 12px;
-    font-weight: 500;
-    border: none !important;
+    font: 500 12px/1 "Segoe UI", sans-serif;
+    color: white !important;
+    cursor: pointer;
     box-shadow: 0 2px 6px var(--shadow);
     transition: all .2s;
 }
 
-.rbc-event.rbc-selected {
-    opacity: 1 !important;
+.fc-event:hover {
+    opacity: .85;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow-lg);
 }
+
+/* Градиенты событий */
+.fc-event.event-status-NEW        { background: linear-gradient(135deg, var(--status-new), #5e7bff); }
+.fc-event.event-status-IN_PROGRESS{ background: linear-gradient(135deg, var(--status-in-progress), #f39c12); }
+.fc-event.event-status-COMPLETED  { background: linear-gradient(135deg, var(--status-completed), #27ae60); }
+.fc-event.event-status-CANCELLED  { background: linear-gradient(135deg, var(--status-cancelled), #e74c3c); }
 
 /* ========================================================= */
 /*  СООБЩЕНИЯ                                              */
 /* ========================================================= */
-.loading, .error {
+.loading,
+.error {
     text-align: center;
     padding: 20px;
     border-radius: 12px;
@@ -304,22 +259,13 @@
     font-weight: 500;
 }
 
-.loading {
-    background: rgba(108, 117, 125, .15);
-    color: var(--accent-light);
-    border: 1px solid var(--accent);
-}
-
-.error {
-    background: rgba(193, 18, 31, .15);
-    color: #ff6b6b;
-    border: 1px solid var(--status-cancelled);
-}
+.loading  { background: rgba(108, 117, 125, .15); color: var(--accent-light); border: 1px solid var(--accent); }
+.error    { background: rgba(193, 18, 31, .15); color: #ff6b6b; border: 1px solid var(--status-cancelled); }
 
 /* ========================================================= */
-/*  ДОПОЛНИТЕЛЬНЫЕ ХОВЕРЫ (по желанию)                     */
+/*  ХОВЕР ПО ЯЧЕЙКАМ                                       */
 /* ========================================================= */
-.rbc-day-bg:hover,
-.rbc-event:hover {
+.fc-daygrid-day:hover .fc-daygrid-day-frame,
+.fc-timegrid-col:hover {
     background: var(--bg-hover) !important;
 }
