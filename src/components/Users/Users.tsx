@@ -26,6 +26,22 @@ const Users: React.FC = () => {
         fetchUsers();
     }, []);
 
+    const handleDelete = async (id: number) => {
+        if (!window.confirm('Вы уверены, что хотите удалить этого пользователя?')) {
+            return;
+        }
+
+        try {
+            // Используем метод из вашего userAPI
+            await userAPI.deleteUserById(id.toString());
+            // Обновляем локальный стейт, чтобы пользователь исчез из списка
+            setUsers(users.filter(user => user.id !== id));
+        } catch (err) {
+            alert('Не удалось удалить пользователя.');
+            console.error(err);
+        }
+    };
+
     if (loading) return <p className="users-message">Загрузка пользователей...</p>;
     if (error) return <p className="users-message error">{error}</p>;
 
@@ -50,9 +66,18 @@ const Users: React.FC = () => {
                                 Роли: {user.roles?.map(r => r.name).join(', ') || 'Нет ролей'}
                             </span>
                         </div>
-                        <Link to={`/users/${user.id}`} className="user-edit-link">
-                            Редактировать роли
-                        </Link>
+                        {/* Обертка для кнопок действий */}
+                        <div className="user-actions">
+                            <Link to={`/users/${user.id}`} className="user-edit-link">
+                                Редактировать
+                            </Link>
+                            <button
+                                onClick={() => handleDelete(user.id)}
+                                className="user-delete-btn"
+                            >
+                                Удалить
+                            </button>
+                        </div>
                     </div>
                 ))}
             </div>

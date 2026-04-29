@@ -36,5 +36,6 @@ export const userAPI = {
         phone: string;
         username: string;
         roles: Role []
-    }) => userApi.post(`/users`, newUser)
+    }) => userApi.post(`/users`, newUser),
+    deleteUserById: (id: string) => userApi.get(`/users/delete/${id}`),
 }
