@@ -49,3 +49,12 @@ export interface MasterDetailReport {
     masterLastName: string;
     reportDetails: MasterDetailEarning[];
 }
+
+export interface SalaryRecord {
+    id?: number;
+    date: string;       // Формат для отображения, например '06.06'
+    carModel: string;   // КУЛРЕЙ
+    workTypeName: string; // ПОЛИРОВКА
+    salary: number;    // ЗП (200)
+}
+

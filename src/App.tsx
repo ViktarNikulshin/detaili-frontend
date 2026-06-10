@@ -13,6 +13,7 @@ import UserRoleForm from "./components/UserRoleForm/UserRoleForm";
 import MasterReport from "./components/Reports/MasterReport";
 import MasterDetailReport from "./components/Reports/MasterDetailReport";
 import WorkTypeDictionaryManager from "./components/WorkTypeDictionaryManager/WorkTypeDictionaryManager";
+import MasterSalaryLog from "./components/MasterSalary/MasterSalaryLog";
 
 function App() {
     return (
@@ -28,8 +29,8 @@ function App() {
                         <Route element={<ProtectedRoute />}>
                             <Route path="/" element={<Layout />}>
                                 {/* Здесь все маршруты теперь защищены! */}
-                                <Route index element={<CalendarView />} />
-                                <Route path="calendar" element={<CalendarView />} />
+                                <Route index element={<MasterSalaryLog />} />
+                                <Route path="/calendar" element={<CalendarView />} />
                                 <Route path="orders/new" element={<OrderForm />} />
                                 <Route path="orders/:id" element={<OrderForm />} />
                                 <Route path="/profile" element={<UserForm />} />
@@ -39,6 +40,7 @@ function App() {
                                 <Route path="/reports/masters" element={<MasterReport />} />
                                 <Route path="/reports/master/:masterId" element={<MasterDetailReport />} />
                                 <Route path="/dictionaries/work-types" element={<WorkTypeDictionaryManager />} />
+                                <Route path="/reports/salary-log" element={<MasterSalaryLog />} />
                             </Route>
                         </Route>
 

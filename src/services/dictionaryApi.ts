@@ -59,6 +59,10 @@ export const dictionaryApi = {
         return dictionaryAxios.get<DictionaryRawItem[]>(`${GENERAL_DICTIONARY_ENDPOINT}`);
     },
 
+    fetchOnlyWorkTypes: () => {
+        return dictionaryAxios.get<DictionaryRawItem[]>(`${GENERAL_DICTIONARY_ENDPOINT}/type/WORK_TYPE`);
+    },
+
     /**
      * Добавление нового типа работы
      */

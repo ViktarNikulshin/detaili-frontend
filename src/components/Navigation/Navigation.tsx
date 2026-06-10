@@ -23,12 +23,21 @@ const Navigation: React.FC = () => {
         setIsMenuOpen(false);
         navigate('/profile');
     };
+    const handleMasterSalary = () => {
+        setIsMenuOpen(false);
+        navigate('/reports/salary-log'); // <-- Переход на страницу отчетов
+    }
+    const handleCalendar = () => {
+        setIsMenuOpen(false);
+        navigate('/calendar'); // <-- Переход на страницу отчетов
+    }
 
     // --- ИЗМЕНЕНО ---
     const handleReport = () => {
         setIsMenuOpen(false);
         navigate('/reports/masters'); // <-- Переход на страницу отчетов
     }
+
 
     const handleUsersAndRoles = () => {
         setIsMenuOpen(false);
@@ -91,8 +100,14 @@ const Navigation: React.FC = () => {
                         <div className="menu-item" onClick={handleProfile}>
                             Профиль
                         </div>
+                        <div className="menu-item" onClick={handleCalendar}>
+                            Календарь
+                        </div>
                         {isAdmin && (
                             <>
+                                <div className="menu-item" onClick={handleMasterSalary}>
+                                    Ведение ЗП 🛠️
+                                </div>
 
                                 <div className="menu-item" onClick={handleReport}>
                                     Отчет
