@@ -70,7 +70,7 @@ const MasterSalaryLog: React.FC = () => {
             try {
                 const [mastersRes, workTypesRes] = await Promise.all([
                     userAPI.getUsersByRole("MASTER") || Promise.resolve({ data: [] }),
-                    dictionaryApi.fetchWorkTypes() || Promise.resolve({ data: [] })
+                    dictionaryApi.fetchOnlyWorkTypes() || Promise.resolve({ data: [] })
                 ]);
 
                 setMasters(mastersRes.data);
