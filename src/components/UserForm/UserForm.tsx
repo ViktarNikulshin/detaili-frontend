@@ -78,11 +78,6 @@ const UserForm: React.FC = () => {
     const validate = (): boolean => {
         const newErrors: { [key: string]: string } = {};
         if (!formData.firstName.trim()) newErrors.firstName = "Имя обязательно";
-        if (!formData.lastName.trim()) newErrors.lastName = "Фамилия обязательна";
-        if (isCreateMode) {
-            if (!formData.phone.trim()) newErrors.phone = "Телефон обязателен";
-            if (formData.roleIds.length === 0) newErrors.roles = "Выберите хотя бы одну роль";
-        }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };

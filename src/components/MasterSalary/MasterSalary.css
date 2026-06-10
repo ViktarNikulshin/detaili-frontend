@@ -634,3 +634,35 @@ UTILITY CLASSES
     font-size: 12px;
     font-style: italic;
 }
+/* ============================================
+EXCEL EXPORT BUTTON
+============================================ */
+.excel-export-btn {
+    background: transparent;
+    border: none;
+    color: #107c41; /* Фирменный зеленый цвет Microsoft Excel */
+    cursor: pointer;
+    padding: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+    margin-left: 8px;
+}
+
+.excel-export-btn:hover:not(:disabled) {
+    background-color: rgba(16, 124, 65, 0.15);
+    color: #1f9a55;
+    transform: translateY(-1px);
+}
+
+.excel-export-btn:active:not(:disabled) {
+    transform: translateY(0) scale(0.95);
+}
+
+.excel-export-btn:disabled {
+    color: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.4;
+}

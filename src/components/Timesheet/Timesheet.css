@@ -1,0 +1,179 @@
+/* ============================================
+TOGGLE BUTTONS (Вид: Явка / Процент)
+============================================ */
+.view-mode-toggle {
+    display: flex;
+    background: var(--bg-input);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    margin-left: auto;
+}
+
+.toggle-btn {
+    background: transparent;
+    border: none;
+    padding: 8px 16px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.toggle-btn.active {
+    background: var(--primary-blue);
+    color: #fff;
+}
+
+.toggle-btn:hover:not(.active) {
+    background: rgba(91, 171, 255, 0.1);
+}
+
+/* ============================================
+FULLCALENDAR OVERRIDES (Стилизация под тему)
+============================================ */
+.timesheet-calendar-wrapper {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.fc-theme-standard td, .fc-theme-standard th {
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.fc-col-header-cell {
+    background: var(--bg-header);
+    color: var(--primary-blue);
+    padding: 10px 0 !important;
+    text-transform: uppercase;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.fc-daygrid-day {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.fc-daygrid-day:hover {
+    background-color: rgba(91, 171, 255, 0.1) !important;
+}
+
+.fc-daygrid-day-number {
+    color: var(--text-secondary);
+    font-weight: 600;
+    padding: 8px !important;
+}
+
+.fc-day-today {
+    background-color: rgba(74, 130, 109, 0.15) !important;
+}
+
+/* Убираем синюю обводку FullCalendar при клике */
+.fc .fc-daygrid-day.fc-day-today {
+    background-color: rgba(74, 130, 109, 0.2);
+}
+
+.fc-event {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* ============================================
+CUSTOM EVENT RENDERERS (Бейджики)
+============================================ */
+.calendar-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    margin: 2px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.performance-circle {
+    background: linear-gradient(135deg, var(--primary-green), #2b5126);
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    padding: 6px;
+    border-radius: 8px;
+    margin: 2px 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.performance-circle.zero {
+    background: linear-gradient(135deg, #6c757d, #495057);
+}
+
+/* ============================================
+MODAL STYLES
+============================================ */
+.timesheet-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.timesheet-modal {
+    background: var(--bg-main);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    width: 100%;
+    max-width: 400px;
+    color: var(--text-primary);
+}
+
+.timesheet-modal h3 {
+    margin-top: 0;
+    color: var(--primary-blue);
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 14px;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.mt-3 { margin-top: 15px; }
+.mt-4 { margin-top: 25px; }
+
+@media (max-width: 768px) {
+    .view-mode-toggle {
+        margin-left: 0;
+        width: 100%;
+        display: flex;
+    }
+    .toggle-btn {
+        flex: 1;
+        text-align: center;
+    }
+}

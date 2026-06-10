@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { MasterDetailReport, MasterWeeklyReport, SalaryRecord } from "../types/report";
+import {MasterDetailReport, MasterWeeklyReport, SalaryRecord} from "../types/report";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
@@ -32,15 +32,11 @@ export const reportAPI = {
      */
     getMasterDetailReport: (masterId: number | string, start: string | null, end: string | null) =>
         reportApi.get<MasterDetailReport>(`/reports/master-detail/${masterId}?start=${start}&end=${end}`),
+
     getSalaryLogs: (masterId: string, startOfMonth: string, endOfMonth: string) =>
         reportApi.get<SalaryRecord[]>(`/reports/masters-salary-log?id=${masterId}&start=${startOfMonth}&end=${endOfMonth}`),
-    saveSalaryRecord: (data: {
-        masterId: number;
-        workTypeId: number | undefined;
-        date: string;
-        carModel: string;
-        salary: number;
-    }) => {
+
+    saveSalaryRecord: (data: any) => {
         return reportApi.post('/reports/masters-salary-log', data); // ваш эндпоинт
     },
     updateSalaryRecord: (id: number, data: any) => {
@@ -50,4 +46,6 @@ export const reportAPI = {
     deleteSalaryRecord: (id: number) => {
         return reportApi.delete(`/reports/masters-salary-log/${id}`);
     },
+
+
 };

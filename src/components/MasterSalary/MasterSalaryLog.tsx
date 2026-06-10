@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import moment from 'moment';
 import 'moment/locale/ru';
-import { SalaryRecord } from "../../types/report";
+import {SalaryRecord} from "../../types/report";
 import { reportAPI } from '../../services/reportApi';
 import './MasterSalary.css';
 import { userAPI } from "../../services/userApi";
-import { dictionaryApi } from "../../services/dictionaryApi";
 
 // Импорты для DatePicker и date-fns (только дата, без времени)
 import DatePicker from 'react-datepicker';
@@ -26,8 +25,9 @@ interface WorkType {
     defaultPrice?: number;
 }
 
-// Единый интерфейс для формы (добавление и редактирование)
-interface FormRecord {
+
+// Новый интерфейс для редактирования
+interface EditRecord {
     id?: number;
     date: Date | null;
     carModel: string;
@@ -39,11 +39,11 @@ const MasterSalaryLog: React.FC = () => {
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
     const [masters, setMasters] = useState<Master[]>([]);
     const [selectedMasterId, setSelectedMasterId] = useState<string>('');
-    const [workTypes, setWorkTypes] = useState<WorkType[]>([]);
+    const [workTypes] = useState<WorkType[]>([]);
     const [records, setRecords] = useState<SalaryRecord[]>([]);
 
     const [isAdding, setIsAdding] = useState<boolean>(false);
-    const [newRecord, setNewRecord] = useState<FormRecord>({
+    const [newRecord, setNewRecord] = useState<EditRecord>({
         date: new Date(),
         carModel: '',
         workTypeName: '',
@@ -51,11 +51,11 @@ const MasterSalaryLog: React.FC = () => {
     });
 
     // Состояния для редактирования
-    const [editingId, setEditingId] = useState<number | null>(null);
-    const [editRecord, setEditRecord] = useState<FormRecord | null>(null);
+    const [editingId, setEditingId] = useState <number | null >(null);
+    const [editRecord, setEditRecord] = useState <EditRecord | null >(null);
 
-    const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState <boolean >(false);
+    const [error, setError] = useState <string | null >(null);
 
     const monthLabel = useMemo(() => {
         return moment(currentDate).locale('ru').format('MMMM').toUpperCase();
@@ -68,13 +68,11 @@ const MasterSalaryLog: React.FC = () => {
     useEffect(() => {
         const initData = async () => {
             try {
-                const [mastersRes, workTypesRes] = await Promise.all([
+                const [mastersRes] = await Promise.all([
                     userAPI.getUsersByRole("MASTER") || Promise.resolve({ data: [] }),
-                    dictionaryApi.fetchOnlyWorkTypes() || Promise.resolve({ data: [] })
                 ]);
 
                 setMasters(mastersRes.data);
-                setWorkTypes(workTypesRes.data);
 
                 if (mastersRes.data.length > 0) {
                     setSelectedMasterId(mastersRes.data[0].id.toString());
@@ -95,7 +93,7 @@ const MasterSalaryLog: React.FC = () => {
             const endOfMonth = moment(date).endOf('month').format('YYYY-MM-DDTHH:mm');
 
             const response = await reportAPI.getSalaryLogs?.(masterId, startOfMonth, endOfMonth)
-                || Promise.resolve({ data: [] }); // Исправлена опечатка Promise.resolv e
+                || Promise.resolve({ data: [] });
 
             setRecords(response.data);
             setError(null);
@@ -153,19 +151,18 @@ const MasterSalaryLog: React.FC = () => {
         }
 
         try {
-            const selectedWorkType = workTypes.find(w => w.name === editRecord.workTypeName);
 
             const payload = {
                 masterId: parseInt(selectedMasterId),
-                workTypeId: selectedWorkType?.id,
+                workTypeName: editRecord.workTypeName,
                 carModel: editRecord.carModel,
                 // Форматируем только дату, время устанавливаем на 00:00:00
                 date: format(editRecord.date, "yyyy-MM-dd") + 'T00:00:00',
                 salary: Number(editRecord.salary)
             };
 
-            await reportAPI.updateSalaryRecord?.(id, payload); // Исправлена опечатка payl oad
-            await fetchSalaryLogs(selectedMasterId, currentDate); // Исправлена опечатка select edMasterId
+            await reportAPI.updateSalaryRecord?.(id, payload);
+            await fetchSalaryLogs(selectedMasterId, currentDate);
             setEditingId(null);
             setEditRecord(null);
         } catch (err) {
@@ -186,7 +183,7 @@ const MasterSalaryLog: React.FC = () => {
         }
     };
 
-    const handleSaveRecord = async (e: React.FormEvent) => { // Исправлена опечатка React.FormEv ent
+    const handleSaveRecord = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedMasterId || !newRecord.carModel || !newRecord.workTypeName || !newRecord.date) {
             alert("Пожалуйста, заполните все обязательные поля и выберите дату");
@@ -194,18 +191,16 @@ const MasterSalaryLog: React.FC = () => {
         }
 
         try {
-            const selectedWorkType = workTypes.find(w => w.name === newRecord.workTypeName);
 
             const payload = {
                 masterId: parseInt(selectedMasterId),
-                workTypeId: selectedWorkType?.id,
-                workTypesName: selectedWorkType?.name, // Исправлена опечатка workTyp esName
+                workTypeName: newRecord.workTypeName,
                 carModel: newRecord.carModel,
                 date: format(newRecord.date, "yyyy-MM-dd") + 'T00:00:00',
                 salary: Number(newRecord.salary)
             };
 
-            await reportAPI.saveSalaryRecord?.(payload); // Исправлена опечатка reportA PI
+            await reportAPI.saveSalaryRecord?.(payload);
             await fetchSalaryLogs(selectedMasterId, currentDate);
 
             setIsAdding(false);
@@ -217,8 +212,54 @@ const MasterSalaryLog: React.FC = () => {
             });
         } catch (err) {
             setError('Ошибка при сохранении записи.');
-            console.error(err); // Исправлена опечатка c onsole
+            console.error(err);
         }
+    };
+    const handleExportToExcel = () => {
+        if (records.length === 0) {
+            alert("Нет данных для выгрузки");
+            return;
+        }
+
+        // Формируем строки CSV. Используем ";" как разделитель для авто-открытия в русскоязычном Excel
+        const csvRows = [];
+
+        // 1. Заголовки таблицы
+        csvRows.push(["Дата", "Автомобиль", "Вид работы", "Зарплата (ЗП)"].join(";"));
+
+        // 2. Данные строк
+        records.forEach(record => {
+            const dateStr = record.date ? moment(record.date).format('DD.MM.YYYY') : '—';
+            const car = record.carModel || '—';
+            const work = record.workTypeName || 'Не указано';
+            const salary = record.salary || 0;
+
+            csvRows.push([dateStr, car, work, salary].join(";"));
+        });
+
+        // 3. Пустая строка и Итого
+        csvRows.push(["", "", "", ""].join(";"));
+        csvRows.push(["", "", "ИТОГО:", totalSalary].join(";"));
+
+        // Превращаем в строку. \uFEFF — это BOM маркер для Excel, чтобы он сразу понял кодировку UTF-8
+        const csvString = '\uFEFF' + csvRows.join("\n");
+
+        // Создаем Blob элемент и скачиваем файл
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        // Имя файла, например: Отчет_ЗП_ИВАНОВ_МАЙ.csv
+        const masterName = selectedMasterId
+            ? masters.find(m => m.id.toString() === selectedMasterId)?.lastName || 'Мастер'
+            : 'Мастер';
+
+        link.setAttribute("href", url);
+        link.setAttribute("download", `Отчет_ЗП_${masterName}_${monthLabel}.csv`);
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     return (
@@ -247,6 +288,21 @@ const MasterSalaryLog: React.FC = () => {
                 <div className="total-salary-display">
                     <span className="total-label">СУММА:</span>
                     <span className="total-value">{totalSalary}</span>
+                    <button
+                        className="excel-export-btn"
+                        onClick={handleExportToExcel}
+                        title="Выгрузить отчет в Excel"
+                        disabled={loading || records.length === 0}
+                    >
+                        {/* SVG-иконка зеленого Excel-файла с табличкой */}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                    </button>
                 </div>
             </div>
 
@@ -258,8 +314,8 @@ const MasterSalaryLog: React.FC = () => {
                     <thead>
                     <tr>
                         <th style={{ width: '15%' }}>Дата</th>
-                        <th style={{ width: '30%' }}>Авто</th>
-                        <th style={{ width: '30%' }}>Вид работы</th>
+                        <th style={{ width: '25%' }}>Авто</th>
+                        <th style={{ width: '35%' }}>Вид работы</th>
                         <th style={{ width: '10%' }}>ЗП</th>
                         <th style={{ width: '15%' }}>Действия</th>
                     </tr>
@@ -288,27 +344,24 @@ const MasterSalaryLog: React.FC = () => {
                                             <input
                                                 type="text"
                                                 value={editRecord.carModel}
-                                                onChange={e => setEditRecord({ ...editRecord, carModel: e.target.value })}
+                                                onChange={e => setEditRecord({...editRecord, carModel: e.target.value})}
                                                 className="inline-input uppercase-input"
                                             />
                                         </td>
                                         <td>
-                                            <select
+                                            <input
+                                                type="text"
                                                 value={editRecord.workTypeName}
-                                                onChange={e => setEditRecord({ ...editRecord, workTypeName: e.target.value })}
-                                                className="inline-select"
-                                            >
-                                                <option value="">Выберите работу</option>
-                                                {workTypes.map((w, idx) => (
-                                                    <option key={w.id || idx} value={w.name}>{w.name}</option>
-                                                ))}
-                                            </select>
+                                                onChange={e => setEditRecord({...editRecord, workTypeName: e.target.value})}
+                                                className="inline-input"
+                                                placeholder="Введите вид работы"
+                                            />
                                         </td>
                                         <td>
                                             <input
                                                 type="number"
                                                 value={editRecord.salary}
-                                                onChange={e => setEditRecord({ ...editRecord, salary: Number(e.target.value) })}
+                                                onChange={e => setEditRecord({...editRecord, salary: Number(e.target.value)})}
                                                 className="inline-input"
                                             />
                                         </td>
@@ -373,35 +426,25 @@ const MasterSalaryLog: React.FC = () => {
                                 <input
                                     type="text"
                                     value={newRecord.carModel}
-                                    onChange={e => setNewRecord({ ...newRecord, carModel: e.target.value })}
+                                    onChange={e => setNewRecord({...newRecord, carModel: e.target.value})}
                                     placeholder="КУЛРЕЙ"
                                     className="inline-input uppercase-input"
                                 />
                             </td>
                             <td>
-                                <select
+                                <input
+                                    type="text"
                                     value={newRecord.workTypeName}
-                                    onChange={e => {
-                                        const selectedWork = workTypes.find(w => w.name === e.target.value);
-                                        setNewRecord({
-                                            ...newRecord,
-                                            workTypeName: e.target.value, // Исправлена опечатка workT ypeName
-                                            salary: selectedWork?.defaultPrice || 0
-                                        });
-                                    }}
-                                    className="inline-select"
-                                >
-                                    <option value="">Выберите работу</option>
-                                    {workTypes.map((w, idx) => (
-                                        <option key={w.id || idx} value={w.name}>{w.name}</option>
-                                    ))}
-                                </select>
+                                    onChange={e => setNewRecord({...newRecord, workTypeName: e.target.value})}
+                                    placeholder="Введите вид работы"
+                                    className="inline-input"
+                                />
                             </td>
                             <td>
                                 <input
                                     type="number"
                                     value={newRecord.salary || ''}
-                                    onChange={e => setNewRecord({ ...newRecord, salary: Number(e.target.value) })}
+                                    onChange={e => setNewRecord({...newRecord, salary: Number(e.target.value)})}
                                     placeholder="200"
                                     className="inline-input"
                                 />
