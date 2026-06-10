@@ -56,14 +56,20 @@ const MasterSalaryLog: React.FC = () => {
 
     const [loading, setLoading] = useState <boolean >(false);
     const [error, setError] = useState <string | null >(null);
+    const [previousMonthBalance, setPreviousMonthBalance] = useState<number>(0);
 
     const monthLabel = useMemo(() => {
         return moment(currentDate).locale('ru').format('MMMM').toUpperCase();
     }, [currentDate]);
 
     const totalSalary = useMemo(() => {
-        return records.reduce((sum, record) => sum + (record.salary || 0), 0);
-    }, [records]);
+        const salarySum = records.reduce(
+            (sum, record) => sum + (record.salary || 0),
+            0
+        );
+
+        return salarySum + previousMonthBalance;
+    }, [records, previousMonthBalance]);
 
     useEffect(() => {
         const initData = async () => {
@@ -157,7 +163,7 @@ const MasterSalaryLog: React.FC = () => {
                 workTypeName: editRecord.workTypeName,
                 carModel: editRecord.carModel,
                 // Форматируем только дату, время устанавливаем на 00:00:00
-                date: format(editRecord.date, "yyyy-MM-dd") + 'T00:00:00',
+                date: format(editRecord.date, "yyyy-MM-dd") + 'T12:00:00',
                 salary: Number(editRecord.salary)
             };
 
@@ -196,7 +202,7 @@ const MasterSalaryLog: React.FC = () => {
                 masterId: parseInt(selectedMasterId),
                 workTypeName: newRecord.workTypeName,
                 carModel: newRecord.carModel,
-                date: format(newRecord.date, "yyyy-MM-dd") + 'T00:00:00',
+                date: format(newRecord.date, "yyyy-MM-dd") + 'T12:00:00',
                 salary: Number(newRecord.salary)
             };
 
@@ -285,6 +291,19 @@ const MasterSalaryLog: React.FC = () => {
                         ))}
                     </select>
                 </div>
+                <div className="previous-balance-container">
+                    <label>Остаток за предыдущий месяц:</label>
+
+                    <input
+                        type="number"
+                        value={previousMonthBalance}
+                        onChange={(e) =>
+                            setPreviousMonthBalance(Number(e.target.value) || 0)
+                        }
+                        className="previous-balance-input"
+                    />
+                </div>
+
                 <div className="total-salary-display">
                     <span className="total-label">СУММА:</span>
                     <span className="total-value">{totalSalary}</span>
