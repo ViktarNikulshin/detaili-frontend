@@ -50,6 +50,12 @@ export interface MasterDetailReport {
     reportDetails: MasterDetailEarning[];
 }
 
+export interface MasterSalary {
+    previousBalance: number
+    records: SalaryRecord [];
+
+}
+
 export interface SalaryRecord {
     id?: number;
     date: string;       // Формат для отображения, например '06.06'

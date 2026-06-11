@@ -56,20 +56,20 @@ const MasterSalaryLog: React.FC = () => {
 
     const [loading, setLoading] = useState <boolean >(false);
     const [error, setError] = useState <string | null >(null);
-    const [previousMonthBalance, setPreviousMonthBalance] = useState<number>(0);
+    const [previousBalance, setPreviousBalance] = useState<number>(0);
 
     const monthLabel = useMemo(() => {
         return moment(currentDate).locale('ru').format('MMMM').toUpperCase();
     }, [currentDate]);
 
     const totalSalary = useMemo(() => {
-        const salarySum = records.reduce(
+        const worksSalary = records.reduce(
             (sum, record) => sum + (record.salary || 0),
             0
         );
 
-        return salarySum + previousMonthBalance;
-    }, [records, previousMonthBalance]);
+        return worksSalary + previousBalance;
+    }, [records, previousBalance]);
 
     useEffect(() => {
         const initData = async () => {
@@ -101,7 +101,8 @@ const MasterSalaryLog: React.FC = () => {
             const response = await reportAPI.getSalaryLogs?.(masterId, startOfMonth, endOfMonth)
                 || Promise.resolve({ data: [] });
 
-            setRecords(response.data);
+            setRecords(response.data.records);
+            setPreviousBalance(response.data.previousBalance || 0);
             setError(null);
         } catch (err) {
             setError('Не удалось загрузить записи по зарплате.');
@@ -227,9 +228,23 @@ const MasterSalaryLog: React.FC = () => {
             return;
         }
 
+
         // Формируем строки CSV. Используем ";" как разделитель для авто-открытия в русскоязычном Excel
         const csvRows = [];
 
+        csvRows.push([
+            "Мастер",
+            masters.find(m => m.id.toString() === selectedMasterId)
+                ? `${masters.find(m => m.id.toString() === selectedMasterId)?.firstName} ${masters.find(m => m.id.toString() === selectedMasterId)?.lastName}`
+                : ""
+        ].join(";"));
+
+        csvRows.push([
+            "Месяц",
+            monthLabel
+        ].join(";"));
+
+        csvRows.push([]);
         // 1. Заголовки таблицы
         csvRows.push(["Дата", "Автомобиль", "Вид работы", "Зарплата (ЗП)"].join(";"));
 
@@ -245,7 +260,27 @@ const MasterSalaryLog: React.FC = () => {
 
         // 3. Пустая строка и Итого
         csvRows.push(["", "", "", ""].join(";"));
-        csvRows.push(["", "", "ИТОГО:", totalSalary].join(";"));
+
+        csvRows.push([
+            "",
+            "",
+            "Остаток за предыдущий месяц:",
+            previousBalance
+        ].join(";"));
+
+        csvRows.push([
+            "",
+            "",
+            "Зарплата за работы:",
+            records.reduce((sum, record) => sum + (record.salary || 0), 0)
+        ].join(";"));
+
+        csvRows.push([
+            "",
+            "",
+            "ИТОГО К ВЫПЛАТЕ:",
+            totalSalary
+        ].join(";"));
 
         // Превращаем в строку. \uFEFF — это BOM маркер для Excel, чтобы он сразу понял кодировку UTF-8
         const csvString = '\uFEFF' + csvRows.join("\n");
@@ -267,6 +302,14 @@ const MasterSalaryLog: React.FC = () => {
         link.click();
         document.body.removeChild(link);
     };
+    const saveBalance = async () => {
+        await reportAPI.savePreviousBalance?.(
+            Number(selectedMasterId),
+             moment(currentDate).year(),
+             moment(currentDate).month() + 1,
+            previousBalance
+        );
+    };
 
     return (
         <div className="report-container salary-logging-container">
@@ -278,7 +321,7 @@ const MasterSalaryLog: React.FC = () => {
                 </div>
 
                 <div className="master-select-inline">
-                    <label htmlFor="master-dropdown">мастер</label>
+                    <label htmlFor="master-dropdown">МАСТЕР</label>
                     <select
                         id="master-dropdown"
                         value={selectedMasterId}
@@ -296,10 +339,11 @@ const MasterSalaryLog: React.FC = () => {
 
                     <input
                         type="number"
-                        value={previousMonthBalance}
+                        value={previousBalance}
                         onChange={(e) =>
-                            setPreviousMonthBalance(Number(e.target.value) || 0)
+                            setPreviousBalance(Number(e.target.value) || 0)
                         }
+                        onBlur={saveBalance}
                         className="previous-balance-input"
                     />
                 </div>

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {MasterDetailReport, MasterWeeklyReport, SalaryRecord} from "../types/report";
+import {MasterDetailReport, MasterSalary, MasterWeeklyReport, SalaryRecord} from "../types/report";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
@@ -34,7 +34,7 @@ export const reportAPI = {
         reportApi.get<MasterDetailReport>(`/reports/master-detail/${masterId}?start=${start}&end=${end}`),
 
     getSalaryLogs: (masterId: string, startOfMonth: string, endOfMonth: string) =>
-        reportApi.get<SalaryRecord[]>(`/reports/masters-salary-log?id=${masterId}&start=${startOfMonth}&end=${endOfMonth}`),
+        reportApi.get<MasterSalary>(`/reports/masters-salary-log?id=${masterId}&start=${startOfMonth}&end=${endOfMonth}`),
 
     saveSalaryRecord: (data: any) => {
         return reportApi.post('/reports/masters-salary-log', data); // ваш эндпоинт
@@ -48,4 +48,7 @@ export const reportAPI = {
     },
 
 
+    savePreviousBalance: ( masterId: number, year: number, month: number, previousBalance: number) => {
+        return reportApi.get(`/reports/masters-salary-balance/?id=${masterId}&year=${year}&month=${month}&previousBalance=${previousBalance}`);
+    }
 };
