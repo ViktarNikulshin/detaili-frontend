@@ -64,3 +64,16 @@ export interface SalaryRecord {
     salary: number;    // ЗП (200)
 }
 
+export interface ManagerSheet {
+    previousBalance: number
+    records: DayRecord [];
+
+}
+
+export interface DayRecord {
+    date: string;
+    isAbsent: boolean;
+    contentRub: number | string;
+    salaryRub: number | string;
+}
+

@@ -1,137 +1,186 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 import 'moment/locale/ru';
 import { userAPI } from '../../services/userApi';
-import '../MasterSalary/MasterSalary.css'; // Переиспользуем ваши стили
+import { reportAPI } from '../../services/reportApi';
+import './Timesheet.css';
 
-// Интерфейс мастера
 interface Master {
     id: number;
     firstName: string;
     lastName: string;
-    // В реальном проекте эти данные должны приходить из профиля мастера
-    baseSalary?: number;
-    dealRate?: number;
 }
 
-// Интерфейс строки табеля (один день)
 interface TimesheetDay {
-    date: string;       // YYYY-MM-DD
-    isWeekend: boolean; // Является ли день выходным (Сб, Вс)
-    percent: number;    // Процент выполнения (0-100)
-    status: string;     // '' (Явка), 'Н' (Отгул/Неявка), 'В' (Выходной)
+    date: string;
+    isAbsent: boolean;
+    contentRub: number | string;
+    salaryRub: number | string;
 }
 
-const MasterTimesheet: React.FC = () => {
+const Timesheet: React.FC = () => {
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
     const [masters, setMasters] = useState<Master[]>([]);
     const [selectedMasterId, setSelectedMasterId] = useState<string>('');
-
-    // Состояние табеля на выбранный месяц
     const [timesheet, setTimesheet] = useState<TimesheetDay[]>([]);
+    const [previousBalance, setPreviousBalance] = useState<number>(0);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [isSaving, setIsSaving] = useState<boolean>(false); // Для фонового автосохранения
+    const [error, setError] = useState<string | null>(null);
 
-    // ЗАГЛУШКИ: Финансовые показатели мастера (в будущем брать из API)
-    const MOCK_BASE_SALARY = 500; // Оклад
-    const MOCK_DEAL_RATE = 70;    // Сумма сделки за 100% выполнение
+    const monthLabel = useMemo(() => {
+        return moment(currentDate).locale('ru').format('MMMM').toUpperCase();
+    }, [currentDate]);
 
-    // Загрузка списка мастеров
+    // Инициализация списка мастеров
     useEffect(() => {
         const fetchMasters = async () => {
             try {
-                const response = await userAPI.getUsersByRole("MASTER") || { data: [] };
+                const response = await userAPI.getUsersByRole("MANAGER") || { data: [] };
                 setMasters(response.data);
                 if (response.data.length > 0) {
                     setSelectedMasterId(response.data[0].id.toString());
                 }
-            } catch (error) {
-                console.error("Ошибка загрузки мастеров", error);
+            } catch (err) {
+                setError('Не удалось загрузить список мастеров.');
+                console.error(err);
             }
         };
         fetchMasters();
     }, []);
 
-    // Генерация дней месяца при смене даты или мастера
-    useEffect(() => {
-        if (!selectedMasterId) return;
+    // Функция загрузки данных табеля с сервера
+    const loadTimesheetData = useCallback(async (masterId: string, date: Date) => {
+        if (!masterId) return;
+        setLoading(true);
+        setError(null);
 
-        const daysInMonth = moment(currentDate).daysInMonth();
-        const newTimesheet: TimesheetDay[] = [];
+        try {
+            const formattedMonth = moment(date).format('YYYY-MM');
+            const daysInMonth = moment(date).daysInMonth();
 
-        for (let i = 1; i <= daysInMonth; i++) {
-            const currentDay = moment(currentDate).date(i);
-            const isWeekend = currentDay.isoWeekday() === 6 || currentDay.isoWeekday() === 7; // Суббота или Воскресенье
+            const response = await reportAPI.getTimesheetRecords(masterId, formattedMonth);
+            setPreviousBalance(response.data.previousBalance || 0);
 
-            // В реальном проекте здесь нужно делать слияние (merge) с данными из БД,
-            // чтобы подтягивать уже сохраненные отгулы и проценты.
-            newTimesheet.push({
-                date: currentDay.format('YYYY-MM-DD'),
-                isWeekend: isWeekend,
-                percent: isWeekend ? 0 : 100, // По умолчанию в будни 100%, в выходные 0%
-                status: isWeekend ? 'В' : ''  // По умолчанию в выходные статус 'В'
-            });
+            const backendRecords: TimesheetDay[] = response?.data.records || [];
+            const backendRecordsMap = new Map<string, TimesheetDay>(
+                backendRecords.map(record => [record.date, record])
+            );
+
+            const completeMonthTimesheet: TimesheetDay[] = [];
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const currentDayStr = moment(date).date(i).format('YYYY-MM-DD');
+
+                if (backendRecordsMap.has(currentDayStr)) {
+                    const savedDay = backendRecordsMap.get(currentDayStr)!;
+                    completeMonthTimesheet.push({
+                        date: currentDayStr,
+                        isAbsent: savedDay.isAbsent,
+                        contentRub: savedDay.contentRub ?? '',
+                        salaryRub: savedDay.salaryRub ?? ''
+                    });
+                } else {
+                    completeMonthTimesheet.push({
+                        date: currentDayStr,
+                        isAbsent: false,
+                        contentRub: '',
+                        salaryRub: ''
+                    });
+                }
+            }
+
+            setTimesheet(completeMonthTimesheet);
+        } catch (err) {
+            setError('Не удалось загрузить данные табеля с сервера.');
+            console.error('Ошибка загрузки табеля:', err);
+        } finally {
+            setLoading(false);
         }
-        setTimesheet(newTimesheet);
-    }, [currentDate, selectedMasterId]);
+    }, []);
 
-    // Навигация по месяцам
+    // Вызов загрузки данных при смене мастера или месяца (ОДИН оптимизированный useEffect)
+    useEffect(() => {
+        loadTimesheetData(selectedMasterId, currentDate);
+    }, [selectedMasterId, currentDate, loadTimesheetData]);
+
+    // Унифицированная функция отправки данных на бэкенд (Автосохранение)
+    const executeAutosave = useCallback(async (targetTimesheet: TimesheetDay[]) => {
+        if (!selectedMasterId) return;
+        setIsSaving(true);
+        setError(null);
+        try {
+            const formattedMonth = moment(currentDate).format('YYYY-MM');
+            await reportAPI.saveTimesheetRecords(selectedMasterId, formattedMonth, targetTimesheet);
+        } catch (err) {
+            console.error("Ошибка автосохранения табеля:", err);
+            setError("Автосохранение не удалось. Проверьте подключение к сети.");
+        } finally {
+            setIsSaving(false);
+        }
+    }, [selectedMasterId, currentDate]);
+
     const handlePrevMonth = () => setCurrentDate(prev => moment(prev).subtract(1, 'month').toDate());
     const handleNextMonth = () => setCurrentDate(prev => moment(prev).add(1, 'month').toDate());
-    const monthLabel = useMemo(() => moment(currentDate).locale('ru').format('MMMM YYYY').toUpperCase(), [currentDate]);
 
-    // Обработчик изменения данных в строке
-    const handleRowChange = (index: number, field: keyof TimesheetDay, value: any) => {
+    // Изменение значений в инпутах (без мгновенной отправки на сервер во время печати)
+    const handleInputChange = (index: number, field: 'contentRub' | 'salaryRub', value: string) => {
         const updatedTimesheet = [...timesheet];
         updatedTimesheet[index] = { ...updatedTimesheet[index], [field]: value };
-
-        // Автоматическая логика: если ставим "Н" (отгул), обнуляем процент
-        if (field === 'status' && value === 'Н') {
-            updatedTimesheet[index].percent = 0;
-        }
-        // Если меняем процент на > 0, сбрасываем статус неявки
-        if (field === 'percent' && value > 0 && updatedTimesheet[index].status === 'Н') {
-            updatedTimesheet[index].status = '';
-        }
-
         setTimesheet(updatedTimesheet);
     };
 
-    const handleSave = () => {
-        console.log("Данные на отправку в БД:", timesheet);
-        alert("Табель успешно сохранен!");
-        // Здесь должен быть вызов API сохранения
+    // Срабатывает, когда пользователь закончил ввод в инпут и убрал фокус (onBlur)
+    const handleInputBlur = () => {
+        executeAutosave(timesheet);
     };
 
-    // --- ВЫЧИСЛЕНИЯ ДЛЯ ТАБЛИЦЫ ---
+    // Срабатывает мгновенно при клике на чекбокс отсутствия
+    const handleCheckboxChange = (index: number, checked: boolean) => {
+        const updatedTimesheet = [...timesheet];
+        updatedTimesheet[index] = {
+            ...updatedTimesheet[index],
+            isAbsent: checked,
+            // Если выставлено отсутствие, очищаем финансовые поля
+            contentRub: checked ? '' : updatedTimesheet[index].contentRub,
+            salaryRub: checked ? '' : updatedTimesheet[index].salaryRub
+        };
 
-    // 1. Считаем количество рабочих дней в месяце (Пн-Пт)
-    const totalWorkingDays = useMemo(() => {
-        return timesheet.filter(day => !day.isWeekend).length;
+        setTimesheet(updatedTimesheet);
+        executeAutosave(updatedTimesheet); // Передаем измененный массив напрямую, минуя задержку стейта
+    };
+
+    // Подсчет суммы за текущий табель
+    const currentMonthSum = useMemo(() => {
+        return timesheet.reduce((sum, day) => {
+            const content = Number(day.contentRub) || 0;
+            const salary = Number(day.salaryRub) || 0;
+            return sum + content + salary;
+        }, 0);
     }, [timesheet]);
 
-    // 2. Стоимость одного рабочего дня (Оклад / Рабочие дни)
-    const dailyBaseSalary = totalWorkingDays > 0 ? (MOCK_BASE_SALARY / totalWorkingDays) : 0;
+    // Общая сумма с учетом предыдущего баланса
+    const totalSumWithBalance = useMemo(() => {
+        return currentMonthSum + previousBalance;
+    }, [currentMonthSum, previousBalance]);
 
-    // 3. Итоговые суммы для подвала таблицы
-    const totals = useMemo(() => {
-        return timesheet.reduce((acc, day) => {
-            // Сумма сделки: (Процент / 100) * Ставка
-            const dealSum = (day.percent / 100) * MOCK_DEAL_RATE;
-
-            // Сумма оклада: Если явка (статус пустой) и не выходной
-            // Если нужно платить оклад даже за работу в выходной, логику можно скорректировать
-            const salarySum = (day.status === '' && !day.isWeekend) ? dailyBaseSalary : 0;
-
-            return {
-                dealSum: acc.dealSum + dealSum,
-                salarySum: acc.salarySum + salarySum
-            };
-        }, { dealSum: 0, salarySum: 0 });
-    }, [timesheet, dailyBaseSalary]);
+    const saveBalance = async () => {
+        try {
+            await reportAPI.savePreviousBalance?.(
+                Number(selectedMasterId),
+                moment(currentDate).year(),
+                moment(currentDate).month() + 1,
+                previousBalance
+            );
+        } catch (err) {
+            console.error("Ошибка сохранения баланса:", err);
+        }
+    };
 
     return (
-        <div className="report-container salary-logging-container">
-            {/* БЛОК ФИЛЬТРОВ */}
-            <div className="salary-filters">
+        <div className="report-container timesheet-container">
+            {/* ШАПКА / ФИЛЬТРЫ */}
+            <div className="salary-filters timesheet-filters">
                 <div className="month-navigation-inline">
                     <button className="arrow-btn" onClick={handlePrevMonth}> &larr; </button>
                     <span className="month-label">{monthLabel}</span>
@@ -139,122 +188,113 @@ const MasterTimesheet: React.FC = () => {
                 </div>
 
                 <div className="master-select-inline">
-                    <label htmlFor="master-dropdown">мастер</label>
+                    <label htmlFor="master-dropdown">СОТРУДНИК</label>
                     <select
                         id="master-dropdown"
                         value={selectedMasterId}
                         onChange={(e) => setSelectedMasterId(e.target.value)}
                         className="dropdown-select"
                     >
-                        <option value="">выберите...</option>
+                        <option value="">список</option>
                         {masters.map(m => (
                             <option key={m.id} value={m.id}>{`${m.firstName} ${m.lastName}`}</option>
                         ))}
                     </select>
                 </div>
+
+                {/* Блок динамического остатка */}
+                <div className="previous-balance-container">
+                    <label>Остаток за предыдущий месяц:</label>
+                    <input
+                        type="number"
+                        value={previousBalance}
+                        onChange={(e) => setPreviousBalance(Number(e.target.value) || 0)}
+                        onBlur={saveBalance}
+                        className="previous-balance-input"
+                    />
+                </div>
+
+                {/* Блок итоговой суммы с индикатором статуса синхронизации */}
+                <div className="total-salary-display" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <span style={{ fontSize: '12px', color: isSaving ? 'var(--primary-blue)' : 'var(--text-muted)' }}>
+                        {isSaving ? '⏳ Сохранение...' : '✓ Все изменения сохранены'}
+                    </span>
+                    <span className="total-label">ИТОГО:</span>
+                    <span className="total-value">{totalSumWithBalance} руб.</span>
+                </div>
             </div>
 
-            {/* ТАБЛИЦА ТАБЕЛЯ */}
+            {error && <div className="report-error">{error}</div>}
+            {loading && <div className="report-loading">Загрузка данных...</div>}
+
+            {/* ТАБЛИЦА */}
             <div className="table-wrapper">
-                <table className="report-table">
+                <table className="timesheet-table">
                     <thead>
                     <tr>
-                        <th style={{ width: '20%' }}>Дата</th>
-                        <th style={{ width: '20%' }}>% выполнения</th>
-                        <th style={{ width: '20%' }}>Сумма (сделка)</th>
-                        <th style={{ width: '20%' }}>Отгул / Статус</th>
-                        <th style={{ width: '20%' }}>Сумма (оклад)</th>
+                        <th>Дата</th>
+                        <th>Отсутствие</th>
+                        <th>Контент руб.</th>
+                        <th>Оклад руб.</th>
                     </tr>
                     </thead>
                     <tbody>
                     {timesheet.map((day, index) => {
                         const dateObj = moment(day.date);
-                        const formattedDate = dateObj.format('D MMMM'); // Например: 1 июня
-
-                        // Вычисляем суммы для текущей строки
-                        const currentDealSum = (day.percent / 100) * MOCK_DEAL_RATE;
-                        const currentSalarySum = (day.status === '' && !day.isWeekend) ? dailyBaseSalary : 0;
-
-                        // Окрашиваем строку выходного дня для наглядности
-                        const rowStyle = day.isWeekend ? { backgroundColor: 'rgba(255, 255, 255, 0.03)' } : {};
+                        const isWeekend = dateObj.isoWeekday() === 6 || dateObj.isoWeekday() === 7;
+                        const formattedDate = dateObj.format('DD.MM.YYYY dddd');
+                        const rowClassName = isWeekend ? 'weekend-row' : '';
 
                         return (
-                            <tr key={day.date} style={rowStyle}>
-                                {/* 1. Дата */}
-                                <td className="text-left-aligned">
-                                        <span style={{ color: day.isWeekend ? 'var(--error-red)' : 'inherit' }}>
-                                            {formattedDate}
-                                        </span>
+                            <tr key={day.date} className={rowClassName}>
+                                <td className="text-left-aligned date-cell">
+                                    <span className={isWeekend ? 'weekend-text' : ''}>
+                                        {formattedDate}
+                                    </span>
                                 </td>
 
-                                {/* 2. Процент */}
+                                <td>
+                                    <label className="checkbox-container">
+                                        <input
+                                            type="checkbox"
+                                            checked={day.isAbsent}
+                                            onChange={(e) => handleCheckboxChange(index, e.target.checked)}
+                                        />
+                                        <span className="checkmark"></span>
+                                    </label>
+                                </td>
+
                                 <td>
                                     <input
                                         type="number"
-                                        min="0"
-                                        max="100"
-                                        value={day.percent}
-                                        onChange={(e) => handleRowChange(index, 'percent', Number(e.target.value))}
-                                        className="inline-input text-center"
-                                        style={{ width: '80px', margin: '0 auto', display: 'block' }}
-                                        disabled={day.status === 'Н'} // Блокируем, если стоит отгул
+                                        value={day.contentRub}
+                                        onChange={(e) => handleInputChange(index, 'contentRub', e.target.value)}
+                                        onBlur={handleInputBlur}
+                                        className="inline-input text-right"
+                                        placeholder="0"
+                                        disabled={day.isAbsent}
                                     />
                                 </td>
 
-                                {/* 3. Сумма сделки (Автовычисление) */}
-                                <td className="text-right-aligned">
-                                    {currentDealSum > 0 ? currentDealSum.toFixed(1) : '0'}
-                                </td>
-
-                                {/* 4. Отгул / Статус */}
                                 <td>
-                                    <select
-                                        value={day.status}
-                                        onChange={(e) => handleRowChange(index, 'status', e.target.value)}
-                                        className="inline-select"
-                                        style={{ color: day.status === 'Н' ? 'var(--error-red)' : 'inherit' }}
-                                    >
-                                        <option value="">Явка</option>
-                                        <option value="Н">Отгул (Н)</option>
-                                        <option value="В">Выходной (В)</option>
-                                    </select>
-                                </td>
-
-                                {/* 5. Сумма оклада (Автовычисление) */}
-                                <td className="text-right-aligned">
-                                    {currentSalarySum > 0 ? currentSalarySum.toFixed(1) : '0'}
+                                    <input
+                                        type="number"
+                                        value={day.salaryRub}
+                                        onChange={(e) => handleInputChange(index, 'salaryRub', e.target.value)}
+                                        onBlur={handleInputBlur}
+                                        className="inline-input text-right"
+                                        placeholder="0"
+                                        disabled={day.isAbsent}
+                                    />
                                 </td>
                             </tr>
                         );
                     })}
                     </tbody>
-
-                    {/* ПОДВАЛ ТАБЛИЦЫ С ИТОГАМИ */}
-                    <tfoot>
-                    <tr>
-                        <td colSpan={2} className="text-right-aligned" style={{ fontSize: '16px', color: 'var(--text-primary)' }}>
-                            <strong>ИТОГО ЗА МЕСЯЦ:</strong>
-                        </td>
-                        <td className="text-right-aligned" style={{ fontSize: '18px', borderTop: '2px solid var(--primary-green)' }}>
-                            {totals.dealSum.toFixed(1)}
-                        </td>
-                        <td></td>
-                        <td className="text-right-aligned" style={{ fontSize: '18px', borderTop: '2px solid var(--primary-green)' }}>
-                            {totals.salarySum.toFixed(1)}
-                        </td>
-                    </tr>
-                    </tfoot>
                 </table>
-            </div>
-
-            {/* КНОПКА СОХРАНЕНИЯ */}
-            <div className="action-buttons-container" style={{ marginTop: '20px', borderRadius: 'var(--radius-md)' }}>
-                <button className="add-row-green-btn save-btn" onClick={handleSave} style={{ borderRadius: 'var(--radius-md)' }}>
-                    Сохранить табель
-                </button>
             </div>
         </div>
     );
 };
 
-export default MasterTimesheet;
+export default Timesheet;

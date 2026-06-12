@@ -1,179 +1,242 @@
-/* ============================================
-TOGGLE BUTTONS (Вид: Явка / Процент)
-============================================ */
-.view-mode-toggle {
-    display: flex;
-    background: var(--bg-input);
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    border: 1px solid var(--border-color);
-    margin-left: auto;
+/* ==========================================================================
+   TIMESHEET STYLES (Refactored & Optimized)
+   ========================================================================== */
+
+/* Переменные темы (если не объявлены глобально, раскомментируйте этот блок) */
+/*
+:root {
+    --primary-blue: #5babff;
+    --primary-green: #4a826d;
+    --error-red: #dc3545;
+    --success-green: #28a745;
+    --text-primary: #e0e0e0;
+    --text-secondary: #1a3c47;
+    --text-muted: #888888;
+    --bg-main: rgba(51, 51, 51, 0.95);
+    --bg-secondary: rgb(173 183 176 / 0.9);
+    --bg-input: #ffffff;
+    --bg-header: #333333;
+    --border-color: rgba(74, 130, 109, 0.3);
+    --border-light: rgba(255, 255, 255, 0.1);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 12px rgba(74, 130, 109, 0.2);
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --transition-fast: 0.2s ease;
+}
+*/
+
+/* ==========================================================================
+   1. ОСНОВНОЙ КОНТЕЙНЕР (Сброс размеров)
+   ========================================================================== */
+.timesheet-container,
+.timesheet-container *,
+.timesheet-container *::before,
+.timesheet-container *::after {
+    box-sizing: border-box !important;
 }
 
-.toggle-btn {
-    background: transparent;
-    border: none;
-    padding: 8px 16px;
-    color: var(--text-secondary);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.toggle-btn.active {
-    background: var(--primary-blue);
-    color: #fff;
-}
-
-.toggle-btn:hover:not(.active) {
-    background: rgba(91, 171, 255, 0.1);
-}
-
-/* ============================================
-FULLCALENDAR OVERRIDES (Стилизация под тему)
-============================================ */
-.timesheet-calendar-wrapper {
-    background: var(--bg-secondary);
+.timesheet-container {
+    max-width: 100%;
+    width: 100%;
+    margin: 30px auto;
+    padding: 25px;
+    background: var(--bg-main);
+    background-image: linear-gradient(
+            135deg,
+            rgba(74, 130, 109, 0.1),
+            rgba(91, 171, 255, 0.1)
+    );
     border-radius: var(--radius-md);
-    padding: var(--spacing-sm);
     border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: var(--text-primary);
 }
 
-.fc-theme-standard td, .fc-theme-standard th {
-    border-color: rgba(0, 0, 0, 0.1) !important;
+/* Верхний блок фильтров */
+.salary-filters {
+    padding: 10px 20px;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
 }
 
-.fc-col-header-cell {
-    background: var(--bg-header);
-    color: var(--primary-blue);
-    padding: 10px 0 !important;
-    text-transform: uppercase;
+/* ==========================================================================
+   2. СЕТКА ТАБЛИЦЫ (Пропорции и компактность)
+   ========================================================================== */
+.timesheet-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 800px;
+}
+
+/* Шапка таблицы */
+.timesheet-table thead th {
+    padding: 10px 14px;
     font-size: 13px;
-    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
-.fc-daygrid-day {
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.fc-daygrid-day:hover {
-    background-color: rgba(91, 171, 255, 0.1) !important;
-}
-
-.fc-daygrid-day-number {
-    color: var(--text-secondary);
-    font-weight: 600;
-    padding: 8px !important;
-}
-
-.fc-day-today {
-    background-color: rgba(74, 130, 109, 0.15) !important;
-}
-
-/* Убираем синюю обводку FullCalendar при клике */
-.fc .fc-daygrid-day.fc-day-today {
-    background-color: rgba(74, 130, 109, 0.2);
-}
-
-.fc-event {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-}
-
-/* ============================================
-CUSTOM EVENT RENDERERS (Бейджики)
-============================================ */
-.calendar-badge {
-    padding: 4px 8px;
-    border-radius: 4px;
-    color: white;
-    font-size: 11px;
-    font-weight: 700;
-    text-align: center;
-    text-transform: uppercase;
-    margin: 2px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-}
-
-.performance-circle {
-    background: linear-gradient(135deg, var(--primary-green), #2b5126);
-    color: white;
+/* Ячейки строк */
+.timesheet-table tbody td {
+    padding: 6px 12px;
     font-size: 14px;
-    font-weight: 700;
-    text-align: center;
-    padding: 6px;
-    border-radius: 8px;
-    margin: 2px 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    vertical-align: middle;
 }
 
-.performance-circle.zero {
-    background: linear-gradient(135deg, #6c757d, #495057);
+/* Распределение ширины колонок табеля */
+.timesheet-table th:nth-child(1),
+.timesheet-table td:nth-child(1) {
+    width: 25%; /* Дата */
+    text-align: left !important;
+}
+.timesheet-table th:nth-child(2),
+.timesheet-table td:nth-child(2) {
+    width: 15%; /* Отсутствие (Чекбокс) */
+    text-align: center !important;
+}
+.timesheet-table th:nth-child(3),
+.timesheet-table td:nth-child(3) {
+    width: 30%; /* Контент руб. */
+}
+.timesheet-table th:nth-child(4),
+.timesheet-table td:nth-child(4) {
+    width: 30%; /* Оклад руб. */
 }
 
-/* ============================================
-MODAL STYLES
-============================================ */
-.timesheet-modal-overlay {
-    position: fixed;
+/* ==========================================================================
+   3. ПОЛЯ ВВОДА (Инпуты)
+   ========================================================================== */
+.inline-input,
+.inline-select {
+    width: 100%;
+    max-width: 200px;
+    padding: 6px 10px;
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-block;
+    margin: 0 auto;
+}
+
+/* Выравнивание числовых данных по правому краю */
+.timesheet-table tbody td input[type="number"],
+.inline-input.text-right {
+    text-align: right;
+    padding-right: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Скрытие стандартных стрелочек (спиннеров) инпутов */
+.timesheet-table input::-webkit-outer-spin-button,
+.timesheet-table input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.timesheet-table input[type='number'] {
+    -moz-appearance: textfield;
+}
+
+/* ==========================================================================
+   4. КОМПАКТНЫЕ ЧЕКБОКСЫ (Кастомизация)
+   ========================================================================== */
+.timesheet-table .checkbox-container {
+    display: inline-block;
+    position: relative;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    user-select: none;
+    margin: 0;
+    padding: 0;
+    vertical-align: middle;
+}
+
+/* Скрываем нативный чекбокс */
+.timesheet-table .checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* Новая компактная подложка */
+.timesheet-table .checkmark {
+    position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+    height: 16px;
+    width: 16px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    transition: all 0.15s ease;
 }
 
-.timesheet-modal {
-    background: var(--bg-main);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-lg);
-    border-radius: var(--radius-md);
-    padding: var(--spacing-lg);
-    width: 100%;
-    max-width: 400px;
-    color: var(--text-primary);
+/* Эффект ховера */
+.timesheet-table .checkbox-container:hover .checkmark {
+    border-color: var(--primary-green);
+    background-color: rgba(74, 130, 109, 0.1);
 }
 
-.timesheet-modal h3 {
-    margin-top: 0;
-    color: var(--primary-blue);
-    border-bottom: 1px solid var(--border-light);
-    padding-bottom: 10px;
-    margin-bottom: 20px;
+/* Активное состояние (Отсутствие -> Красный маркер) */
+.timesheet-table .checkbox-container input:checked ~ .checkmark {
+    background-color: var(--error-red) !important;
+    border-color: var(--error-red) !important;
+    box-shadow: 0 0 4px rgba(220, 53, 69, 0.4);
 }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+/* Внутренняя галочка (птичка) */
+.timesheet-table .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid #ffffff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
 }
 
-.form-group label {
-    font-size: 14px;
-    color: var(--text-primary);
+.timesheet-table .checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+/* ==========================================================================
+   5. СОСТОЯНИЯ И МОДИФИКАТОРЫ СТРОК
+   ========================================================================== */
+/* Выходные дни */
+.weekend-row {
+    background-color: rgba(220, 53, 69, 0.05) !important;
+}
+
+.weekend-text {
+    color: #4d181b;
     font-weight: 500;
 }
 
-.mt-3 { margin-top: 15px; }
-.mt-4 { margin-top: 25px; }
+.date-cell {
+    text-transform: capitalize;
+}
 
-@media (max-width: 768px) {
-    .view-mode-toggle {
-        margin-left: 0;
-        width: 100%;
-        display: flex;
-    }
-    .toggle-btn {
-        flex: 1;
-        text-align: center;
-    }
+/* Состояние блокировки строки при отсутствии мастера */
+.timesheet-table tr input:disabled,
+.inline-input:disabled {
+    opacity: 0.3;
+    background-color: rgba(0, 0, 0, 0.1) !important;
+    color: var(--text-muted);
+    border-color: var(--border-light);
+    cursor: not-allowed;
+}
+
+/* ==========================================================================
+   6. КНОПКИ ДЕЙСТВИЙ
+   ========================================================================== */
+.save-btn.full-width {
+    flex: 1;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    border: none;
 }

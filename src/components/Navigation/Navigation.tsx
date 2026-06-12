@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom'; // <-- Добавили useLocation
 import { useAuth } from '../../contexts/AuthContext';
 import logo from '../asserts/fd6cad63-cb26-4d08-bcf6-0c4f7d152eed.jpg'
 import './Navigation.css'
@@ -7,9 +7,14 @@ import './Navigation.css'
 const Navigation: React.FC = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation(); // <-- Получаем объект текущего местоположения
+
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const isMaster = !!user?.roles?.some(role => role.name === 'MASTER');
     const isAdmin = user?.roles?.some(r => r.name === 'ADMIN');
+
+    // Проверяем, находится ли пользователь именно на странице календаря
+    const isCalendarPage = location.pathname === '/calendar';
 
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -23,35 +28,34 @@ const Navigation: React.FC = () => {
         setIsMenuOpen(false);
         navigate('/profile');
     };
+
     const handleMasterSalary = () => {
         setIsMenuOpen(false);
-        navigate('/reports/salary-log'); // <-- Переход на страницу отчетов
+        navigate('/reports/salary-log');
     }
+
     const handleTimesheet = () => {
         setIsMenuOpen(false);
-        navigate('/reports/time=sheet'); // <-- Переход на страницу отчетов
+        navigate('/reports/time=sheet');
     }
+
     const handleCalendar = () => {
         setIsMenuOpen(false);
-        navigate('/calendar'); // <-- Переход на страницу отчетов
+        navigate('/calendar');
     }
 
-    // --- ИЗМЕНЕНО ---
     const handleReport = () => {
         setIsMenuOpen(false);
-        navigate('/reports/masters'); // <-- Переход на страницу отчетов
+        navigate('/reports/masters');
     }
-
 
     const handleUsersAndRoles = () => {
         setIsMenuOpen(false);
         navigate('/users');
     };
 
-    // --- НОВАЯ ФУНКЦИЯ ДЛЯ ПЕРЕХОДА НА СТРАНИЦУ СПРАВОЧНИКА ---
     const handleWorkDictionary = () => {
         setIsMenuOpen(false);
-        // Предполагаемый путь для формы управления справочником
         navigate('/dictionaries/work-types');
     };
 
@@ -59,7 +63,6 @@ const Navigation: React.FC = () => {
         navigate('/orders/new');
     };
 
-    // Логика закрытия меню при клике вне его (оставлена без изменений)
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -83,11 +86,14 @@ const Navigation: React.FC = () => {
                 <Link to="/">CGP</Link>
             </div>
 
+            {/* --- ИЗМЕНЕНО УСЛОВИЕ ОТОБРАЖЕНИЯ --- */}
             <div className="nav-actions">
-                {!isMaster && (<button className="create-order-btn" onClick={handleCreateOrder}>
-                    <span className="button-text-desktop">+ Создать заказ</span>
-                    <span className="button-icon-mobile">+</span>
-                </button>)}
+                {!isMaster && isCalendarPage && ( // Показываем, если НЕ мастер И страница календаря
+                    <button className="create-order-btn" onClick={handleCreateOrder}>
+                        <span className="button-text-desktop">+ Создать заказ</span>
+                        <span className="button-icon-mobile">+</span>
+                    </button>
+                )}
             </div>
 
             <div className="nav-user" ref={menuRef}>
@@ -100,7 +106,6 @@ const Navigation: React.FC = () => {
 
                 {isMenuOpen && (
                     <div className="dropdown-menu">
-
                         <div className="menu-item" onClick={handleProfile}>
                             Профиль
                         </div>
@@ -115,18 +120,15 @@ const Navigation: React.FC = () => {
                                 <div className="menu-item" onClick={handleTimesheet}>
                                     Табель
                                 </div>
-
                                 <div className="menu-item" onClick={handleReport}>
                                     Отчет
                                 </div>
                                 <div className="menu-item" onClick={handleUsersAndRoles}>
                                     Пользователи и роли
                                 </div>
-                                {/* НОВЫЙ ПУНКТ МЕНЮ ДЛЯ ADMIN */}
                                 <div className="menu-item" onClick={handleWorkDictionary}>
                                     Справочник работ
                                 </div>
-
                             </>
                         )}
                         <div className="menu-item logout-menu-item" onClick={handleLogoutAndClose}>

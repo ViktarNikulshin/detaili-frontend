@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {MasterDetailReport, MasterSalary, MasterWeeklyReport, SalaryRecord} from "../types/report";
+import {ManagerSheet, MasterDetailReport, MasterSalary, MasterWeeklyReport} from "../types/report";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
@@ -48,7 +48,24 @@ export const reportAPI = {
     },
 
 
-    savePreviousBalance: ( masterId: number, year: number, month: number, previousBalance: number) => {
+    savePreviousBalance: (masterId: number, year: number, month: number, previousBalance: number) => {
         return reportApi.get(`/reports/masters-salary-balance/?id=${masterId}&year=${year}&month=${month}&previousBalance=${previousBalance}`);
-    }
+    },
+    // Пример дополнения вашего reportAPI
+
+        // ... ваши существующие методы (например, getSalaryRecords)
+
+        // Получить записи табеля за конкретный месяц для мастера
+        getTimesheetRecords: async (masterId: string, month: string) => {
+            // Ожидаемый url: /api/reports/timesheet?masterId=X&month=YYYY-MM
+            return reportApi.get(`/reports/timesheet`, { params: { masterId, month } });
+        },
+
+        // Сохранить/обновить весь табель за месяц
+        saveTimesheetRecords: async (masterId: string, month: string, records: any[]) => {
+            return reportApi.post(`/reports/timesheet`, { masterId, month, records });
+        }
+
+
+
 };
