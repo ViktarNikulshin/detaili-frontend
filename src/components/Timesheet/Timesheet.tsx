@@ -216,7 +216,7 @@ const Timesheet: React.FC = () => {
 
                 {/* Блок итоговой суммы с индикатором статуса синхронизации */}
                 <div className="total-salary-display" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    <span style={{ fontSize: '12px', color: isSaving ? 'var(--primary-blue)' : 'var(--text-muted)' }}>
+                    <span style={{ fontSize: '12px', color: isSaving ? 'var(--primary-blue)' : 'var(--success-green)' }}>
                         {isSaving ? '⏳ Сохранение...' : '✓ Все изменения сохранены'}
                     </span>
                     <span className="total-label">ИТОГО:</span>
