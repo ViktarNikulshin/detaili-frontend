@@ -1,16 +1,17 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import moment from 'moment';
 import 'moment/locale/ru';
 import {SalaryRecord} from "../../types/report";
-import { reportAPI } from '../../services/reportApi';
+import {reportAPI} from '../../services/reportApi';
 import './MasterSalary.css';
-import { userAPI } from "../../services/userApi";
+import {userAPI} from "../../services/userApi";
+import * as XLSX from 'xlsx';
 
 // Импорты для DatePicker и date-fns (только дата, без времени)
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { ru } from 'date-fns/locale';
-import { format } from 'date-fns';
+import {ru} from 'date-fns/locale';
+import {format} from 'date-fns';
 
 // Локальные интерфейсы
 interface Master {
@@ -51,11 +52,11 @@ const MasterSalaryLog: React.FC = () => {
     });
 
     // Состояния для редактирования
-    const [editingId, setEditingId] = useState <number | null >(null);
-    const [editRecord, setEditRecord] = useState <EditRecord | null >(null);
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const [editRecord, setEditRecord] = useState<EditRecord | null>(null);
 
-    const [loading, setLoading] = useState <boolean >(false);
-    const [error, setError] = useState <string | null >(null);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
     const [previousBalance, setPreviousBalance] = useState<number>(0);
 
     const monthLabel = useMemo(() => {
@@ -75,7 +76,7 @@ const MasterSalaryLog: React.FC = () => {
         const initData = async () => {
             try {
                 const [mastersRes] = await Promise.all([
-                    userAPI.getUsersByRole("MASTER") || Promise.resolve({ data: [] }),
+                    userAPI.getUsersByRole("MASTER") || Promise.resolve({data: []}),
                 ]);
 
                 setMasters(mastersRes.data);
@@ -99,7 +100,7 @@ const MasterSalaryLog: React.FC = () => {
             const endOfMonth = moment(date).endOf('month').format('YYYY-MM-DDTHH:mm');
 
             const response = await reportAPI.getSalaryLogs?.(masterId, startOfMonth, endOfMonth)
-                || Promise.resolve({ data: [] });
+                || Promise.resolve({data: []});
 
             setRecords(response.data.records);
             setPreviousBalance(response.data.previousBalance || 0);
@@ -228,85 +229,80 @@ const MasterSalaryLog: React.FC = () => {
             return;
         }
 
+        const currentMaster = masters.find(m => m.id.toString() === selectedMasterId);
+        const masterFullName = currentMaster ? `${currentMaster.firstName} ${currentMaster.lastName}` : "Не выбран";
 
-        // Формируем строки CSV. Используем ";" как разделитель для авто-открытия в русскоязычном Excel
-        const csvRows = [];
+        // ✅ ИСПРАВЛЕНИЕ 1: Явно указываем тип (string | number)[][]
+        const wsData: (string | number)[][] = [
+            [`РАСЧЕТНЫЙ ЛИСТОК ЗА ${monthLabel.toUpperCase()}`],
+            [`Сотрудник:`, masterFullName],
+            [], // Пустая строка
+            ["Дата", "Автомобиль", "Вид работы / Операция", "Начислено (ЗП)", "Выплаты / Удержания"] // Заголовки
+        ];
 
-        csvRows.push([
-            "Мастер",
-            masters.find(m => m.id.toString() === selectedMasterId)
-                ? `${masters.find(m => m.id.toString() === selectedMasterId)?.firstName} ${masters.find(m => m.id.toString() === selectedMasterId)?.lastName}`
-                : ""
-        ].join(";"));
+        let totalEarned = 0;
+        let totalPaid = 0;
 
-        csvRows.push([
-            "Месяц",
-            monthLabel
-        ].join(";"));
-
-        csvRows.push([]);
-        // 1. Заголовки таблицы
-        csvRows.push(["Дата", "Автомобиль", "Вид работы", "Зарплата (ЗП)"].join(";"));
-
-        // 2. Данные строк
+        // 2. Наполнение данными
         records.forEach(record => {
             const dateStr = record.date ? moment(record.date).format('DD.MM.YYYY') : '—';
             const car = record.carModel || '—';
             const work = record.workTypeName || 'Не указано';
             const salary = record.salary || 0;
 
-            csvRows.push([dateStr, car, work, salary].join(";"));
+            let earned = 0;
+            let paid = 0;
+
+            if (salary > 0) {
+                earned = salary;
+                totalEarned += salary;
+            } else if (salary < 0) {
+                earned = 0;
+                paid = Math.abs(salary);
+                totalPaid += paid;
+            }
+
+            wsData.push([dateStr, car, work, earned, paid]);
         });
 
-        // 3. Пустая строка и Итого
-        csvRows.push(["", "", "", ""].join(";"));
+        // 3. Подвал таблицы
+        wsData.push([]);
+        wsData.push(["", "", "Остаток за предыдущий месяц:", previousBalance]);
+        wsData.push(["", "", "Промежуточные выплаты :", totalPaid]);
+        wsData.push(["", "", "Начислено за работы :", totalEarned]);
+        wsData.push(["", "", "ИТОГО К ВЫПЛАТЕ :", totalSalary]);
 
-        csvRows.push([
-            "",
-            "",
-            "Остаток за предыдущий месяц:",
-            previousBalance
-        ].join(";"));
+        // 4. Создаем рабочую книгу Excel
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
 
-        csvRows.push([
-            "",
-            "",
-            "Зарплата за работы:",
-            records.reduce((sum, record) => sum + (record.salary || 0), 0)
-        ].join(";"));
+        // ✅ ИСПРАВЛЕНИЕ 2: Явно указываем тип number[]
+        const objectMaxLength: number[] = [];
 
-        csvRows.push([
-            "",
-            "",
-            "ИТОГО К ВЫПЛАТЕ:",
-            totalSalary
-        ].join(";"));
+        wsData.forEach((row) => {
+            row.forEach((val, colIndex) => {
+                const valueLength = val ? val.toString().length : 0;
+                // Учитываем длину текста + даем небольшой запас в 3 символа
+                if (!objectMaxLength[colIndex] || valueLength > objectMaxLength[colIndex]) {
+                    objectMaxLength[colIndex] = valueLength;
+                }
+            });
+        });
 
-        // Превращаем в строку. \uFEFF — это BOM маркер для Excel, чтобы он сразу понял кодировку UTF-8
-        const csvString = '\uFEFF' + csvRows.join("\n");
+        // Применяем ширину к колонкам (добавляем +3 для красивых отступов)
+        ws['!cols'] = objectMaxLength.map(maxLen => ({ wch: maxLen + 3 }));
 
-        // Создаем Blob элемент и скачиваем файл
-        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
+        // 6. Сохраняем и скачиваем настоящий .xlsx файл
+        XLSX.utils.book_append_sheet(wb, ws, "Расчетный лист");
 
-        // Имя файла, например: Отчет_ЗП_ИВАНОВ_МАЙ.csv
-        const masterName = selectedMasterId
-            ? masters.find(m => m.id.toString() === selectedMasterId)?.lastName || 'Мастер'
-            : 'Мастер';
-
-        link.setAttribute("href", url);
-        link.setAttribute("download", `Отчет_ЗП_${masterName}_${monthLabel}.csv`);
-
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const masterName = currentMaster?.firstName || 'Мастер';
+        XLSX.writeFile(wb, `Расчетный_лист_${masterName}_${monthLabel}.xlsx`);
     };
     const saveBalance = async () => {
         await reportAPI.savePreviousBalance?.(
             Number(selectedMasterId),
-             moment(currentDate).year(),
-             moment(currentDate).month() + 1,
+            moment(currentDate).year(),
+            moment(currentDate).month() + 1,
             previousBalance
         );
     };
@@ -358,7 +354,8 @@ const MasterSalaryLog: React.FC = () => {
                         disabled={loading || records.length === 0}
                     >
                         {/* SVG-иконка зеленого Excel-файла с табличкой */}
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                             <polyline points="14 2 14 8 20 8"></polyline>
                             <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -376,11 +373,11 @@ const MasterSalaryLog: React.FC = () => {
                 <table className="report-table salary-log-table">
                     <thead>
                     <tr>
-                        <th style={{ width: '15%' }}>Дата</th>
-                        <th style={{ width: '25%' }}>Авто</th>
-                        <th style={{ width: '35%' }}>Вид работы</th>
-                        <th style={{ width: '10%' }}>ЗП</th>
-                        <th style={{ width: '15%' }}>Действия</th>
+                        <th style={{width: '15%'}}>Дата</th>
+                        <th style={{width: '25%'}}>Авто</th>
+                        <th style={{width: '35%'}}>Вид работы</th>
+                        <th style={{width: '10%'}}>ЗП</th>
+                        <th style={{width: '15%'}}>Действия</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -397,7 +394,10 @@ const MasterSalaryLog: React.FC = () => {
                                             <DatePicker
                                                 selected={editRecord.date}
                                                 locale={ru}
-                                                onChange={(date: Date | null) => editRecord && setEditRecord({ ...editRecord, date })}
+                                                onChange={(date: Date | null) => editRecord && setEditRecord({
+                                                    ...editRecord,
+                                                    date
+                                                })}
                                                 dateFormat="dd.MM.yyyy"
                                                 placeholderText="дд.мм.гггг"
                                                 className="inline-input"
@@ -415,7 +415,10 @@ const MasterSalaryLog: React.FC = () => {
                                             <input
                                                 type="text"
                                                 value={editRecord.workTypeName}
-                                                onChange={e => setEditRecord({...editRecord, workTypeName: e.target.value})}
+                                                onChange={e => setEditRecord({
+                                                    ...editRecord,
+                                                    workTypeName: e.target.value
+                                                })}
                                                 className="inline-input"
                                                 placeholder="Введите вид работы"
                                             />
@@ -424,7 +427,10 @@ const MasterSalaryLog: React.FC = () => {
                                             <input
                                                 type="number"
                                                 value={editRecord.salary}
-                                                onChange={e => setEditRecord({...editRecord, salary: Number(e.target.value)})}
+                                                onChange={e => setEditRecord({
+                                                    ...editRecord,
+                                                    salary: Number(e.target.value)
+                                                })}
                                                 className="inline-input"
                                             />
                                         </td>
@@ -479,7 +485,7 @@ const MasterSalaryLog: React.FC = () => {
                                 <DatePicker
                                     selected={newRecord.date}
                                     locale={ru}
-                                    onChange={(date: Date | null) => setNewRecord({ ...newRecord, date })}
+                                    onChange={(date: Date | null) => setNewRecord({...newRecord, date})}
                                     dateFormat="dd.MM.yyyy"
                                     placeholderText="дд.мм.гггг"
                                     className="inline-input"
