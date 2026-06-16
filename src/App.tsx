@@ -15,6 +15,7 @@ import MasterDetailReport from "./components/Reports/MasterDetailReport";
 import WorkTypeDictionaryManager from "./components/WorkTypeDictionaryManager/WorkTypeDictionaryManager";
 import MasterSalaryLog from "./components/MasterSalary/MasterSalaryLog";
 import Timesheet from "./components/Timesheet/Timesheet";
+import FinanceReport from "./components/FinanceReport/FinanceReport";
 
 function App() {
     return (
@@ -42,7 +43,8 @@ function App() {
                                 <Route path="/reports/master/:masterId" element={<MasterDetailReport />} />
                                 <Route path="/dictionaries/work-types" element={<WorkTypeDictionaryManager />} />
                                 <Route path="/reports/salary-log" element={<MasterSalaryLog />} />
-                                <Route path="/reports/time=sheet" element={<Timesheet />} />
+                                <Route path="/reports/time-sheet" element={<Timesheet />} />
+                                <Route path="/reports/finance-report" element={<FinanceReport />} />
                             </Route>
                         </Route>
 

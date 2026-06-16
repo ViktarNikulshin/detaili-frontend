@@ -36,12 +36,17 @@ const Navigation: React.FC = () => {
 
     const handleTimesheet = () => {
         setIsMenuOpen(false);
-        navigate('/reports/time=sheet');
+        navigate('/reports/time-sheet');
     }
 
     const handleCalendar = () => {
         setIsMenuOpen(false);
         navigate('/calendar');
+    }
+
+    const handleFinanceReport = () => {
+        setIsMenuOpen(false);
+        navigate('/reports/finance-report');
     }
 
     const handleReport = () => {
@@ -120,15 +125,18 @@ const Navigation: React.FC = () => {
                                 <div className="menu-item" onClick={handleTimesheet}>
                                     Табель
                                 </div>
-                                <div className="menu-item" onClick={handleReport}>
-                                    Отчет
+                                <div className="menu-item" onClick={handleFinanceReport}>
+                                    Отчет по безналу
                                 </div>
+                                {/*<div className="menu-item" onClick={handleReport}>*/}
+                                {/*    Отчет*/}
+                                {/*</div>*/}
                                 <div className="menu-item" onClick={handleUsersAndRoles}>
                                     Пользователи и роли
                                 </div>
-                                <div className="menu-item" onClick={handleWorkDictionary}>
-                                    Справочник работ
-                                </div>
+                                {/*<div className="menu-item" onClick={handleWorkDictionary}>*/}
+                                {/*    Справочник работ*/}
+                                {/*</div>*/}
                             </>
                         )}
                         <div className="menu-item logout-menu-item" onClick={handleLogoutAndClose}>

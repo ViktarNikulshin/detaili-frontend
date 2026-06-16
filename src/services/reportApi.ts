@@ -64,8 +64,32 @@ export const reportAPI = {
         // Сохранить/обновить весь табель за месяц
         saveTimesheetRecords: async (masterId: string, month: string, records: any[]) => {
             return reportApi.post(`/reports/timesheet`, { masterId, month, records });
-        }
+        },
+// Добавьте эти методы внутрь объекта export const reportAPI = { ... } в файле reportApi.ts
 
+    /**
+     * Получить данные по безналичным операциям за месяц (баланс + список записей)
+     */
+    getFinanceSummary: (year: number, month: number) =>
+        reportApi.get<{ startingBalance: number; records: any[] }>(`/finance/summary?year=${year}&month=${month}`),
+
+    /**
+     * Сохранить новую или обновить существующую финансовую операцию
+     */
+    saveFinanceRecord: (data: any) =>
+        reportApi.post('/finance/records', data),
+
+    /**
+     * Удалить финансовую операцию
+     */
+    deleteFinanceRecord: (id: number) =>
+        reportApi.delete(`/finance/records/${id}`),
+
+    /**
+     * Обновить баланс на начало отчетного периода
+     */
+    saveFinanceBalance: (year: number, month: number, amount: number) =>
+        reportApi.post(`/finance/balance?year=${year}&month=${month}&amount=${amount}`),
 
 
 };
