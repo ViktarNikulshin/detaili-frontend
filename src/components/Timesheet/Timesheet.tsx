@@ -220,7 +220,7 @@ const Timesheet: React.FC = () => {
                         {isSaving ? '⏳ Сохранение...' : '✓ Все изменения сохранены'}
                     </span>
                     <span className="total-label">ИТОГО:</span>
-                    <span className="total-value">{totalSumWithBalance} руб.</span>
+                    <span className="total-value">{Number(totalSumWithBalance).toFixed(2)} руб.</span>
                 </div>
             </div>
 
