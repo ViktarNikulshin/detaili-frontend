@@ -10,7 +10,7 @@ const Navigation: React.FC = () => {
     const location = useLocation(); // <-- Получаем объект текущего местоположения
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const isMaster = !!user?.roles?.some(role => role.name === 'MASTER');
+    const isNotMaster = !!user?.roles?.some(role => role.name === 'ADMIN' || role.name === 'MANAGER');
     const isAdmin = user?.roles?.some(r => r.name === 'ADMIN');
 
     // Проверяем, находится ли пользователь именно на странице календаря
@@ -93,7 +93,7 @@ const Navigation: React.FC = () => {
 
             {/* --- ИЗМЕНЕНО УСЛОВИЕ ОТОБРАЖЕНИЯ --- */}
             <div className="nav-actions">
-                {!isMaster && isCalendarPage && ( // Показываем, если НЕ мастер И страница календаря
+                {isNotMaster && isCalendarPage && ( // Показываем, если Админ И страница календаря
                     <button className="create-order-btn" onClick={handleCreateOrder}>
                         <span className="button-text-desktop">+ Создать заказ</span>
                         <span className="button-icon-mobile">+</span>
@@ -126,7 +126,7 @@ const Navigation: React.FC = () => {
                                     Табель
                                 </div>
                                 <div className="menu-item" onClick={handleFinanceReport}>
-                                    Отчет по безналу
+                                    Отчет по 💵
                                 </div>
                                 {/*<div className="menu-item" onClick={handleReport}>*/}
                                 {/*    Отчет*/}
