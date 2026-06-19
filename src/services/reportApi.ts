@@ -91,5 +91,20 @@ export const reportAPI = {
     saveFinanceBalance: (year: number, month: number, amount: number, type: string) =>
         reportApi.post(`/finance/balance?year=${year}&month=${month}&amount=${amount}&type=${type}`),
 
+    getActsSummary: (year: number, month: number) =>
+        reportApi.get<any[]>(`/reports/acts?year=${year}&month=${month}`),
+
+    /**
+     * Создать или обновить запись акта выполненных работ
+     */
+    saveActRecord: (data: any) =>
+        reportApi.post('/reports/acts', data),
+
+    /**
+     * Удалить запись акта по ID
+     */
+    deleteActRecord: (id: number) =>
+        reportApi.delete(`/reports/acts/${id}`),
+
 
 };

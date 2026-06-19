@@ -680,3 +680,13 @@ EXCEL EXPORT BUTTON
     border-radius: 4px;
     border: 1px solid #ccc;
 }
+/* Отключение стрелок (скролла) для числовых инпутов в компоненте актов */
+.report-table input[type="number"]::-webkit-outer-spin-button,
+.report-table input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.report-table input[type="number"] {
+    -moz-appearance: textfield; /* Для Firefox */
+}

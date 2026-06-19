@@ -730,3 +730,13 @@ EXCEL EXPORT BUTTON
 .report-table thead th[colspan] {
     border-bottom: 1px solid var(--border-light);
 }
+/* Отключение стрелок (скролла) для числовых инпутов в компоненте актов */
+.report-table input[type="number"]::-webkit-outer-spin-button,
+.report-table input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.report-table input[type="number"] {
+    -moz-appearance: textfield; /* Для Firefox */
+}

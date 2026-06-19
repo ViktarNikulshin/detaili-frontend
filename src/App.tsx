@@ -16,6 +16,7 @@ import WorkTypeDictionaryManager from "./components/WorkTypeDictionaryManager/Wo
 import MasterSalaryLog from "./components/MasterSalary/MasterSalaryLog";
 import Timesheet from "./components/Timesheet/Timesheet";
 import FinanceReport from "./components/FinanceReport/FinanceReport";
+import ActsAnalytics from "./components/ActsAnalytics/ActsAnalytics";
 
 function App() {
     return (
@@ -45,6 +46,7 @@ function App() {
                                 <Route path="/reports/salary-log" element={<MasterSalaryLog />} />
                                 <Route path="/reports/time-sheet" element={<Timesheet />} />
                                 <Route path="/reports/finance-report" element={<FinanceReport />} />
+                                <Route path="/reports/acts-report" element={<ActsAnalytics />} />
                             </Route>
                         </Route>
 

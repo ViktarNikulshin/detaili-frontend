@@ -1,0 +1,88 @@
+/* Подключение базовых переменных из общего стиля */
+.acts-analytics-container {
+    width: 100%;
+}
+
+/* Стилизация таблицы конкретно для актов */
+.acts-table th, .acts-table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Стилизация выпадающих списков селекта при редактировании */
+.inline-select {
+    width: 100%;
+    height: 32px;
+    background-color: #2a2a2a;
+    color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0 5px;
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+}
+
+.inline-select:focus {
+    border-color: var(--primary-green);
+}
+
+/* Красивые бэджи статусов для высокой читаемости */
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.paid {
+    background-color: rgba(40, 167, 69, 0.2);
+    color: #2ecc71;
+    border: 1px solid rgba(40, 167, 69, 0.4);
+}
+
+.status-badge.unpaid {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #ff6b6b;
+    border: 1px solid rgba(220, 53, 69, 0.4);
+}
+
+.status-badge.cash {
+    background-color: rgba(255, 183, 77, 0.2);
+    color: #ffb74d;
+    border: 1px solid rgba(255, 183, 77, 0.4);
+}
+
+/* Левая декоративная линия для виджетов статуса */
+.status-paid-widget {
+    border-left: 3px solid var(--success-green) !important;
+}
+
+.status-unpaid-widget {
+    border-left: 3px solid var(--error-red) !important;
+}
+
+.status-cash-widget {
+    border-left: 3px solid #ffb74d !important;
+}
+
+/* Кастомная стилизация чекбокса */
+.act-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--primary-green);
+}
+/* Отключение стрелок (скролла) для числовых инпутов в компоненте актов */
+.acts-analytics-container input[type="number"]::-webkit-outer-spin-button,
+.acts-analytics-container input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.acts-analytics-container input[type="number"] {
+    -moz-appearance: textfield; /* Для Firefox */
+}

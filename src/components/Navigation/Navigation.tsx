@@ -48,6 +48,10 @@ const Navigation: React.FC = () => {
         setIsMenuOpen(false);
         navigate('/reports/finance-report');
     }
+    const handleActsReport = () => {
+        setIsMenuOpen(false);
+        navigate('/reports/acts-report');
+    }
 
     const handleReport = () => {
         setIsMenuOpen(false);
@@ -127,6 +131,9 @@ const Navigation: React.FC = () => {
                                 </div>
                                 <div className="menu-item" onClick={handleFinanceReport}>
                                     Отчет по 💵
+                                </div>
+                                <div className="menu-item" onClick={handleActsReport}>
+                                    Аналитика по актам
                                 </div>
                                 {/*<div className="menu-item" onClick={handleReport}>*/}
                                 {/*    Отчет*/}
