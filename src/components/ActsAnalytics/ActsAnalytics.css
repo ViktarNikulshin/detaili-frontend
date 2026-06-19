@@ -27,33 +27,41 @@
     border-color: var(--primary-green);
 }
 
-/* Красивые бэджи статусов для высокой читаемости */
+/* ========================================================
+   ОБНОВЛЕННЫЕ ВЫСОКОКОНТРАСТНЫЕ СТАТУСЫ (ДЛЯ ТЕМНОЙ ТЕМЫ)
+   ======================================================== */
 .status-badge {
     display: inline-block;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 6px;          /* Чуть более строгие углы под стиль таблицы */
+    font-size: 11px;
+    font-weight: 700;            /* Максимальная жирность текста */
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
+    text-align: center;
+    min-width: 105px;            /* Фиксированная ширина, чтобы таблица не "плясала" */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25); /* Легкая тень для отделения от строки */
 }
 
+/* Статус: Оплачен (Насыщенный зеленый) */
 .status-badge.paid {
-    background-color: rgba(40, 167, 69, 0.2);
-    color: #2ecc71;
-    border: 1px solid rgba(40, 167, 69, 0.4);
+    background-color: #1b4332;   /* Глубокий плотный зеленый */
+    color: #52b788;              /* Яркий салатовый текст */
+    border: 1px solid #2d6a4f;
 }
 
+/* Статус: Не оплачен (Контрастный красный) */
 .status-badge.unpaid {
-    background-color: rgba(220, 53, 69, 0.2);
-    color: #ff6b6b;
-    border: 1px solid rgba(220, 53, 69, 0.4);
+    background-color: #4a151b;   /* Плотный бордово-красный */
+    color: #ff6b6b;              /* Насыщенный светлый чистый красный */
+    border: 1px solid #800f2f;
 }
 
+/* Статус: Наличные (Яркий янтарный/оранжевый) */
 .status-badge.cash {
-    background-color: rgba(255, 183, 77, 0.2);
-    color: #ffb74d;
-    border: 1px solid rgba(255, 183, 77, 0.4);
+    background-color: #482f0d;   /* Плотный коньячный оттенок */
+    color: #f7a01d;              /* Контрастный золотисто-оранжевый */
+    border: 1px solid #a66e1a;
 }
 
 /* Левая декоративная линия для виджетов статуса */
