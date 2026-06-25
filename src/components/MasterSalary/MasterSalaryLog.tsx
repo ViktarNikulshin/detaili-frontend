@@ -303,7 +303,8 @@ const MasterSalaryLog: React.FC = () => {
             Number(selectedMasterId),
             moment(currentDate).year(),
             moment(currentDate).month() + 1,
-            previousBalance
+            previousBalance,
+            0
         );
     };
 
