@@ -48,8 +48,8 @@ export const reportAPI = {
     },
 
 
-    savePreviousBalance: (masterId: number, year: number, month: number, previousBalance: number) => {
-        return reportApi.get(`/reports/masters-salary-balance/?id=${masterId}&year=${year}&month=${month}&previousBalance=${previousBalance}`);
+    savePreviousBalance: (masterId: number, year: number, month: number, previousBalance: number, interimPayments?: number) => {
+        return reportApi.get(`/reports/masters-salary-balance/?id=${masterId}&year=${year}&month=${month}&previousBalance=${previousBalance}&interimPayments=${interimPayments}`);
     },
     // Пример дополнения вашего reportAPI
 

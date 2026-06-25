@@ -24,8 +24,9 @@ const Timesheet: React.FC = () => {
     const [selectedMasterId, setSelectedMasterId] = useState<string>('');
     const [timesheet, setTimesheet] = useState<TimesheetDay[]>([]);
     const [previousBalance, setPreviousBalance] = useState<number>(0);
+    const [interimPayments, setInterimPayments] = useState<number>(0); // НОВЫЙ СТЕЙТ ДЛЯ ВЫПЛАТ
     const [loading, setLoading] = useState<boolean>(false);
-    const [isSaving, setIsSaving] = useState<boolean>(false); // Для фонового автосохранения
+    const [isSaving, setIsSaving] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
     const monthLabel = useMemo(() => {
@@ -60,7 +61,10 @@ const Timesheet: React.FC = () => {
             const daysInMonth = moment(date).daysInMonth();
 
             const response = await reportAPI.getTimesheetRecords(masterId, formattedMonth);
-            setPreviousBalance(response.data.previousBalance || 0);
+
+            // Загружаем баланс и выплаты из бэкенда
+            setPreviousBalance(response?.data?.previousBalance || 0);
+            setInterimPayments(response?.data?.interimPayments || 0); // Считываем выплаты
 
             const backendRecords: TimesheetDay[] = response?.data.records || [];
             const backendRecordsMap = new Map<string, TimesheetDay>(
@@ -99,12 +103,12 @@ const Timesheet: React.FC = () => {
         }
     }, []);
 
-    // Вызов загрузки данных при смене мастера или месяца (ОДИН оптимизированный useEffect)
+    // Вызов загрузки данных при смене мастера или месяца
     useEffect(() => {
         loadTimesheetData(selectedMasterId, currentDate);
     }, [selectedMasterId, currentDate, loadTimesheetData]);
 
-    // Унифицированная функция отправки данных на бэкенд (Автосохранение)
+    // Унифицированная функция отправки данных на бэкенд (Автосохранение строк)
     const executeAutosave = useCallback(async (targetTimesheet: TimesheetDay[]) => {
         if (!selectedMasterId) return;
         setIsSaving(true);
@@ -123,14 +127,14 @@ const Timesheet: React.FC = () => {
     const handlePrevMonth = () => setCurrentDate(prev => moment(prev).subtract(1, 'month').toDate());
     const handleNextMonth = () => setCurrentDate(prev => moment(prev).add(1, 'month').toDate());
 
-    // Изменение значений в инпутах (без мгновенной отправки на сервер во время печати)
+    // Изменение значений в инпутах таблицы
     const handleInputChange = (index: number, field: 'contentRub' | 'salaryRub', value: string) => {
         const updatedTimesheet = [...timesheet];
         updatedTimesheet[index] = { ...updatedTimesheet[index], [field]: value };
         setTimesheet(updatedTimesheet);
     };
 
-    // Срабатывает, когда пользователь закончил ввод в инпут и убрал фокус (onBlur)
+    // Сохранение строк по утере фокуса
     const handleInputBlur = () => {
         executeAutosave(timesheet);
     };
@@ -141,16 +145,15 @@ const Timesheet: React.FC = () => {
         updatedTimesheet[index] = {
             ...updatedTimesheet[index],
             isAbsent: checked,
-            // Если выставлено отсутствие, очищаем финансовые поля
             contentRub: checked ? '' : updatedTimesheet[index].contentRub,
             salaryRub: checked ? '' : updatedTimesheet[index].salaryRub
         };
 
         setTimesheet(updatedTimesheet);
-        executeAutosave(updatedTimesheet); // Передаем измененный массив напрямую, минуя задержку стейта
+        executeAutosave(updatedTimesheet);
     };
 
-    // Подсчет суммы за текущий табель
+    // Подсчет чистой суммы за текущий месяц (начисления по строкам)
     const currentMonthSum = useMemo(() => {
         return timesheet.reduce((sum, day) => {
             const content = Number(day.contentRub) || 0;
@@ -159,21 +162,27 @@ const Timesheet: React.FC = () => {
         }, 0);
     }, [timesheet]);
 
-    // Общая сумма с учетом предыдущего баланса
+    // ИЗМЕНЕННАЯ ФОРМУЛА: Учитываем промежуточные выплаты (вычитаем их)
     const totalSumWithBalance = useMemo(() => {
-        return currentMonthSum + previousBalance;
-    }, [currentMonthSum, previousBalance]);
+        return currentMonthSum + previousBalance - interimPayments;
+    }, [currentMonthSum, previousBalance, interimPayments]);
 
-    const saveBalance = async () => {
+    // Метод сохранения баланса И промежуточных выплат на бэкенд
+    const saveBalanceAndPayments = async () => {
         try {
+            setIsSaving(true);
             await reportAPI.savePreviousBalance?.(
                 Number(selectedMasterId),
                 moment(currentDate).year(),
                 moment(currentDate).month() + 1,
-                previousBalance
+                previousBalance,
+                interimPayments // Отправляем оба параметра на бэк
             );
         } catch (err) {
-            console.error("Ошибка сохранения баланса:", err);
+            console.error("Ошибка сохранения параметров баланса:", err);
+            setError("Не удалось сохранить настройки баланса/выплат.");
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -202,22 +211,35 @@ const Timesheet: React.FC = () => {
                     </select>
                 </div>
 
-                {/* Блок динамического остатка */}
+                {/* Блок остатка */}
                 <div className="previous-balance-container">
-                    <label>Остаток за предыдущий месяц:</label>
+                    <label>Остаток за прошлый месяц:</label>
                     <input
                         type="number"
                         value={previousBalance}
                         onChange={(e) => setPreviousBalance(Number(e.target.value) || 0)}
-                        onBlur={saveBalance}
+                        onBlur={saveBalanceAndPayments}
                         className="previous-balance-input"
                     />
                 </div>
 
-                {/* Блок итоговой суммы с индикатором статуса синхронизации */}
+                {/* НОВЫЙ БЛОК: Промежуточные выплаты (возле остатка) */}
+                <div className="previous-balance-container">
+                    <label>Промежуточные выплаты:</label>
+                    <input
+                        type="number"
+                        value={interimPayments}
+                        onChange={(e) => setInterimPayments(Number(e.target.value) || 0)}
+                        onBlur={saveBalanceAndPayments} // Сохраняем на бэк при выходе из инпута
+                        className="previous-balance-input interim-payments-input"
+                        placeholder="0"
+                    />
+                </div>
+
+                {/* Блок итоговой суммы */}
                 <div className="total-salary-display" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    <span style={{ fontSize: '12px', color: isSaving ? 'var(--primary-blue)' : 'var(--success-green)' }}>
-                        {isSaving ? '⏳ Сохранение...' : '✓ Все изменения сохранены'}
+                    <span style={{ fontSize: '12px', color: isSaving ? 'var(--primary-blue)' : 'var(--primary-blue)' }}>
+                        {isSaving ? '⏳ Сохранение...' : '✓ Изменения сохранены'}
                     </span>
                     <span className="total-label">ИТОГО:</span>
                     <span className="total-value">{Number(totalSumWithBalance).toFixed(2)} руб.</span>

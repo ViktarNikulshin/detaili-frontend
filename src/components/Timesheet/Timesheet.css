@@ -128,7 +128,8 @@
 
 /* Скрытие стандартных стрелочек (спиннеров) инпутов */
 .timesheet-table input::-webkit-outer-spin-button,
-.timesheet-table input::-webkit-inner-spin-button {
+.timesheet-table input::-webkit-inner-spin-button,
+.previous-balance-container input::-webkit-inner-spin-button{
     -webkit-appearance: none;
     margin: 0;
 }
