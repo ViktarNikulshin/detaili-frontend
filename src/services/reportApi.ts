@@ -106,5 +106,24 @@ export const reportAPI = {
     deleteActRecord: (id: number) =>
         reportApi.delete(`/reports/acts/${id}`),
 
-
+    /**
+     * Получить данные по арендодателю
+     */
+    getLandlordSummary: (year: number, month: number) =>
+        reportApi.get<{ previousBalance: number; additionalAgreement: number; records: any[] }>(`/reports/landlord?year=${year}&month=${month}`),
+    /**
+     * Сохранение данные по арендодателю
+     */
+    saveLandlordMeta: (data: any) =>
+        reportApi.put<{ previousBalance: number; additionalAgreement: number; records: any[] }>(`/reports/landlord/meta`, data),
+    /**
+     * Сохранение каждой услуги по арендодателю
+     */
+    saveLandlordRecord: (data: any) =>
+        reportApi.post<{ previousBalance: number; additionalAgreement: number; records: any[] }>(`/reports/landlord/records`, data),
+    /**
+     * Удаление каждой услуги по арендодателю
+     */
+    deleteLandlordRecord: (id: number) =>
+        reportApi.delete<{ previousBalance: number; additionalAgreement: number; records: any[] }>(`/reports/landlord/records/${id}`),
 };

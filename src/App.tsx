@@ -17,6 +17,7 @@ import MasterSalaryLog from "./components/MasterSalary/MasterSalaryLog";
 import Timesheet from "./components/Timesheet/Timesheet";
 import FinanceReport from "./components/FinanceReport/FinanceReport";
 import ActsAnalytics from "./components/ActsAnalytics/ActsAnalytics";
+import Landlord from "./components/Landlord/Landlord";
 
 function App() {
     return (
@@ -47,6 +48,7 @@ function App() {
                                 <Route path="/reports/time-sheet" element={<Timesheet />} />
                                 <Route path="/reports/finance-report" element={<FinanceReport />} />
                                 <Route path="/reports/acts-report" element={<ActsAnalytics />} />
+                                <Route path="/reports/landlord-report" element={<Landlord />} />
                             </Route>
                         </Route>
 
