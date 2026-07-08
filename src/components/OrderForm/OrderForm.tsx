@@ -286,7 +286,13 @@ const OrderForm: React.FC = () => {
                             <DatePicker
                                 selected={field.value ? parseISO(field.value) : null}
                                 locale={ru}
-                                onChange={(date: Date | null) => field.onChange(date ? format(date, "yyyy-MM-dd'T'HH:mm") : "")}
+                                onChange={(date: Date | null) => {
+                                    if (date) {
+                                        // Устанавливаем время по умолчанию, например 09:00
+                                        date.setHours(9, 0, 0, 0);
+                                    }
+                                    field.onChange(date ? format(date, "yyyy-MM-dd'T'HH:mm") : "");
+                                }}
                                 showTimeSelect timeFormat="HH:mm" dateFormat="dd.MM.yyyy HH:mm"
                                 placeholderText="Выберите дату поступления"
                                 className={errors.arrivalDate ? "error" : ""}
@@ -301,7 +307,12 @@ const OrderForm: React.FC = () => {
                             <DatePicker
                                 selected={field.value ? parseISO(field.value) : null}
                                 locale={ru}
-                                onChange={(date: Date | null) => field.onChange(date ? format(date, "yyyy-MM-dd'T'HH:mm") : "")}
+                                onChange={(date: Date | null) => {
+                                    if (date) {
+                                        date.setHours(19, 0, 0, 0);
+                                    }
+                                    field.onChange(date ? format(date, "yyyy-MM-dd'T'HH:mm") : "");
+                                }}
                                 showTimeSelect timeFormat="HH:mm" dateFormat="dd.MM.yyyy HH:mm"
                                 placeholderText="Выберите дату выдачи"
                                 className={errors.deliveryDate ? "error" : ""}

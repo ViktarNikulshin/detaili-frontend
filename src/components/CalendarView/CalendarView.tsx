@@ -87,12 +87,16 @@ const CalendarView: React.FC = () => {
                     const workColors: string[] = order.works
                         ?.map((w: any) => w.workType?.color || w.color)
                         .filter(Boolean) || [];
-
+                    const workName: string[] = order.works
+                        ?.map((w: any) => ' ' + w.workType?.name)
+                        .filter(Boolean) || [];
                     return {
                         id: order.id,
-                        title: `${order.clientName} - ${order.carBrand ?? ''}`,
+                        // eslint-disable-next-line no-useless-concat
+                        title: `${order.carBrand ?? ''}` + ' ' + workName,
                         start: order.arrivalDate,
                         end: order.deliveryDate,
+                        cost: order.orderCost,
                         extendedProps: {
                             clientName: order.clientName,
                             clientPhone: order.clientPhone,
@@ -124,6 +128,7 @@ const CalendarView: React.FC = () => {
             clientName: ev.extendedProps.clientName,
             clientPhone: ev.extendedProps.clientPhone,
             carBrand: ev.extendedProps.carBrand,
+            cost: ev.extendedProps.cost,
             works: ev.extendedProps.works,
             status: ev.extendedProps.status,
         });
@@ -277,21 +282,42 @@ const CalendarView: React.FC = () => {
                     eventContent={(eventInfo) => {
                         const colors: string[] = eventInfo.event.extendedProps.workColors || [];
                         return (
-                            <div className="fc-custom-event-card">
-                                <div className="fc-custom-colors-bar">
+                            <div className="fc-custom-event-card" style={{ position: 'relative', width: '100%', height: '100%', minHeight: '24px', overflow: 'hidden' }}>
+
+                                {/* ФОНОВЫЙ СЛОЙ: Растягивается на всю карточку */}
+                                <div className="fc-custom-bg-colors" style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    display: 'flex',
+                                    flexDirection: 'row', // 'row' - цвета делят карточку вертикально, 'column' - горизонтально
+                                    zIndex: 1
+                                }}>
                                     {colors.map((color, idx) => (
                                         <div
                                             key={idx}
-                                            style={{ backgroundColor: color }}
-                                            className="fc-custom-color-segment"
+                                            style={{ backgroundColor: color, flex: 1, height: '100%' }}
                                         />
                                     ))}
                                 </div>
-                                <div className="fc-custom-event-body">
-                                    <span className="fc-custom-event-title" title={eventInfo.event.title}>
-                                        {eventInfo.event.title}
-                                    </span>
+
+                                <div className="fc-custom-event-body" style={{
+                                    position: 'relative',
+                                    zIndex: 2,
+                                    padding: '4px 6px',
+                                    color: '#ffffff', // Белый цвет текста, чтобы читался на любом фоне
+                                    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)', // Тень для стопроцентной читаемости
+                                    height: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center'
+                                }}>
+                <span className="fc-custom-event-title" title={eventInfo.event.title} style={{ fontWeight: '500', fontSize: '12px', lineHeight: '1.2' }}>
+                    {eventInfo.event.title}
+                </span>
                                 </div>
+
                             </div>
                         );
                     }}

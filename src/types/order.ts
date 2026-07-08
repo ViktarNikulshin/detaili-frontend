@@ -33,6 +33,7 @@ export interface CalendarEvent {
     clientName: string;
     clientPhone: string;
     carBrand: string;
+    cost: number;
     status: string;
     works: Work[];
 }

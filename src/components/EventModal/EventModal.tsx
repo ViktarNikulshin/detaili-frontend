@@ -97,6 +97,7 @@ const EventModal: React.FC<EventModalProps> = ({
                     <p>Клиент: <strong>{event.clientName}</strong> ({event.clientPhone})</p>
                     <p>Автомобиль: <strong>{carBrandName || '—'}</strong></p>
                     <p>Статус: <span className={`status-tag status-${event.status.toLowerCase()}`}>{event.status}</span></p>
+                    <p>Стоимость: <strong>{event.cost}</strong> </p>
 
                     {/* Разделенные поля начала и конца работ */}
                     <p>Начало работ: <strong>{moment(event.start).format('DD.MM.YYYY HH:mm')}</strong></p>
@@ -110,6 +111,7 @@ const EventModal: React.FC<EventModalProps> = ({
                                 {event.works.map((w: any, idx: number) => {
                                     const workColor = w.workType?.color || w.color || '#3b82f6';
                                     const workName = w.workType?.name || w.name;
+                                    const workComment = w.workType?.comment || w.comment;
                                     return (
                                         <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px', fontSize: '14px' }}>
                                             <span
@@ -122,7 +124,7 @@ const EventModal: React.FC<EventModalProps> = ({
                                                     flexShrink: 0
                                                 }}
                                             />
-                                            <span>{workName}</span>
+                                            <span>{workName}</span> <p> {workComment}</p>
                                         </li>
                                     );
                                 })}
