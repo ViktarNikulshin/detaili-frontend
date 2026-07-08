@@ -4,10 +4,11 @@ export interface Order {
     id?: number;
     clientName: string;
     clientPhone: string;
-    carBrand: CarBrand | null;
+    carBrand: string;
     vin: string;
     works: Work[];
-    executionDate: string;
+    arrivalDate: string;
+    deliveryDate: string;
     beforePhoto?: File;
     afterPhoto?: File;
     status: 'NEW' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
@@ -31,14 +32,11 @@ export interface CalendarEvent {
     end: Date;
     clientName: string;
     clientPhone: string;
-    carBrand: CarBrand | null;
+    carBrand: string;
     status: string;
     works: Work[];
 }
-export interface CarBrand {
-    id: number;
-    name: string;
-}
+
 export interface Work {
     id?: number;
     workType: WorkType;
@@ -52,6 +50,7 @@ export interface WorkType {
     id: number;
     code: string;
     name: string;
+    color: string;
     active?: boolean
 }
 

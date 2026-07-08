@@ -1,5 +1,5 @@
 /* ========================================================= */
-/*  ПЕРЕМЕННЫЕ                                             */
+/* ПЕРЕМЕННЫЕ                                             */
 /* ========================================================= */
 :root {
     --bg-primary: rgba(51, 51, 51, 0.95);
@@ -13,242 +13,253 @@
     --accent-light: #adb5bd;
     --accent-shadow: rgba(108, 117, 125, 0.3);
 
-    --status-new: #4361ee;
-    --status-in-progress: #e67e22;
-    --status-completed: #2d6a4f;
-    --status-cancelled: #c1121f;
-
     --border: #16212b;
     --shadow: rgba(0, 0, 0, 0.3);
     --shadow-lg: rgba(0, 0, 0, 0.5);
 }
 
 /* ========================================================= */
-/*  ГЛОБАЛЬНЫЕ СБРОСЫ                                      */
+/* ГЛОБАЛЬНЫЕ СБРОСЫ                                      */
 /* ========================================================= */
-html, body, #root { height: 100%; margin: 0; }
+html, body, #root {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
 
 /* ========================================================= */
-/*  ОСНОВНАЯ РАЗМЕТКА                                      */
+/* СТРУКТУРА СТРАНИЦЫ                                      */
 /* ========================================================= */
 .calendar-container {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    height: 100vh; /* <-- ИЗМЕНЕНИЕ 1: Задаем строгую высоту */
-    box-sizing: border-box; /* <-- ИЗМЕНЕНИЕ 2: Учитываем padding в высоте */
-    padding: 20px;
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    font-family: "Segoe UI", sans-serif;
+    height: 100vh;
+    box-sizing: border-box;
+    background-color: var(--bg-primary);
+    padding: 20px 30px;
 }
 
-.calendar-wrapper { flex: 1; min-height: 0; }
-.calendar-header,
-.calendar-legend,
-.calendar-wrapper {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    box-shadow: 0 4px 12px var(--shadow);
-}
-
-/* ========================================================= */
-/*  ХЕДЕР                                                  */
-/* ========================================================= */
 .calendar-header {
     display: flex;
-    flex-wrap: wrap;
+    justify-content: space-between;
     align-items: center;
-    gap: 20px;
-    padding: 16px 20px;
+    margin-bottom: 20px;
+    flex-shrink: 0;
 }
 
 .calendar-header h1 {
-    margin: 0;
     font-size: 24px;
     font-weight: 600;
-    background: linear-gradient(90deg, var(--accent), var(--accent-light));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    margin: 0;
+    color: var(--text-primary);
 }
 
-/* ========================================================= */
-/*  ФИЛЬТРЫ                                                */
-/* ========================================================= */
 .calendar-filters {
     display: flex;
-    gap: 16px;
     align-items: center;
-    flex-wrap: wrap;
+    background: var(--bg-card);
+    padding: 10px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px var(--shadow);
 }
 
 .calendar-filters label {
-    font: 600 14px/1 "Segoe UI", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
     color: var(--text-secondary);
+    margin-right: 8px;
 }
 
 .calendar-filters select {
-    padding: 8px 14px;
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    background: var(--bg-hover);
+    background-color: var(--bg-primary);
     color: var(--text-primary);
-    font-size: 14px;
-    cursor: pointer;
-    transition: border-color .2s, box-shadow .2s;
-}
-
-.calendar-filters select:hover,
-.calendar-filters select:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 4px var(--accent-shadow);
-}
-
-.calendar-info {
-    margin-left: auto;
-    font-size: 14px;
-    color: var(--text-secondary);
-}
-
-/* ========================================================= */
-/*  ЛЕГЕНДА                                                */
-/* ========================================================= */
-.calendar-legend {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    padding: 12px 16px;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    color: var(--text-primary);
-}
-
-.legend-color {
-    width: 16px;
-    height: 16px;
+    border: 1px solid var(--border);
+    padding: 6px 12px;
     border-radius: 6px;
-    box-shadow: 0 1px 3px var(--shadow);
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
 }
 
-/* Градиенты легенд */
-.legend-color.new        { background: linear-gradient(135deg, var(--status-new), #5e7bff); }
-.legend-color.in-progress{ background: linear-gradient(135deg, var(--status-in-progress), #f39c12); }
-.legend-color.completed  { background: linear-gradient(135deg, var(--status-completed), #27ae60); }
-.legend-color.cancelled  { background: linear-gradient(135deg, var(--status-cancelled), #e74c3c); }
+.calendar-filters select:focus {
+    border-color: var(--accent-light);
+}
+
+.calendar-wrapper {
+    flex-grow: 1;
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 24px var(--shadow-lg);
+    overflow: hidden;
+    min-height: 0;
+}
 
 /* ========================================================= */
-/*  FULLCALENDAR — ОСНОВНОЕ                                */
+/* КАСТОМИЗАЦИЯ FULLCALENDAR                              */
 /* ========================================================= */
 .fc {
-    border-radius: 16px;
-    overflow: hidden;
-    /* УДАЛЕНО: height: 100% */
+    height: 100%;
+    --fc-border-color: var(--border);
+    --fc-button-text-color: var(--text-primary);
+    --fc-button-bg-color: var(--bg-toolbar);
+    --fc-button-border-color: var(--border);
+    --fc-button-hover-bg-color: var(--bg-hover);
+    --fc-button-hover-border-color: var(--accent);
+    --fc-button-active-bg-color: var(--bg-primary);
+    --fc-button-active-border-color: var(--accent-light);
 }
 
 /* Тулбар */
-.fc .fc-toolbar {
-    background: var(--bg-toolbar) !important;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border) !important;
-    border-radius: 12px 12px 0 0;
+.fc .fc-header-toolbar {
+    margin-bottom: 15px !important;
 }
 
-.fc .fc-toolbar-title {
-    font-size: 18px;
+.fc-toolbar-title {
+    font-size: 18px !important;
     font-weight: 600;
-    background: linear-gradient(90deg, var(--accent), var(--accent-light));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text-primary);
 }
 
 /* Кнопки */
-.fc .fc-button-primary {
-    background: var(--bg-card) !important;
-    color: var(--text-primary) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 8px !important;
+.fc .fc-button {
+    font-weight: 500;
     font-size: 14px;
-    padding: 6px 12px;
-    transition: all .2s;
+    padding: 6px 14px;
+    text-transform: capitalize;
+    border-radius: 6px;
+    transition: all 0.15s ease;
 }
 
-.fc .fc-button-primary:hover {
-    background: var(--accent) !important;
-    color: #fff !important;
-    border-color: var(--accent) !important;
+.fc .fc-button-group > .fc-button:not(:first-child) {
+    margin-left: 2px;
 }
 
-.fc .fc-button-primary:not(:disabled).fc-button-active {
-    background: linear-gradient(135deg, var(--accent), var(--accent-light)) !important;
-    color: #fff !important;
-    border-color: var(--accent) !important;
+/* Сетка и Ячейки */
+.fc-col-header-cell {
+    background-color: var(--bg-toolbar);
+    padding: 10px 0 !important;
 }
 
-/* Шапка дней */
-.fc .fc-col-header-cell {
-    background: var(--bg-hover);
-    border: 1px solid #363636 !important;
-    color: var(--accent-light);
+.fc-col-header-cell-cushion {
+    color: var(--text-primary) !important;
     font-weight: 600;
-    padding: 10px 0;
+    text-decoration: none !important;
 }
 
-/* Ячейки */
-.fc .fc-daygrid-day-frame,
-.fc .fc-timegrid-col {
-    position: relative; /* для событий */
+.fc-daygrid-day {
+    background-color: transparent;
 }
 
-.fc .fc-day-other {
-    background: var(--bg-hover);
-    opacity: .6;
+.fc-daygrid-day-number {
+    color: var(--text-secondary) !important;
+    padding: 8px !important;
+    font-weight: 500;
+    text-decoration: none !important;
 }
 
-.fc .fc-day-today {
-    background: rgba(108, 117, 125, .2) !important;
-    border: 2px solid var(--accent) !important;
-    border-radius: 8px;
+.fc-day-today {
+    background-color: rgba(108, 117, 125, 0.08) !important;
 }
 
-.fc .fc-timegrid-slot { border-color: #3a3838 !important; }
-.fc .fc-scrollgrid { border: 1px solid #5d5959 !important; }
+.fc-day-today .fc-daygrid-day-number {
+    color: var(--text-primary) !important;
+    font-weight: 700;
+}
+
+/* Таймлайн сетка во вкладке "Неделя/День" */
+.fc-timegrid-slot {
+    height: 45px !important;
+}
+
+.fc-timegrid-slot-label-cushion {
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+/* Повестка дня (список) */
+.fc-list-day-cushion {
+    background-color: var(--bg-toolbar) !important;
+}
+
+.fc-list-event:hover td {
+    background-color: var(--bg-hover) !important;
+}
 
 /* ========================================================= */
-/*  СОБЫТИЯ                                                */
+/* КАСТОМНЫЕ КАРТОЧКИ СОБЫТИЙ (ЦВЕТА УСЛУГ)                 */
 /* ========================================================= */
 .fc-event {
-    position: relative;
-    z-index: 2 !important;
-    border: none !important;
-    border-radius: 6px;
-    padding: 2px 6px;
-    font: 500 12px/1 "Segoe UI", sans-serif;
-    color: white !important;
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    padding: 0 !important; /* Важно: в ноль, чтобы полоска прилегала к краям карточки */
+    overflow: hidden !important; /* Скругляет углы вложенной цветной полоски */
     cursor: pointer;
-    box-shadow: 0 2px 6px var(--shadow);
-    transition: all .2s;
+    color: var(--text-primary) !important;
+    box-shadow: 0 2px 4px var(--shadow);
+    transition: all 0.2s ease;
 }
 
 .fc-event:hover {
-    opacity: .85;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px var(--shadow-lg);
 }
 
-/* Градиенты событий */
-.fc-event.event-status-NEW        { background: linear-gradient(135deg, var(--status-new), #5e7bff); }
-.fc-event.event-status-IN_PROGRESS{ background: linear-gradient(135deg, var(--status-in-progress), #f39c12); }
-.fc-event.event-status-COMPLETED  { background: linear-gradient(135deg, var(--status-completed), #27ae60); }
-.fc-event.event-status-CANCELLED  { background: linear-gradient(135deg, var(--status-cancelled), #e74c3c); }
+.fc-custom-event-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+/* Динамический индикатор сверху карточки */
+.fc-custom-colors-bar {
+    display: flex;
+    width: 100%;
+    height: 5px; /* Аккуратная премиальная толщина линии */
+    flex-shrink: 0;
+}
+
+/* Сегмент цвета (если в массиве несколько услуг, они поделят ширину поровну) */
+.fc-custom-color-segment {
+    flex: 1;
+    height: 100%;
+}
+
+/* Тело контейнера с текстом */
+.fc-custom-event-body {
+    padding: 5px 8px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Название заказа */
+.fc-custom-event-title {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+/* Для недельного/дневного календаря (TimeGrid): разрешаем перенос текста, если карточка вытянутая */
+.fc-timegrid-event .fc-custom-event-title {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
 
 /* ========================================================= */
-/*  СООБЩЕНИЯ                                              */
+/* СООБЩЕНИЯ                                              */
 /* ========================================================= */
 .loading,
 .error {
@@ -259,13 +270,12 @@ html, body, #root { height: 100%; margin: 0; }
     font-weight: 500;
 }
 
-.loading  { background: rgba(108, 117, 125, .15); color: var(--accent-light); border: 1px solid var(--accent); }
-.error    { background: rgba(193, 18, 31, .15); color: #ff6b6b; border: 1px solid var(--status-cancelled); }
+.loading {
+    background: rgba(108, 117, 125, .15);
+    color: var(--accent-light);
+}
 
-/* ========================================================= */
-/*  ХОВЕР ПО ЯЧЕЙКАМ                                       */
-/* ========================================================= */
-.fc-daygrid-day:hover .fc-daygrid-day-frame,
-.fc-timegrid-col:hover {
-    background: var(--bg-hover) !important;
+.error {
+    background: rgba(193, 18, 31, .15);
+    color: #ff6b6b;
 }

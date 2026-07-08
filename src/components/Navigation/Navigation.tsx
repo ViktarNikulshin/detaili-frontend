@@ -148,9 +148,9 @@ const Navigation: React.FC = () => {
                                 <div className="menu-item" onClick={handleUsersAndRoles}>
                                     Пользователи и роли
                                 </div>
-                                {/*<div className="menu-item" onClick={handleWorkDictionary}>*/}
-                                {/*    Справочник работ*/}
-                                {/*</div>*/}
+                                <div className="menu-item" onClick={handleWorkDictionary}>
+                                    Справочник работ
+                                </div>
                             </>
                         )}
                         <div className="menu-item logout-menu-item" onClick={handleLogoutAndClose}>

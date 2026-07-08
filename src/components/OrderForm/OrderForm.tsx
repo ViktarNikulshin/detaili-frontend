@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -7,9 +7,7 @@ import { orderAPI, OrderPayload } from "../../services/orderApi";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import "./OrderForm.css";
-import { userAPI } from "../../services/userApi";
-import { User } from "../../types/user";
-import { CarBrand, InfoSource, MasterAssignment, Order, Work, WorkType } from "../../types/order";
+import { WorkType } from "../../types/order";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format, parseISO } from "date-fns";
@@ -29,32 +27,10 @@ const PencilIcon = () => (
     </svg>
 );
 
-const RoleSchema = Yup.object().shape({
-    id: Yup.number().required(),
-    name: Yup.string().required(),
-});
-
-const UserSchema = Yup.object().shape({
-    id: Yup.number().required(),
-    username: Yup.string().required(),
-    firstName: Yup.string().required(),
-    lastName: Yup.string().required(),
-    phone: Yup.string().required(),
-    roles: Yup.array().of(RoleSchema).required(),
-});
-
-const InfoSourceSchema = Yup.object().shape({
-    id: Yup.number().required(),
-    name: Yup.string().optional(),
-    code: Yup.string().optional(),
-    active: Yup.boolean().optional(),
-}).nullable();
-
 const schema = Yup.object().shape({
     clientName: Yup.string().required("Введите имя клиента"),
     clientPhone: Yup.string().required("Введите телефон"),
-    carBrand: Yup.string().required("Выберите марку автомобиля"),
-    vin: Yup.string().nullable().optional().default(null),
+    carBrand: Yup.string().required("Введите марку автомобиля"),
     works: Yup.array()
         .of(
             Yup.object().shape({
@@ -63,37 +39,19 @@ const schema = Yup.object().shape({
                     id: Yup.number().required(),
                     name: Yup.string().required(),
                     code: Yup.string().required(),
+                    color: Yup.string().optional().nullable(),
                 }).required(),
-                parts: Yup.array().of(
-                    Yup.object().shape({
-                        id: Yup.number().required(),
-                        name: Yup.string().required(),
-                        code: Yup.string().required(),
-                    })
-                ).required(),
                 comment: Yup.string().nullable().optional(),
-                cost: Yup.number()
-                    .typeError("Укажите стоимость")
-                    .required("Укажите стоимость работы")
-                    .min(0, "Стоимость не может быть отрицательной"),
-                assignments: Yup.array().of(
-                    Yup.object().shape({
-                        master: UserSchema.required("Выберите мастера"),
-                        salaryPercent: Yup.number()
-                            .typeError("Укажите %")
-                            .required("Укажите процент")
-                            .min(0, "Процент не может быть отрицательным")
-                            .max(100, "Процент не может быть больше 100"),
-                    })
-                ).optional().default([]),
             })
         )
         .min(1, "Выберите хотя бы один тип работ")
         .required(),
-    infoSource: InfoSourceSchema,
-    executionDate: Yup.string().required("Укажите дату выполнения"),
-    orderCost: Yup.number().typeError("Введите стоимость заказа").required("Введите стоимость заказа").min(0, "Стоимость не может быть отрицательной"),
-    executionTimeByMaster: Yup.string().nullable().default(null),
+    arrivalDate: Yup.string().required("Укажите дату поступления авто"),
+    deliveryDate: Yup.string().required("Укажите дату выдачи авто"),
+    orderCost: Yup.number()
+        .typeError("Введите стоимость заказа")
+        .required("Введите стоимость заказа")
+        .min(0, "Стоимость не может быть отрицательной"),
 });
 
 type OrderFormValues = Yup.InferType<typeof schema>;
@@ -103,17 +61,10 @@ const OrderForm: React.FC = () => {
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState(false);
-    const [brands, setBrands] = useState<CarBrand[]>([]);
     const [allWorkTypes, setAllWorkTypes] = useState<WorkType[]>([]);
-    const [masters, setMasters] = useState<User[]>([]);
     const [editingCommentForWork, setEditingCommentForWork] = useState<number | null>(null);
-    const [infoSourcesDict, setInfoSourcesDict] = useState<InfoSource[]>([]);
-    const [dynamicWorkParts, setDynamicWorkParts] = useState<Record<number, WorkType[]>>({});
-    const [loadingParts, setLoadingParts] = useState<Record<number, boolean>>({});
     const [notification, setNotification] = useState<Notification>({ message: "", type: "success", visible: false });
     const [dictionariesLoaded, setDictionariesLoaded] = useState(false);
-    const dynamicWorkPartsRef = useRef(dynamicWorkParts);
-    dynamicWorkPartsRef.current = dynamicWorkParts;
 
     const {
         control,
@@ -129,52 +80,25 @@ const OrderForm: React.FC = () => {
             clientName: "",
             clientPhone: "",
             carBrand: "",
-            vin: null,
             works: [],
-            infoSource: null,
-            executionDate: "",
+            arrivalDate: "",
+            deliveryDate: "",
             orderCost: 0,
-            executionTimeByMaster: null,
         },
     });
 
     const selectedWorks = watch("works");
-    const selectedInfoSource = watch("infoSource");
 
     const showNotification = (message: string, type: "success" | "error") => {
         setNotification({ message, type, visible: true });
         setTimeout(() => setNotification(prev => ({ ...prev, visible: false })), 2000);
     };
 
-    const fetchPartsForWork = useCallback(async (workType: WorkType) => {
-        if (dynamicWorkPartsRef.current[workType.id] !== undefined) return;
-        if (!workType.code) return;
-
-        setLoadingParts(prev => ({ ...prev, [workType.id]: true }));
-        try {
-            const response = await orderAPI.getDictionaryByType(workType.code);
-            setDynamicWorkParts(prev => ({ ...prev, [workType.id]: response.data || [] }));
-        } catch (err) {
-            setDynamicWorkParts(prev => ({ ...prev, [workType.id]: [] }));
-        } finally {
-            setLoadingParts(prev => ({ ...prev, [workType.id]: false }));
-        }
-    }, []);
-
     useEffect(() => {
         const loadDictionaries = async () => {
             try {
-                const [brandsRes, workTypesRes, mastersRes, infoSourcesRes] = await Promise.all([
-                    orderAPI.getCarBrands(),
-                    orderAPI.getDictionaryByType("WORK_TYPE"),
-                    userAPI.getUsersByRole("MASTER"),
-                    orderAPI.getDictionaryByType("INFO"),
-                ]);
-
-                setBrands(brandsRes.data.sort((a: CarBrand, b: CarBrand) => a.name.localeCompare(b.name)));
+                const workTypesRes = await orderAPI.getDictionaryByType("WORK_TYPE");
                 setAllWorkTypes(workTypesRes.data);
-                setMasters(Array.isArray(mastersRes.data) ? mastersRes.data : [mastersRes.data]);
-                setInfoSourcesDict(infoSourcesRes.data);
                 setDictionariesLoaded(true);
             } catch (e) {
                 console.error("Ошибка при загрузке справочников:", e);
@@ -191,34 +115,20 @@ const OrderForm: React.FC = () => {
             setLoading(true);
             try {
                 const response = await orderAPI.getById(id);
-                const order: Order = response.data;
+                const order: any = response.data;
 
-                // Ensure we map assignment.master to full User from masters if possible
-                const processedWorks = order.works.map(work => ({
-                    ...work,
-                    assignments: work.assignments?.map(assignment => {
-                        // assignment.master might already be a User or an object with id
-                        const masterId = (assignment.master as any)?.id ?? assignment.master;
-                        const masterUser = masters.find(m => m.id === masterId);
-                        return {
-                            ...assignment,
-                            master: masterUser || (assignment.master as any),
-                        };
-                    }) || []
-                }));
-
-                // preload parts for each workType
-                await Promise.all(processedWorks.map(w => fetchPartsForWork(w.workType)));
-
-                const executionDate = order.executionDate ? format(parseISO(order.executionDate), "yyyy-MM-dd'T'HH:mm") : "";
+                const arrivalDate = order.arrivalDate ? format(parseISO(order.arrivalDate), "yyyy-MM-dd'T'HH:mm") : "";
+                const deliveryDate = order.deliveryDate ? format(parseISO(order.deliveryDate), "yyyy-MM-dd'T'HH:mm") : "";
 
                 reset({
-                    ...order,
-                    works: processedWorks,
-                    carBrand: order.carBrand?.id.toString() || "",
-                    infoSource: order.infoSource || null,
-                    executionDate,
-                } as unknown as OrderFormValues);
+                    clientName: order.clientName || "",
+                    clientPhone: order.clientPhone || "",
+                    carBrand: typeof order.carBrand === "object" ? order.carBrand?.name : order.carBrand || "",
+                    works: order.works || [],
+                    arrivalDate,
+                    deliveryDate,
+                    orderCost: order.orderCost || 0,
+                } as OrderFormValues);
             } catch (e) {
                 console.error("Ошибка загрузки заказа:", e);
             } finally {
@@ -227,18 +137,14 @@ const OrderForm: React.FC = () => {
         };
 
         loadOrder();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [id, dictionariesLoaded, reset, fetchPartsForWork, masters]);
+    }, [id, dictionariesLoaded, reset]);
 
     const onSubmit: SubmitHandler<OrderFormValues> = async (data) => {
         try {
-            const carBrandObj = brands.find(brand => brand.id.toString() === data.carBrand) || null;
             const dataToSend: OrderPayload = {
                 ...data,
-                carBrand: carBrandObj,
-                vin: data.vin || "",
-                infoSource: data.infoSource,
-            };
+                carBrand: data.carBrand,
+            } as unknown as OrderPayload;
 
             if (id) {
                 await orderAPI.update(id, dataToSend);
@@ -255,8 +161,7 @@ const OrderForm: React.FC = () => {
         }
     };
 
-    // Handlers
-    const handleWorkTypeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleWorkTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const workTypeId = Number(e.target.value);
         const isChecked = e.target.checked;
         const currentWorks = watch("works") || [];
@@ -264,83 +169,11 @@ const OrderForm: React.FC = () => {
         if (isChecked) {
             const workTypeToAdd = allWorkTypes.find(wt => wt.id === workTypeId);
             if (!workTypeToAdd) return;
-            const newWork: Work = { workType: workTypeToAdd, parts: [], comment: "", cost: 0, assignments: [] };
+            const newWork: any = { workType: workTypeToAdd, comment: "" };
             setValue("works", [...currentWorks, newWork], { shouldValidate: true });
-            if (workTypeToAdd.code && !dynamicWorkParts[workTypeToAdd.id]) {
-                await fetchPartsForWork(workTypeToAdd);
-            }
         } else {
             setValue("works", currentWorks.filter(w => w.workType.id !== workTypeId), { shouldValidate: true });
         }
-    };
-
-    const handleWorkPartChange = (workTypeId: number, partId: number, isChecked: boolean) => {
-        const currentWorks = watch("works") || [];
-        const workInForm = currentWorks.find(w => w.workType.id === workTypeId);
-        if (!workInForm) return;
-
-        const partsForThisWork = dynamicWorkParts[workTypeId] || [];
-        const partObject = partsForThisWork.find(p => p.id === partId);
-        if (!partObject) return;
-
-        const updatedParts = isChecked
-            ? [...workInForm.parts, partObject]
-            : workInForm.parts.filter(p => p.id !== partId);
-
-        setValue("works", currentWorks.map(w => w.workType.id === workTypeId ? { ...w, parts: updatedParts } : w), { shouldValidate: true });
-    };
-
-    const handleMasterAssignmentChange = (workIndex: number, master: User, isChecked: boolean) => {
-        const works = [...(watch("works") || [])];
-        const work = works[workIndex];
-        if (!work) return;
-
-        if (isChecked) {
-            // add assignment with default percent 0
-            const newAssignments = [...work.assignments, { master, salaryPercent: 0 }];
-            works[workIndex] = { ...work, assignments: newAssignments };
-        } else {
-            // remove assignment
-            const newAssignments = work.assignments.filter(a => a.master.id !== master.id);
-            works[workIndex] = { ...work, assignments: newAssignments };
-        }
-
-        setValue("works", works, { shouldValidate: true });
-    };
-
-    const handleSalaryPercentChange = (workIndex: number, masterId: number, rawPercentStr: string) => {
-        const regex = /^[0-9]*([.,])?[0-9]*$/;
-
-        if (rawPercentStr !== "" && !regex.test(rawPercentStr)) {
-            return;
-        }
-
-        const percentStr = rawPercentStr.replace(",", ".");
-
-        const works = [...(watch("works") || [])];
-        const work = works[workIndex];
-        if (!work) return;
-
-        const newAssignments = work.assignments.map(a =>
-            a.master.id === masterId ? { ...a, salaryPercent: percentStr as any } : a
-        );
-        works[workIndex] = { ...work, assignments: newAssignments };
-
-        setValue("works", works, { shouldValidate: false });
-    };
-
-    // Calculation helpers
-    const getMasterSum = (cost: number | undefined | null, percent: number | undefined | null) => {
-        const c = Number(cost || 0);
-        const p = Number(percent || 0);
-        const value = (c * p) / 100;
-        return Number(value.toFixed(2));
-    };
-
-    const getTotalForWork = (work: Work) => {
-        const cost = Number(work.cost || 0);
-        const total = (work.assignments || []).reduce((acc, a) => acc + getMasterSum(cost, a.salaryPercent), 0);
-        return total.toFixed(2);
     };
 
     if (loading && id) return <p>Загрузка заказа...</p>;
@@ -365,36 +198,15 @@ const OrderForm: React.FC = () => {
                     {errors.clientPhone && <span className="error-text">{errors.clientPhone.message}</span>}
                 </div>
 
-                {infoSourcesDict.length > 0 && (
-                    <div className="checkbox-group info-source-group">
-                        <label>Откуда узнали о нас (выберите один вариант):</label>
-                        <div className="checkbox-container">
-                            {infoSourcesDict.map((source) => (
-                                <div key={source.id} className="checkbox-item">
-                                    <input
-                                        type="radio"
-                                        name="infoSource"
-                                        id={`info-source-${source.id}`}
-                                        value={source.id}
-                                        checked={selectedInfoSource?.id === source.id}
-                                        onChange={() => setValue("infoSource", source, { shouldValidate: true })}
-                                    />
-                                    <label htmlFor={`info-source-${source.id}`}>{source.name}</label>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
                 <div className="form-group">
-                    <select {...register("carBrand")} className={errors.carBrand ? "error" : ""}>
-                        <option value="">Выберите марку автомобиля</option>
-                        {brands.map((brand) => (<option key={brand.id} value={brand.id}>{brand.name}</option>))}
-                    </select>
+                    <input
+                        type="text"
+                        placeholder="Марка автомобиля"
+                        {...register("carBrand")}
+                        className={errors.carBrand ? "error" : ""}
+                    />
                     {errors.carBrand && <span className="error-text">{errors.carBrand.message}</span>}
                 </div>
-
-                <input type="text" placeholder="VIN (необязательно)" {...register("vin")} />
 
                 <div className="checkbox-group">
                     <label>Тип работ:</label>
@@ -403,7 +215,6 @@ const OrderForm: React.FC = () => {
                             const workIndex = (selectedWorks || []).findIndex(w => w.workType.id === workType.id);
                             const workInForm = workIndex !== -1 ? (selectedWorks || [])[workIndex] : null;
                             const isChecked = !!workInForm;
-                            const workErrors = (errors.works?.[workIndex]) as any;
 
                             return (
                                 <div key={workType.id} className="work-type-wrapper">
@@ -416,6 +227,20 @@ const OrderForm: React.FC = () => {
                                                 checked={isChecked}
                                                 onChange={handleWorkTypeChange}
                                             />
+                                            {workType.color && (
+                                                <span
+                                                    className="work-type-color-badge"
+                                                    style={{
+                                                        display: "inline-block",
+                                                        width: "14px",
+                                                        height: "14px",
+                                                        borderRadius: "50%",
+                                                        backgroundColor: workType.color,
+                                                        marginRight: "8px",
+                                                        verticalAlign: "middle"
+                                                    }}
+                                                />
+                                            )}
                                             <label htmlFor={`work-type-${workType.id}`}>{workType.name}</label>
                                         </div>
 
@@ -444,113 +269,6 @@ const OrderForm: React.FC = () => {
                                             <button type="button" className="comment-save-btn" onClick={() => setEditingCommentForWork(null)}>Готово</button>
                                         </div>
                                     )}
-
-                                    {isChecked && workInForm && (
-                                        <div className="work-details-container">
-                                            <div className="form-group work-cost-container">
-                                                <label htmlFor={`work-cost-${workType.id}`}>Стоимость работы:</label>
-                                                <input
-                                                    id={`work-cost-${workType.id}`}
-                                                    type="number"
-                                                    placeholder="0"
-                                                    {...register(`works.${workIndex}.cost`, { valueAsNumber: true })}
-                                                    className={workErrors?.cost ? "error" : ""}
-                                                />
-                                                {workErrors?.cost && <span className="error-text">{workErrors.cost.message}</span>}
-                                            </div>
-
-                                            {(dynamicWorkParts[workType.id] || []).length > 0 && (
-                                                <div className="checkbox-group dynamic-parts-group">
-                                                    <label className="dynamic-parts-label">Выберите детали ({workType.name}):</label>
-                                                    {loadingParts[workType.id] ? (
-                                                        <p className="dynamic-parts-loading">Загрузка деталей...</p>
-                                                    ) : (
-                                                        <div className="checkbox-container small-checkbox-container">
-                                                            {(dynamicWorkParts[workType.id] || []).map((part) => (
-                                                                <div key={part.id} className="checkbox-item small-checkbox-item">
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        id={`part-${workType.id}-${part.id}`}
-                                                                        value={part.id}
-                                                                        checked={workInForm.parts.some(p => p.id === part.id)}
-                                                                        onChange={(e) => handleWorkPartChange(workType.id, part.id, e.target.checked)}
-                                                                    />
-                                                                    <label htmlFor={`part-${workType.id}-${part.id}`}>{part.name}</label>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-
-                                            {masters.length > 0 && (
-                                                <div className="master-assignment-section">
-                                                    <label>Назначить мастеров:</label>
-
-                                                    {masters.map(master => {
-                                                        const assignment = workInForm.assignments.find(a => a.master.id === master.id);
-                                                        const isMasterChecked = !!assignment;
-                                                        const assignmentIndex = workInForm.assignments.findIndex(a => a.master.id === master.id);
-                                                        const assignmentErrors = workErrors?.assignments?.[assignmentIndex] as any;
-                                                        const percent = assignment?.salaryPercent ?? 0;
-                                                        const masterSum = getMasterSum(Number(workInForm.cost || 0), percent);
-
-                                                        return (
-                                                            <div key={master.id} className="master-assignment-item">
-                                                                <div className="checkbox-item">
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        id={`master-${workType.id}-${master.id}`}
-                                                                        checked={isMasterChecked}
-                                                                        onChange={(e) => handleMasterAssignmentChange(workIndex, master, e.target.checked)}
-                                                                    />
-                                                                    <label htmlFor={`master-${workType.id}-${master.id}`}>{master.firstName} {master.lastName}</label>
-                                                                </div>
-
-                                                                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                                                    {isMasterChecked ? (
-                                                                        <>
-                                                                            <div className="percentage-input-container">
-                                                                                {/* register percent only if assignment exists */}
-                                                                                <input
-                                                                                    type="text"
-                                                                                    placeholder="%"
-                                                                                    {...register(`works.${workIndex}.assignments.${assignmentIndex}.salaryPercent`, {
-                                                                                        valueAsNumber: true,
-                                                                                        onChange: (e) => handleSalaryPercentChange(workIndex, master.id, String(e.target.value))
-                                                                                    })}
-                                                                                    className={assignmentErrors?.salaryPercent ? "error" : ""}
-                                                                                />
-                                                                            </div>
-                                                                            <div style={{ minWidth: 110, textAlign: "right" }}>
-                                                                                <div style={{ fontSize: 13, fontWeight: 600 }}>Сумма:</div>
-                                                                                <div>{masterSum.toFixed(2)} BYN</div>
-                                                                            </div>
-                                                                        </>
-                                                                    ) : (
-                                                                        <>
-                                                                            <div className="percentage-input-container">
-                                                                                <input type="text" placeholder="%" disabled />
-                                                                            </div>
-                                                                            <div style={{ minWidth: 110, textAlign: "right", color: "#6c757d" }}>
-                                                                                <div style={{ fontSize: 13, fontWeight: 600 }}>Сумма:</div>
-                                                                                <div>0.00 BYN</div>
-                                                                            </div>
-                                                                        </>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
-
-                                                    {/* Total per work */}
-                                                    <div style={{ marginTop: 12, fontWeight: 700 }}>
-                                                        Итого по мастерам: {getTotalForWork(workInForm)} BYN
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
                                 </div>
                             );
                         })}
@@ -561,29 +279,44 @@ const OrderForm: React.FC = () => {
                     )}
                 </div>
 
-                <div className="form-group order-form-date-cost">
-                    <div className="form-group-half">
-                        <label>Дата и время выполнения 📅:</label>
-                        <Controller name="executionDate" control={control} render={({ field }) => (
+                <div className="form-group order-form-dates" style={{ display: "flex", gap: "16px", marginBottom: "15px" }}>
+                    <div className="form-group-half" style={{ flex: 1 }}>
+                        <label>Дата поступления авто 📅:</label>
+                        <Controller name="arrivalDate" control={control} render={({ field }) => (
                             <DatePicker
                                 selected={field.value ? parseISO(field.value) : null}
                                 locale={ru}
                                 onChange={(date: Date | null) => field.onChange(date ? format(date, "yyyy-MM-dd'T'HH:mm") : "")}
                                 showTimeSelect timeFormat="HH:mm" dateFormat="dd.MM.yyyy HH:mm"
-                                placeholderText="Выберите дату"
-                                className={errors.executionDate ? "error" : ""}
+                                placeholderText="Выберите дату поступления"
+                                className={errors.arrivalDate ? "error" : ""}
                             />
                         )} />
-                        {errors.executionDate && <span className="error-text">{errors.executionDate.message}</span>}
+                        {errors.arrivalDate && <span className="error-text">{errors.arrivalDate.message}</span>}
                     </div>
 
-                    <div className="form-group-half">
-                        <label htmlFor="orderCost">Стоимость заказа:</label>
-                        <input id="orderCost" type="number"
-                               placeholder="Стоимость" {...register("orderCost", { valueAsNumber: true })}
-                               className={errors.orderCost ? "error" : ""} />
-                        {errors.orderCost && <span className="error-text">{errors.orderCost.message}</span>}
+                    <div className="form-group-half" style={{ flex: 1 }}>
+                        <label>Дата выдачи авто 📅:</label>
+                        <Controller name="deliveryDate" control={control} render={({ field }) => (
+                            <DatePicker
+                                selected={field.value ? parseISO(field.value) : null}
+                                locale={ru}
+                                onChange={(date: Date | null) => field.onChange(date ? format(date, "yyyy-MM-dd'T'HH:mm") : "")}
+                                showTimeSelect timeFormat="HH:mm" dateFormat="dd.MM.yyyy HH:mm"
+                                placeholderText="Выберите дату выдачи"
+                                className={errors.deliveryDate ? "error" : ""}
+                            />
+                        )} />
+                        {errors.deliveryDate && <span className="error-text">{errors.deliveryDate.message}</span>}
                     </div>
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="orderCost">Стоимость заказа:</label>
+                    <input id="orderCost" type="number"
+                           placeholder="Стоимость" {...register("orderCost", { valueAsNumber: true })}
+                           className={errors.orderCost ? "error" : ""} />
+                    {errors.orderCost && <span className="error-text">{errors.orderCost.message}</span>}
                 </div>
 
                 <button type="submit" disabled={loading}>{id ? "Обновить заказ" : "Сохранить заказ"}</button>

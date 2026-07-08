@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {CarBrand, InfoSource, Order, Work} from "../types/order";
+import {InfoSource, Order, Work} from "../types/order";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
@@ -18,10 +18,11 @@ interface CalendarFilters {
 export interface OrderPayload {
     clientName: string;
     clientPhone: string;
-    carBrand: CarBrand | null;
+    carBrand: string;
     vin: string;
     works: Work[]; // Changed from WorkPayload[] to Work[]
-    executionDate: string;
+    arrivalDate: string;
+    deliveryDate: string;
     orderCost: number;
     executionTimeByMaster?: string | null;
     infoSource?: InfoSource | null;

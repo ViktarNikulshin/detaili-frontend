@@ -10,23 +10,14 @@ export interface DictionaryRawItem extends WorkType {
 // --- Interface DTO for work types WITHOUT parts (для старых методов) ---
 export interface DictionaryItemDto extends WorkType {
     description?: string;
-    // Parts is removed from here if this DTO is only for WorkType metadata update
-    // If needed, it must be WorkType[], not DictionaryPartDto[]
-    parts?: WorkType[];
 }
 
 // --- NEW: Interface DTO for UPDATING WorkType and its Parts (combined save) ---
 export interface WorkTypeUpdateDto extends WorkType {
     description?: string;
     type: string; // <--- ДОБАВЛЕНО ЭТО ПОЛЕ
-    // Массив частей для отправки на сервер
-    parts: {
-        id?: number; // Optional for new parts
-        name: string;
-        code: string;
-        active: boolean; // Must be included
-        type: string; // Parent code (WorkType's code)
-    }[];
+    color: string;
+
 }
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
@@ -66,7 +57,7 @@ export const dictionaryApi = {
     /**
      * Добавление нового типа работы
      */
-    addWorkType: (name: string, code: string) => {
+    addWorkType: (name: string, code: string, color: string) => {
         return dictionaryAxios.post<DictionaryItemDto>(DICTIONARY_ENDPOINT, { name, code, type: 'WORK_TYPE' });
     },
 

@@ -92,7 +92,7 @@ const EventModal: React.FC<EventModalProps> = ({
                 <div className="modal-body">
                     {/* Основная информация о заказе */}
                     <p>Клиент: <strong>{event.clientName}</strong> ({event.clientPhone})</p>
-                    <p>Автомобиль: <strong>{event.carBrand?.name || '—'}</strong></p>
+                    <p>Автомобиль: <strong>{event.carBrand || '—'}</strong></p>
                     <p>Статус: <span className={`status-tag status-${event.status.toLowerCase()}`}>{event.status}</span>
                     </p>
                     <p>Время: <strong>{moment(event.start).format('DD.MM.YYYY HH:mm')} - {moment(event.end).format('HH:mm')}</strong>
