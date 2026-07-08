@@ -1,9 +1,9 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import './EventModal.css';
-import {CalendarEvent} from '../../types/order';
+import { CalendarEvent } from '../../types/order';
 import moment from 'moment';
-import {useAuth} from '../../contexts/AuthContext';
-import {orderAPI} from '../../services/orderApi';
+import { useAuth } from '../../contexts/AuthContext';
+import { orderAPI } from '../../services/orderApi';
 
 interface EventModalProps {
     isOpen: boolean;
@@ -11,7 +11,6 @@ interface EventModalProps {
     onClose: () => void;
     onEdit: () => void;
     onStatusChanged?: () => void;
-
 }
 
 const EventModal: React.FC<EventModalProps> = ({
@@ -21,7 +20,7 @@ const EventModal: React.FC<EventModalProps> = ({
                                                    onEdit,
                                                    onStatusChanged
                                                }) => {
-    const {user} = useAuth();
+    const { user } = useAuth();
     const [isTaking, setIsTaking] = useState(false);
     const [isCompleting, setIsCompleting] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
@@ -65,12 +64,11 @@ const EventModal: React.FC<EventModalProps> = ({
         if (!event || !window.confirm('Вы уверены, что хотите отменить этот заказ?')) return;
         try {
             setIsCancelling(true);
-            // Изменяем статус на CANCELLED (предполагая, что такой статус есть в API)
             await orderAPI.changeStatus(String(event.id), 'CANCELLED', String(user?.id));
-
             if (onStatusChanged) {
                 onStatusChanged();
             }
+            onClose();
         } catch (error) {
             console.error('Error cancelling order:', error);
             alert('Не удалось отменить заказ.');
@@ -80,6 +78,11 @@ const EventModal: React.FC<EventModalProps> = ({
     };
 
     if (!isOpen || !event) return null;
+
+    // Безопасное извлечение названия автомобиля (так как carBrand может быть объектом)
+    const carBrandName = typeof event.carBrand === 'object' && event.carBrand !== null
+        ? (event.carBrand as any).name
+        : event.carBrand;
 
     return (
         <div className="modal-overlay" onClick={onClose}>
@@ -92,61 +95,40 @@ const EventModal: React.FC<EventModalProps> = ({
                 <div className="modal-body">
                     {/* Основная информация о заказе */}
                     <p>Клиент: <strong>{event.clientName}</strong> ({event.clientPhone})</p>
-                    <p>Автомобиль: <strong>{event.carBrand || '—'}</strong></p>
-                    <p>Статус: <span className={`status-tag status-${event.status.toLowerCase()}`}>{event.status}</span>
-                    </p>
-                    <p>Время: <strong>{moment(event.start).format('DD.MM.YYYY HH:mm')} - {moment(event.end).format('HH:mm')}</strong>
-                    </p>
+                    <p>Автомобиль: <strong>{carBrandName || '—'}</strong></p>
+                    <p>Статус: <span className={`status-tag status-${event.status.toLowerCase()}`}>{event.status}</span></p>
 
-                    {/* NEW SECTION: Работы и ЗП мастеров */}
+                    {/* Разделенные поля начала и конца работ */}
+                    <p>Начало работ: <strong>{moment(event.start).format('DD.MM.YYYY HH:mm')}</strong></p>
+                    <p>Конец работ: <strong>{moment(event.end).format('DD.MM.YYYY HH:mm')}</strong></p>
+
+                    {/* Вывод массива заказанных услуг с их цветами */}
                     {event.works && event.works.length > 0 && (
-                        <div className="event-works">
-                            <h3>Работы:</h3>
-                            <ul>
-                                {event.works.map((work, workIndex) => (
-                                    <li key={workIndex}>
-                                        <p>
-                                            <strong>{work.workType.name}</strong>
-                                            {work.comment && ` (${work.comment})`}
-                                        </p>
-                                        <p>
-                                            <strong>Стоимость: {work.cost}</strong>
-                                        </p>
-
-                                        {work.assignments && work.assignments.length > 0 && (
-                                            <div className="master-assignments">
-                                                {work.assignments.map((assignment, assignmentIndex) => {
-                                                    // Расчет: (work.cost * assignment.salaryPercent) / 100
-                                                    const cost = work.cost || 0;
-                                                    const percent = assignment.salaryPercent || 0;
-                                                    const masterSalary = ((cost * percent) / 100).toFixed(2);
-
-                                                    return (
-                                                        <p key={assignmentIndex} className="master-earning-detail">
-                                                            Мастер:
-                                                            {assignment.master.firstName} {assignment.master.lastName}
-
-                                                            {/* Детали ЗП видны только Admin */}
-                                                            {isAdmin && (
-                                                                <small className="salary-info">
-                                                                    Процент: {percent}% :
-                                                                    (ЗП: <strong>{masterSalary}</strong>)
-                                                                </small>
-                                                            )}
-                                                            {!isAdmin &&
-                                                                <small className="salary-info-hidden">Назначен</small>}
-                                                        </p>
-                                                    );
-                                                })}
-                                            </div>
-                                        )}
-
-                                    </li>
-                                ))}
+                        <div className="modal-works-section" style={{ marginTop: '15px', paddingTop: '15px', borderTop: '1px solid #334155' }}>
+                            <p style={{ marginBottom: '8px', color: '#aaaaaa', fontWeight: '500' }}>Запланированные работы:</p>
+                            <ul className="modal-works-list" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                                {event.works.map((w: any, idx: number) => {
+                                    const workColor = w.workType?.color || w.color || '#3b82f6';
+                                    const workName = w.workType?.name || w.name;
+                                    return (
+                                        <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px', fontSize: '14px' }}>
+                                            <span
+                                                style={{
+                                                    display: 'inline-block',
+                                                    width: '10px',
+                                                    height: '10px',
+                                                    borderRadius: '50%',
+                                                    backgroundColor: workColor,
+                                                    flexShrink: 0
+                                                }}
+                                            />
+                                            <span>{workName}</span>
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </div>
                     )}
-
                 </div>
 
                 <div className="modal-footer">
@@ -170,14 +152,21 @@ const EventModal: React.FC<EventModalProps> = ({
                     )}
                     {isAdmin && event.status !== 'COMPLETED' && event.status !== 'CANCELLED' && event.status !== 'IN_PROGRESS' && (
                         <button
-                            className="cancel-button" // <-- Новый класс для стилей
+                            className="cancel-button"
                             onClick={handleCancel}
                             disabled={isCancelling}
                         >
                             {isCancelling ? 'Отмена…' : 'Отменить заказ'}
                         </button>
                     )}
-                    {!isMaster && <button className="edit-button" onClick={onEdit}>Редактировать</button>}
+
+                    {/* Кнопка редактирования доступна администраторам либо тем, кто не является исключительно мастером */}
+                    {(isAdmin || !isMaster) && (
+                        <button className="edit-button" onClick={onEdit}>
+                            Редактировать
+                        </button>
+                    )}
+
                     <button className="close-button-footer" onClick={onClose}>Закрыть</button>
                 </div>
             </div>

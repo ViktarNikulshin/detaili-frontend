@@ -84,8 +84,6 @@ const CalendarView: React.FC = () => {
                 );
 
                 const calendarEvents = response.data.map((order: Order) => {
-                    // Извлекаем цвета из массива работ.
-                    // Если у вас на бэке цвет лежит в workType, то: w.workType?.color, если в самой работе: w.color
                     const workColors: string[] = order.works
                         ?.map((w: any) => w.workType?.color || w.color)
                         .filter(Boolean) || [];
@@ -101,7 +99,7 @@ const CalendarView: React.FC = () => {
                             carBrand: order.carBrand,
                             works: order.works,
                             status: order.status,
-                            workColors: workColors.length > 0 ? workColors : ['#3b82f6'] // Дефолтный синий, если массив пуст
+                            workColors: workColors.length > 0 ? workColors : ['#3b82f6']
                         }
                     };
                 });
@@ -141,32 +139,50 @@ const CalendarView: React.FC = () => {
         calendarRef.current?.getApi().refetchEvents();
     };
 
+    /* ---------- ОБНОВЛЕННЫЙ ОБРАБОТЧИК ПЕРЕТАСКИВАНИЯ И РЕЦАЙЗА ---------- */
     const handleEventUpdate = async (info: any) => {
         const { event } = info;
         const id = event.id;
-        const newStart = moment(event.start).format('YYYY-MM-DDTHH:mm');
 
         try {
+            // 1. Получаем актуальный заказ с бэкенда, чтобы узнать изначальные параметры
             const { data: currentOrder } = await orderAPI.getById(id);
 
+            // 2. Рассчитываем новую дату начала заказа
+            const newStartMoment = moment(event.start);
+
+            // 3. Вычисляем новую дату окончания (deliveryDate)
+            let newEndStr: string;
+
+            if (event.end) {
+                // Если FullCalendar передает точную дату окончания (при ресайзе или корректном драге), используем её
+                newEndStr = moment(event.end).format('YYYY-MM-DDTHH:mm');
+            } else {
+                // Если по какой-то причине event.end отсутствует, вычисляем оригинальную длительность в мс и прибавляем к новой дате
+                const originalDurationMs = moment(currentOrder.deliveryDate).diff(moment(currentOrder.arrivalDate));
+                newEndStr = moment(newStartMoment).add(originalDurationMs, 'milliseconds').format('YYYY-MM-DDTHH:mm');
+            }
+
+            // 4. Формируем payload с сохраненной или обновленной длительностью
             const payload: OrderPayload = {
                 clientName: currentOrder.clientName,
                 clientPhone: currentOrder.clientPhone,
                 carBrand: currentOrder.carBrand,
                 vin: currentOrder.vin,
                 works: currentOrder.works,
-                arrivalDate: newStart,
-                deliveryDate: currentOrder.deliveryDate,
+                arrivalDate: newStartMoment.format('YYYY-MM-DDTHH:mm'),
+                deliveryDate: newEndStr, // Теперь дата окончания динамическая и корректная!
                 orderCost: currentOrder.orderCost,
                 executionTimeByMaster: currentOrder.executionTimeByMaster,
                 infoSource: currentOrder.infoSource,
             };
 
+            // 5. Отправляем изменения на бэкенд и обновляем календарную сетку
             await orderAPI.update(id, payload);
             calendarRef.current?.getApi().refetchEvents();
         } catch (err) {
             console.error('Ошибка обновления события:', err);
-            info.revert();
+            info.revert(); // Возвращаем карточку на место в интерфейсе, если бэкенд ответил ошибкой
         }
     };
 
@@ -244,8 +260,8 @@ const CalendarView: React.FC = () => {
                     locale="ru"
                     firstDay={1}
                     height="100%"
-                    slotMinTime="00:00:00"
-                    slotMaxTime="21:00:00"
+                    slotMinTime="09:00:00"
+                    slotMaxTime="19:00:00"
                     slotDuration="01:00:00"
                     editable={true}
                     eventDrop={handleEventUpdate}
@@ -258,12 +274,10 @@ const CalendarView: React.FC = () => {
                             id: 'orders-source',
                         },
                     ]}
-                    /* Кастомный рендеринг карточки события */
                     eventContent={(eventInfo) => {
                         const colors: string[] = eventInfo.event.extendedProps.workColors || [];
                         return (
                             <div className="fc-custom-event-card">
-                                {/* Динамическая цветная полоска сверху */}
                                 <div className="fc-custom-colors-bar">
                                     {colors.map((color, idx) => (
                                         <div
@@ -273,7 +287,6 @@ const CalendarView: React.FC = () => {
                                         />
                                     ))}
                                 </div>
-                                {/* Текстовое содержимое */}
                                 <div className="fc-custom-event-body">
                                     <span className="fc-custom-event-title" title={eventInfo.event.title}>
                                         {eventInfo.event.title}

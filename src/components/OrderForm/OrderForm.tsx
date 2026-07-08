@@ -154,7 +154,7 @@ const OrderForm: React.FC = () => {
                 showNotification("Заказ успешно создан!", "success");
             }
 
-            setTimeout(() => navigate("/"), 1000);
+            setTimeout(() => navigate("/calendar"), 1000);
         } catch (error) {
             console.error("Ошибка сохранения:", error);
             showNotification("Произошла ошибка при сохранении заказа!", "error");
