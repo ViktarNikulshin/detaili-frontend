@@ -282,19 +282,10 @@ const CalendarView: React.FC = () => {
                     eventContent={(eventInfo) => {
                         const colors: string[] = eventInfo.event.extendedProps.workColors || [];
                         return (
-                            <div className="fc-custom-event-card" style={{ position: 'relative', width: '100%', height: '100%', minHeight: '24px', overflow: 'hidden' }}>
+                            <div className="fc-custom-event-card">
 
-                                {/* ФОНОВЫЙ СЛОЙ: Растягивается на всю карточку */}
-                                <div className="fc-custom-bg-colors" style={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
-                                    right: 0,
-                                    bottom: 0,
-                                    display: 'flex',
-                                    flexDirection: 'row', // 'row' - цвета делят карточку вертикально, 'column' - горизонтально
-                                    zIndex: 1
-                                }}>
+                                {/* ФОНОВЫЙ СЛОЙ (Вертикальные полосы услуг) */}
+                                <div className="fc-custom-bg-colors">
                                     {colors.map((color, idx) => (
                                         <div
                                             key={idx}
@@ -303,17 +294,9 @@ const CalendarView: React.FC = () => {
                                     ))}
                                 </div>
 
-                                <div className="fc-custom-event-body" style={{
-                                    position: 'relative',
-                                    zIndex: 2,
-                                    padding: '4px 6px',
-                                    color: '#ffffff', // Белый цвет текста, чтобы читался на любом фоне
-                                    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)', // Тень для стопроцентной читаемости
-                                    height: '100%',
-                                    display: 'flex',
-                                    alignItems: 'center'
-                                }}>
-                <span className="fc-custom-event-title" title={eventInfo.event.title} style={{ fontWeight: '500', fontSize: '12px', lineHeight: '1.2' }}>
+                                {/* ТЕКСТОВЫЙ СЛОЙ — Управляется полностью из CalendarView.css */}
+                                <div className="fc-custom-event-body">
+                <span className="fc-custom-event-title" title={eventInfo.event.title}>
                     {eventInfo.event.title}
                 </span>
                                 </div>
