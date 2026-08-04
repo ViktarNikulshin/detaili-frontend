@@ -249,8 +249,8 @@ const CalendarView: React.FC = () => {
                     plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
                     initialView={isMaster ? 'timeGridWeek' : 'dayGridMonth'}
                     headerToolbar={{
-                        left: 'prev,next today',
-                        center: 'title',
+                        left: 'prev title next',
+                        center: '',
                         right: isMaster
                             ? 'timeGridWeek,timeGridDay'
                             : 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',

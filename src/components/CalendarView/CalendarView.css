@@ -1,29 +1,32 @@
 /* ========================================================= */
-/* ЦВЕТОВАЯ ПАЛИТРА И ПЕРЕМЕННЫЕ (Тотальный благородный зеленый) */
+/* ЦВЕТОВАЯ ПАЛИТРА И ПЕРЕМЕННЫЕ (Благородный зеленый)      */
 /* ========================================================= */
 :root {
     /* Фирменные зеленые акценты */
-    --primary-green: #4a826d;       /* Базовый зеленый из финансовых отчетов */
-    --dark-green: #254438;          /* Глубокий темно-зеленый (вместо голубого) */
-    --mint-green: #8ec4aa;          /* Контрастный светло-мятный для текста на темном фоне */
+    --primary-green: #4a826d;
+    --dark-green: #254438;
+    --mint-green: #8ec4aa;
 
     /* Текст */
-    --text-primary: #e0e0e0;        /* Светлый текст для темных подложек страницы */
-    --text-secondary: #1a3c47;      /* Темный контрастный текст для светлого тела календаря */
+    --text-primary: #e0e0e0;
+    --text-secondary: #1a3c47;
     --text-muted: #888888;
 
     /* Фоны */
-    --bg-main: rgba(51, 51, 51, 0.95);       /* Глубокий темно-серый фон страницы */
-    --bg-secondary: rgb(173 183 176 / 0.9);   /* Светлый серо-зеленый для подложки календаря */
-    --bg-header: #333333;                    /* Плотный серый для шапок таблиц */
+    --bg-main: rgba(51, 51, 51, 0.95);
+    --bg-secondary: rgba(173, 183, 176, 0.9);
+    --bg-header: #333333;
     --bg-input: #ffffff;
 
     /* Границы и тени */
     --border-color: rgba(74, 130, 109, 0.3);
     --border-light: rgba(255, 255, 255, 0.1);
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
     --shadow-md: 0 4px 12px rgba(74, 130, 109, 0.2);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
+
+    /* Компактные внешние отступы */
+    --calendar-padding: clamp(6px, 1.5vw, 12px);
+    --calendar-gap: 6px;
 }
 
 /* ========================================================= */
@@ -32,112 +35,126 @@
 html, body, #root {
     margin: 0;
     padding: 0;
-    height: 100%;
+    height: 100dvh;
     background-color: var(--bg-main);
     color: var(--text-primary);
     font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* ========================================================= */
-/* СТРУКТУРА СТРАРАНИЦЫ                                    */
+/* СТРУКТУРА СТРАНИЦЫ                                      */
 /* ========================================================= */
 .calendar-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 100dvh;
     box-sizing: border-box;
     background: var(--bg-main);
-    /* Зеленый глубокий градиент на фоне страницы */
     background-image: linear-gradient(
             135deg,
             rgba(74, 130, 109, 0.08),
             rgba(37, 68, 56, 0.15)
     );
-    padding: 35px;
-    gap: 20px;
+    padding: var(--calendar-padding);
+    gap: var(--calendar-gap);
+    overflow: hidden;
 }
 
+/* Сверхкомпактная заголовочная часть */
 .calendar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-shrink: 0;
+    gap: 8px;
 }
 
 .calendar-header h1 {
-    font-size: 24px;
+    font-size: clamp(16px, 3vw, 20px);
     font-weight: 700;
     margin: 0;
     letter-spacing: 0.5px;
     color: var(--text-primary);
 }
 
-/* Панель фильтров */
+/* 1. КОМПАКТНАЯ СЕКЦИЯ ФИЛЬТРОВ */
 .calendar-filters {
     display: flex;
     align-items: center;
     background: var(--bg-secondary);
-    padding: 12px 20px;
-    border-radius: 8px;
+    padding: 4px 10px; /* Минимальный вертикальный padding */
+    border-radius: 6px;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
-    gap: 12px;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .calendar-filters label {
-    font-size: 15px;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 600;
     color: var(--text-secondary);
+    white-space: nowrap;
 }
 
 .calendar-filters select {
     background: var(--bg-input);
     color: var(--text-secondary);
     border: 1px solid var(--border-color);
-    padding: 8px 30px 8px 14px;
+    padding: 3px 22px 3px 8px;
+    min-height: 28px; /* Уменьшено с 40px до 28px */
     border-radius: 4px;
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 600;
     outline: none;
     cursor: pointer;
     transition: all 0.2s ease;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234a826d' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%234a826d' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 10px center;
+    background-position: right 6px center;
 }
 
 .calendar-filters select:focus {
     border-color: var(--primary-green);
-    box-shadow: 0 0 0 3px rgba(74, 130, 109, 0.2);
 }
 
 /* Подложка календаря */
 .calendar-wrapper {
     flex-grow: 1;
     background: var(--bg-secondary);
-    border-radius: 8px;
-    padding: 20px;
+    border-radius: 6px;
+    padding: 6px; /* Минимальные отступы внутри подложки */
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-md);
     overflow: hidden;
     min-height: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 /* ========================================================= */
-/* КАСТОМИЗАЦИЯ FULLCALENDAR                              */
+/* 2. КОМПАКТНАЯ ПАНЕЛЬ И СЕТКА FULLCALENDAR                */
 /* ========================================================= */
 .fc {
     height: 100%;
+    width: 100%;
     --fc-border-color: rgba(74, 130, 109, 0.25);
 }
 
-/* Зеленый градиентный заголовок текущего месяца */
+/* Сжатие шапки переключателей в FullCalendar */
+.fc .fc-toolbar {
+    margin-bottom: 6px !important; /* Уменьшен отступ снизу от кнопок до сетки */
+    gap: 4px !important;
+}
+
+/* Компактный заголовок текущего месяца */
 .fc-toolbar-title {
-    font-size: 20px !important;
+    font-size: clamp(13px, 2.8vw, 16px) !important;
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 0.3px;
     text-transform: uppercase;
     background: linear-gradient(90deg, var(--dark-green), var(--primary-green));
     -webkit-background-clip: text;
@@ -145,15 +162,19 @@ html, body, #root {
     background-clip: text;
 }
 
-/* Кнопки управления (Теперь в темно-зеленом исполнении) */
+/* Компактные кнопки управления */
 .fc .fc-button {
     background: var(--dark-green) !important;
     border: none !important;
     color: #ffffff !important;
     border-radius: 4px !important;
-    padding: 6px 14px !important;
+    padding: 4px 8px !important; /* Минимальный padding внутри кнопок */
+    min-height: 28px !important;  /* Высота кнопок снижена до 28px */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 11px;
     text-transform: capitalize;
     box-shadow: var(--shadow-sm);
     transition: all 0.2s ease !important;
@@ -161,58 +182,45 @@ html, body, #root {
 
 .fc .fc-button:hover {
     background: var(--primary-green) !important;
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
 }
 
-.fc .fc-button:active {
-    transform: translateY(0);
-}
-
-/* Активные вкладки (Месяц, Неделя, День) */
 .fc .fc-button-primary:not(:disabled).fc-button-active,
 .fc .fc-button-primary:not(:disabled):active {
     background: var(--primary-green) !important;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.3) !important;
 }
 
 .fc .fc-button-group > .fc-button:not(:first-child) {
-    margin-left: 4px;
+    margin-left: 2px;
 }
 
-/* Шапка дней недели (Идеальный контраст на темной плашке) */
+/* Шапка дней недели */
 .fc-col-header-cell {
     background: var(--bg-header) !important;
-    padding: 12px 0 !important;
+    padding: 4px 0 !important;
     border-bottom: 2px solid var(--primary-green) !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .fc-col-header-cell-cushion {
-    color: var(--mint-green) !important; /* Мятный цвет отлично читается на темно-сером */
+    color: var(--mint-green) !important;
     text-transform: uppercase;
     font-weight: 600;
-    font-size: 13px;
-    letter-spacing: 0.5px;
+    font-size: 11px;
     text-decoration: none !important;
 }
 
-/* Числа месяцев */
-.fc-daygrid-day {
-    background-color: transparent;
-}
-
+/* Числа месяцев в ячейках */
 .fc-daygrid-day-number {
     color: var(--text-secondary) !important;
-    padding: 10px !important;
+    padding: 2px 4px !important;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 12px;
     text-decoration: none !important;
 }
 
 /* Подсветка текущего дня */
 .fc-day-today {
-    background-color: rgba(74, 130, 109, 0.18) !important;
+    background-color: rgba(74, 130, 109, 0.22) !important;
 }
 
 .fc-day-today .fc-daygrid-day-number {
@@ -222,45 +230,37 @@ html, body, #root {
 
 /* Временная сетка (Неделя / День) */
 .fc-timegrid-slot {
-    height: 48px !important;
+    height: 34px !important; /* Уменьшена высота временных слотов */
 }
 
 .fc-timegrid-slot-label-cushion {
     color: var(--text-secondary);
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 600;
 }
 
 /* Повестка дня (Список) */
 .fc-list-day-cushion {
     background-color: var(--bg-header) !important;
+    padding: 4px 8px !important;
 }
 
 .fc-list-day-text, .fc-list-day-side-text {
     color: var(--mint-green) !important;
     font-weight: 600;
-}
-
-.fc-list-event:hover td {
-    background-color: rgba(74, 130, 109, 0.1) !important;
+    font-size: 12px;
 }
 
 /* ========================================================= */
-/* КАРТОЧКИ ЗАКАЗОВ (СТРОГО ГОРИЗОНТАЛЬНЫЕ СЛОИ)            */
+/* КАРТОЧКИ ЗАКАЗОВ (СОБЫТИЯ)                                */
 /* ========================================================= */
 .fc-event {
     background-color: transparent !important;
     border: none !important;
-    border-radius: 6px !important;
+    border-radius: 3px !important;
     overflow: hidden !important;
     cursor: pointer;
     box-shadow: var(--shadow-sm);
-    transition: all 0.2s ease;
-}
-
-.fc-event:hover {
-    transform: translateY(-1.5px);
-    box-shadow: var(--shadow-md);
 }
 
 .fc-custom-event-card {
@@ -269,17 +269,13 @@ html, body, #root {
     width: 100%;
     height: 100%;
     position: relative;
-    min-height: 24px;
+    min-height: 18px;
     overflow: hidden;
 }
 
-/* Фоны: деление на горизонтальные строки (column) */
 .fc-custom-bg-colors {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     display: flex;
     flex-direction: column;
     z-index: 1;
@@ -290,45 +286,140 @@ html, body, #root {
     width: 100%;
 }
 
-/* Слой текста */
 .fc-custom-event-body {
     position: relative;
     z-index: 2;
-    padding: 4px 8px;
+    padding: 1px 4px;
     height: 100%;
     display: flex;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.28); /* Затемнение для идеального чтения белого текста */
-    backdrop-filter: blur(0.5px);
+    background-color: rgba(0, 0, 0, 0.35);
 }
 
 .fc-custom-event-title {
-    font-size: 12px;
+    font-size: 10px;
     font-weight: 600;
     color: #ffffff !important;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-    line-height: 1.2;
+    line-height: 1.1;
 }
 
-.fc-timegrid-event .fc-custom-event-title {
-    white-space: normal;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
+/* ========================================================= */
+/* МОБИЛЬНАЯ АДАПТАЦИЯ (СМАРТФОНЫ)                           */
+/* ========================================================= */
+@media (max-width: 768px) {
+    .calendar-container {
+        padding: 4px;
+        gap: 4px;
+    }
+
+    /* Фильтры располагаются в горизонтальную плотную строку */
+    .calendar-filters {
+        padding: 4px 6px;
+        gap: 6px;
+        justify-content: space-between;
+    }
+
+    .calendar-filters select {
+        flex: 1 1 auto;
+        min-width: 100px;
+    }
+
+    /* Панель кнопок календаря делится на 2 плотные строки вместо огромного стека */
+    .fc .fc-toolbar {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 4px !important;
+    }
+
+    .fc .fc-toolbar-chunk:nth-child(1) {
+        grid-column: 1;
+    }
+
+    .fc .fc-toolbar-chunk:nth-child(2) {
+        grid-column: 2;
+        text-align: center;
+    }
+
+    .fc .fc-toolbar-chunk:nth-child(3) {
+        grid-column: 1 / -1; /* Кнопки Месяц/Неделя/День встают плотной строкой снизу */
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2px;
+    }
+
+    .fc .fc-button {
+        padding: 4px 2px !important;
+        font-size: 10px;
+        flex: 1;
+    }
+}
+/* ========================================================= */
+/* ПРИНУДИТЕЛЬНО В ОДНУ СТРОКУ (FULLCALENDAR TOOLBAR)        */
+/* ========================================================= */
+
+/* 1. Контейнер шапки — отменяем переносы и сетки */
+.fc .fc-toolbar {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 4px !important;
+    margin-bottom: 6px !important;
+    width: 100% !important;
 }
 
-/* Системные статусы */
-.loading {
-    background: linear-gradient(135deg, rgba(74, 130, 109, 0.2), rgba(37, 68, 56, 0.15));
-    color: var(--mint-green);
-    border: 1px solid var(--border-color);
-    text-align: center;
-    padding: 20px;
-    border-radius: 8px;
-    margin: 20px 0;
-    font-weight: 500;
+/* 2. Левый и правый блоки шапки — внутри только в строку */
+.fc .fc-toolbar-chunk {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    gap: 2px !important;
+    flex-shrink: 1 !important;
+}
+
+/* 3. Название месяца — компактное, не переносится */
+.fc .fc-toolbar-title {
+    font-size: clamp(10px, 2.5vw, 13px) !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    margin: 0 3px !important;
+    line-height: 1 !important;
+}
+
+/* 4. Микро-кнопки для сохранения места */
+.fc .fc-button {
+    padding: 3px 5px !important;
+    font-size: 10px !important;
+    min-height: 26px !important;
+    white-space: nowrap !important;
+    border-radius: 4px !important;
+}
+
+/* 5. Группа кнопок (Месяц/Неделя/День) */
+.fc .fc-button-group {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+}
+
+/* 6. Сброс мобильных медиа-запросов, которые разбивали шапку на колонки */
+@media (max-width: 768px) {
+    .fc .fc-toolbar {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        grid-template-columns: none !important;
+    }
+
+    .fc .fc-toolbar-chunk:nth-child(3) {
+        grid-column: auto !important;
+        margin-top: 0 !important;
+        width: auto !important;
+    }
 }
