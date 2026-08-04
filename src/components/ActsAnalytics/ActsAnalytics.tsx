@@ -6,17 +6,8 @@ import { ru } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { reportAPI } from '../../services/reportApi';
 import './ActsAnalytics.css';
+import {ActRow} from "../../types/report";
 
-interface ActRow {
-    id?: number;
-    date: string; // Формат YYYY-MM-DD
-    client: string; // Заказчик
-    carModel: string; // Машина
-    amount: number; // Сумма
-    phone: string; // Кон. телефон
-    status: 'PAID' | 'UNPAID' | 'CASH'; // Статус (Оплачен, Не оплачен, Наличные)
-    hasDocuments: boolean; // Наличие док (чекбокс)
-}
 
 const ActsAnalytics: React.FC = () => {
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -46,8 +37,8 @@ const ActsAnalytics: React.FC = () => {
             const year = moment(date).year();
             const month = moment(date).month() + 1;
 
-            const response = await reportAPI.getActsSummary?.(year, month) || { data: [] };
-            setRecords(response.data || []);
+            const response = await reportAPI.getActsSummary?.(year, month) || { ActRecord: [] };
+            setRecords(response.data);
             setError(null);
         } catch (err) {
             setError('Не удалось загрузить аналитику по актам.');

@@ -171,12 +171,13 @@ const Timesheet: React.FC = () => {
     const saveBalanceAndPayments = async () => {
         try {
             setIsSaving(true);
-            await reportAPI.savePreviousBalance?.(
+            await reportAPI.saveSalaryBalance?.(
                 Number(selectedMasterId),
                 moment(currentDate).year(),
                 moment(currentDate).month() + 1,
                 previousBalance,
-                interimPayments // Отправляем оба параметра на бэк
+                interimPayments,
+                true// Отправляем оба параметра на бэк
             );
         } catch (err) {
             console.error("Ошибка сохранения параметров баланса:", err);

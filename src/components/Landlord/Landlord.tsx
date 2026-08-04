@@ -7,33 +7,16 @@ import { ru } from 'date-fns/locale';
 import { format } from 'date-fns';
 import './Landlord.css';
 import { reportAPI } from "../../services/reportApi";
+import { LandlordRecord, LandlordSummary } from "../../types/report";
 
-// Типы подстроенные под Backend DTO
-interface LandlordRecord {
-    id?: number;
-    date: Date | null;
-    carModel: string;
-    workTypeName: string;
-    cost: number;
-}
-
-interface UpdateMetaRequest {
-    year: number;
-    month: number;
-    previousBalance: number;
-    additionalAgreement: number;
-}
-
-// Структура запроса для сохранения/обновления записи
-interface SaveRecordRequest {
-    id: number | null;
-    year: number;
-    month: number;
-    date: string;
-    carModel: string;
-    workTypeName: string;
-    cost: number;
-}
+// Вспомогательное значение для пустой новой записи
+const INITIAL_NEW_RECORD: LandlordRecord = {
+    id: null,
+    date: new Date(),
+    carModel: '',
+    workTypeName: '',
+    cost: 0
+};
 
 const LandlordReconciliationLog: React.FC = () => {
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -45,9 +28,7 @@ const LandlordReconciliationLog: React.FC = () => {
 
     // Состояния для добавления новой строки
     const [isAdding, setIsAdding] = useState<boolean>(false);
-    const [newRecord, setNewRecord] = useState<LandlordRecord>({
-        date: new Date(), carModel: '', workTypeName: '', cost: 0
-    });
+    const [newRecord, setNewRecord] = useState<LandlordRecord>(INITIAL_NEW_RECORD);
 
     // Состояния для редактирования существующей строки
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -77,7 +58,7 @@ const LandlordReconciliationLog: React.FC = () => {
             const response = await reportAPI.getLandlordSummary(year, month);
 
             // Преобразуем строки дат из бэкенда в объекты JS Date для DatePicker
-            const formattedRecords = response.data.records.map((r: any) => ({
+            const formattedRecords = (response.data.records || []).map((r: any) => ({
                 ...r,
                 date: r.date ? moment(r.date).toDate() : null
             }));
@@ -101,11 +82,12 @@ const LandlordReconciliationLog: React.FC = () => {
     const saveMonthlyMeta = async () => {
         const year = moment(currentDate).year();
         const month = moment(currentDate).month() + 1;
-        const data: UpdateMetaRequest = {
+        const data: LandlordSummary = {
             year,
             month,
             previousBalance,
-            additionalAgreement
+            additionalAgreement,
+            records // Добавлено поле records для соответствия типу LandlordSummary
         };
         try {
             await reportAPI.saveLandlordMeta(data);
@@ -118,7 +100,10 @@ const LandlordReconciliationLog: React.FC = () => {
     // Включение режима редактирования строки
     const handleEdit = (record: LandlordRecord) => {
         setEditingId(record.id || null);
-        setEditRecord({ ...record });
+        setEditRecord({
+            ...record,
+            date: record.date ? new Date(record.date) : null
+        });
     };
 
     // Отмена редактирования
@@ -138,11 +123,11 @@ const LandlordReconciliationLog: React.FC = () => {
         const month = moment(currentDate).month() + 1;
 
         try {
-            const payload: SaveRecordRequest = {
+            const payload: LandlordRecord = {
                 id: editRecord.id || null,
                 year,
                 month,
-                date: format(editRecord.date, "yyyy-MM-dd"),
+                date: format(new Date(editRecord.date), "yyyy-MM-dd"),
                 carModel: editRecord.carModel,
                 workTypeName: editRecord.workTypeName,
                 cost: Number(editRecord.cost)
@@ -169,11 +154,11 @@ const LandlordReconciliationLog: React.FC = () => {
         const month = moment(currentDate).month() + 1;
 
         try {
-            const payload: SaveRecordRequest = {
-                id: null, // Для новой записи id пустой
+            const payload: LandlordRecord = {
+                id: null,
                 year,
                 month,
-                date: format(newRecord.date, "yyyy-MM-dd"),
+                date: format(new Date(newRecord.date), "yyyy-MM-dd"),
                 carModel: newRecord.carModel,
                 workTypeName: newRecord.workTypeName,
                 cost: Number(newRecord.cost)
@@ -183,7 +168,7 @@ const LandlordReconciliationLog: React.FC = () => {
             await fetchLandlordData(currentDate);
 
             setIsAdding(false);
-            setNewRecord({ date: new Date(), carModel: '', workTypeName: '', cost: 0 });
+            setNewRecord(INITIAL_NEW_RECORD);
         } catch (err) {
             console.error("Ошибка при создании записи:", err);
             alert("Не удалось сохранить новую запись");
@@ -204,7 +189,6 @@ const LandlordReconciliationLog: React.FC = () => {
 
     return (
         <div className="report-container salary-logging-container">
-            {/* ШАПКА ФИЛЬТРОВ И МЕТАДАННЫХ */}
             <div className="salary-filters" style={{ justifyContent: 'flex-start' }}>
                 <div className="month-navigation-inline">
                     <button className="arrow-btn" onClick={() => setCurrentDate(moment(currentDate).subtract(1, 'M').toDate())}> &larr; </button>
@@ -268,9 +252,9 @@ const LandlordReconciliationLog: React.FC = () => {
                                     <>
                                         <td>
                                             <DatePicker
-                                                selected={editRecord.date}
+                                                selected={editRecord.date ? new Date(editRecord.date) : null}
                                                 locale={ru}
-                                                onChange={(date) => setEditRecord({ ...editRecord, date })}
+                                                onChange={(date: Date | null) => setEditRecord({ ...editRecord, date })}
                                                 dateFormat="dd.MM.yyyy"
                                                 className="inline-input"
                                             />
@@ -324,9 +308,9 @@ const LandlordReconciliationLog: React.FC = () => {
                         <tr className="editable-row">
                             <td>
                                 <DatePicker
-                                    selected={newRecord.date}
+                                    selected={newRecord.date ? new Date(newRecord.date) : null}
                                     locale={ru}
-                                    onChange={(date) => setNewRecord({ ...newRecord, date })}
+                                    onChange={(date: Date | null) => setNewRecord({ ...newRecord, date })}
                                     dateFormat="dd.MM.yyyy"
                                     className="inline-input"
                                 />

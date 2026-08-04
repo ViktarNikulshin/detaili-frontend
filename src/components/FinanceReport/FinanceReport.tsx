@@ -6,20 +6,7 @@ import { ru } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { reportAPI } from '../../services/reportApi';
 import './FinanceReport.css';
-
-interface FinanceRow {
-    id?: number;
-    date: string;
-    income: number;
-    expUtilities: number;
-    expRent: number;
-    expMaterials: number;
-    expCredit: number;
-    expSalary: number;
-    expTaxes: number;
-    expOther: number;
-    financeType?: 'NON_CASH' | 'CASH';
-}
+import {FinanceRow} from "../../types/report";
 
 const FinanceReport: React.FC = () => {
     const [currentDate, setCurrentDate] = useState<Date>(new Date());

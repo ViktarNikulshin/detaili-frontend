@@ -299,12 +299,13 @@ const MasterSalaryLog: React.FC = () => {
         XLSX.writeFile(wb, `Расчетный_лист_${masterName}_${monthLabel}.xlsx`);
     };
     const saveBalance = async () => {
-        await reportAPI.savePreviousBalance?.(
+        await reportAPI.saveSalaryBalance?.(
             Number(selectedMasterId),
             moment(currentDate).year(),
             moment(currentDate).month() + 1,
             previousBalance,
-            0
+            0,
+            false
         );
     };
 

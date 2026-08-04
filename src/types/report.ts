@@ -77,3 +77,66 @@ export interface DayRecord {
     salaryRub: number | string;
 }
 
+/**
+ * Общая финансовая запись (безналичные операции)
+ */
+export interface FinanceRow {
+    id?: number;
+    date: string;
+    income: number;
+    expUtilities: number;
+    expRent: number;
+    expMaterials: number;
+    expCredit: number;
+    expSalary: number;
+    expTaxes: number;
+    expOther: number;
+    financeType?: 'NON_CASH' | 'CASH';
+}
+
+export interface FinanceSummary {
+    startingBalance: number;
+    records: FinanceRow[];
+}
+
+/**
+ * Запись акта выполненных работ
+ */
+export interface ActRow {
+    id?: number;
+    date: string; // Формат YYYY-MM-DD
+    client: string; // Заказчик
+    carModel: string; // Машина
+    amount: number; // Сумма
+    phone: string; // Кон. телефон
+    status: 'PAID' | 'UNPAID' | 'CASH'; // Статус (Оплачен, Не оплачен, Наличные)
+    hasDocuments: boolean; // Наличие док (чекбокс)
+}
+
+/**
+ * Запись по арендодателю (услуга/операция)
+ */
+export interface LandlordRecord {
+    id?: number | null;
+    year?: number;
+    month?: number;
+    date: Date | string | null; // Позволяет использовать и Date для DatePicker, и string
+    carModel: string;
+    workTypeName: string;
+    cost: number;
+}
+
+export interface LandlordSummary {
+    year: number;
+    month: number;
+    previousBalance: number;
+    additionalAgreement: number;
+    records?: LandlordRecord[]; // Помечено как опциональное, если бэк его не требует при сохранении
+}
+
+export interface TimesheetResponse {
+    previousBalance: number;
+    interimPayments?: number;
+    records: DayRecord[];
+}
+
