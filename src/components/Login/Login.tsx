@@ -4,6 +4,7 @@ import {useAuth} from '../../contexts/AuthContext';
 import {authAPI} from '../../services/authApi';
 import './Login.css';
 import logo from "../asserts/fd6cad63-cb26-4d08-bcf6-0c4f7d152eed.jpg";
+import {isMasterUser} from "../../utils/auth";
 
 const Login: React.FC = () => {
     const [credentials, setCredentials] = useState({
@@ -14,17 +15,23 @@ const Login: React.FC = () => {
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
-    const {login, isAuthenticated} = useAuth();
+    // Достаем user изAuthContext
+    const {login, isAuthenticated, user} = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Перенаправляем если уже авторизован
+    // Вспомогательная функция определения целевого пути по роли
+    const getTargetPath = (userData: any) => {
+        return isMasterUser(userData) ? '/calendar' : '/';
+    };
+
+    // Перенаправляем, если уже авторизован
     useEffect(() => {
         if (isAuthenticated) {
-            const targetPath = '/';
+            const targetPath = getTargetPath(user);
             navigate(targetPath, {replace: true});
         }
-    }, [isAuthenticated, navigate, location]);
+    }, [isAuthenticated, user, navigate, location]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const {name, value} = e.target;
@@ -33,17 +40,14 @@ const Login: React.FC = () => {
             [name]: value
         }));
 
-        // Очищаем ошибку при изменении поля
         if (error) setError('');
     };
-
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
-        // Валидация
         if (!credentials.username.trim() || !credentials.password.trim()) {
             setError('Все поля обязательны для заполнения');
             setLoading(false);
@@ -54,8 +58,8 @@ const Login: React.FC = () => {
             const response = await authAPI.login(credentials);
             login(response.token, response.user);
 
-            // Перенаправляем на главную страницу
-            const targetPath = '/';
+            // Перенаправляем в зависимости от роли из ответа авторизации
+            const targetPath = getTargetPath(response.user);
             navigate(targetPath, {replace: true});
 
         } catch (err: any) {

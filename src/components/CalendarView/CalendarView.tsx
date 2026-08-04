@@ -247,12 +247,12 @@ const CalendarView: React.FC = () => {
                 <FullCalendar
                     ref={calendarRef}
                     plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-                    initialView={isMaster ? 'timeGridWeek' : 'dayGridMonth'}
+                    initialView={'dayGridMonth'}
                     headerToolbar={{
                         left: 'prev title next',
                         center: '',
                         right: isMaster
-                            ? 'timeGridWeek,timeGridDay'
+                            ? 'dayGridMonth,timeGridWeek,timeGridDay'
                             : 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
                     }}
                     buttonText={{

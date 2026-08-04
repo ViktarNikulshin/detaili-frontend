@@ -24,29 +24,33 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-    const [user, setUser] = useState<User | null>(null);
-
-    // src/contexts/AuthContext.tsx
+    // 1. Инициализируем user СРАЗУ из localStorage, а не null
+    const [user, setUser] = useState<User | null>(() => {
+        const userDataStr = localStorage.getItem('user');
+        if (userDataStr) {
+            try {
+                return JSON.parse(userDataStr);
+            } catch (e) {
+                return null;
+            }
+        }
+        return null;
+    });
 
     useEffect(() => {
         const token = localStorage.getItem('token');
         const userDataStr = localStorage.getItem('user');
 
         if (token && userDataStr) {
-
             const validate = async () => {
                 try {
-                    // 1. Ждем результат проверки
                     const isValid = await authAPI.validateToken(token);
-
                     if (isValid) {
-                        // 2. Только если токен валиден, устанавливаем пользователя
                         const userData = JSON.parse(userDataStr);
                         setUser(userData);
                     } else {
-                        // 3. Если токен невалиден - выходим
                         console.warn('Initial token validation failed.');
-                        logout(); // Вызовет authAPI.logout() и setUser(null)
+                        logout();
                     }
                 } catch (error) {
                     console.error('Error parsing user data or validating token:', error);
@@ -54,10 +58,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 }
             };
 
-            validate(); // Запускаем асинхронную проверку
-
+            validate();
         }
-    }, []); // Пустой массив зависимостей - все верно
+    }, []);
 
     const login = (token: string, userData: User) => {
         localStorage.setItem('token', token);

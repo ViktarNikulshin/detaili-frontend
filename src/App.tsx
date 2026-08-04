@@ -18,6 +18,7 @@ import Timesheet from "./components/Timesheet/Timesheet";
 import FinanceReport from "./components/FinanceReport/FinanceReport";
 import ActsAnalytics from "./components/ActsAnalytics/ActsAnalytics";
 import Landlord from "./components/Landlord/Landlord";
+import {IndexRedirect} from "./components/IndexRedirect/IndexRedirect";
 
 function App() {
     return (
@@ -33,7 +34,7 @@ function App() {
                         <Route element={<ProtectedRoute />}>
                             <Route path="/" element={<Layout />}>
                                 {/* Здесь все маршруты теперь защищены! */}
-                                <Route index element={<MasterSalaryLog />} />
+                                <Route index element={<IndexRedirect />} />
                                 <Route path="/calendar" element={<CalendarView />} />
                                 <Route path="orders/new" element={<OrderForm />} />
                                 <Route path="orders/:id" element={<OrderForm />} />
