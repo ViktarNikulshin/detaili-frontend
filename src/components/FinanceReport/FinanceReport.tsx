@@ -6,7 +6,7 @@ import { ru } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { reportAPI } from '../../services/reportApi';
 import './FinanceReport.css';
-import {FinanceRow} from "../../types/report";
+import { FinanceRow } from "../../types/report";
 
 const FinanceReport: React.FC = () => {
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -19,7 +19,16 @@ const FinanceReport: React.FC = () => {
 
     const [isAdding, setIsAdding] = useState<boolean>(false);
     const [newRow, setNewRow] = useState<FinanceRow>({
-        date: format(new Date(), "yyyy-MM-dd"), income: 0, expUtilities: 0, expRent: 0, expMaterials: 0, expCredit: 0, expSalary: 0, expTaxes: 0, expOther: 0
+        date: format(new Date(), "yyyy-MM-dd"),
+        income: 0,
+        expUtilities: 0,
+        expRent: 0,
+        expMaterials: 0,
+        expCredit: 0,
+        expSalary: 0,
+        expTaxes: 0,
+        expAdvertising: 0,
+        expOther: 0
     });
 
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -62,7 +71,17 @@ const FinanceReport: React.FC = () => {
 
     const totals = useMemo(() => {
         const sums = {
-            income: 0, utilities: 0, rent: 0, materials: 0, credit: 0, salary: 0, taxes: 0, other: 0, totalExpense: 0, finalBalance: 0
+            income: 0,
+            utilities: 0,
+            rent: 0,
+            materials: 0,
+            credit: 0,
+            salary: 0,
+            taxes: 0,
+            advertising: 0,
+            other: 0,
+            totalExpense: 0,
+            finalBalance: 0
         };
 
         records.forEach(r => {
@@ -73,10 +92,11 @@ const FinanceReport: React.FC = () => {
             sums.credit += (r.expCredit || 0);
             sums.salary += (r.expSalary || 0);
             sums.taxes += (r.expTaxes || 0);
+            sums.advertising += (r.expAdvertising || 0);
             sums.other += (r.expOther || 0);
         });
 
-        sums.totalExpense = sums.utilities + sums.rent + sums.materials + sums.credit + sums.salary + sums.taxes + sums.other;
+        sums.totalExpense = sums.utilities + sums.rent + sums.materials + sums.credit + sums.salary + sums.taxes + sums.advertising + sums.other;
         sums.finalBalance = startingBalance + sums.income - sums.totalExpense;
 
         return sums;
@@ -115,7 +135,18 @@ const FinanceReport: React.FC = () => {
             await reportAPI.saveFinanceRecord({ ...newRow, financeType: activeTab });
             await fetchFinanceData(currentDate, activeTab);
             setIsAdding(false);
-            setNewRow({ date: format(new Date(), "yyyy-MM-dd"), income: 0, expUtilities: 0, expRent: 0, expMaterials: 0, expCredit: 0, expSalary: 0, expTaxes: 0, expOther: 0 });
+            setNewRow({
+                date: format(new Date(), "yyyy-MM-dd"),
+                income: 0,
+                expUtilities: 0,
+                expRent: 0,
+                expMaterials: 0,
+                expCredit: 0,
+                expSalary: 0,
+                expTaxes: 0,
+                expAdvertising: 0,
+                expOther: 0
+            });
         } catch (err) {
             alert('Ошибка при добавлении записи');
             console.error(err);
@@ -139,14 +170,14 @@ const FinanceReport: React.FC = () => {
             {/* СТРОКА НАВИГАЦИИ, ПЕРЕКЛЮЧАТЕЛЯ И БАЛАНСОВ */}
             <div className="salary-filters" style={{ gap: '20px', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
 
-                {/* 1. Навигация по месяцам */}
+                {/* Навигация по месяцам */}
                 <div className="month-navigation-inline" style={{ margin: 0 }}>
                     <button className="arrow-btn" onClick={handlePrevMonth}> &larr; </button>
                     <span className="month-label" style={{ minWidth: '150px', textAlign: 'center' }}>{monthLabel}</span>
                     <button className="arrow-btn" onClick={handleNextMonth}> &rarr; </button>
                 </div>
 
-                {/* 2. Компактный переключатель Нал / Безнал */}
+                {/* Переключатель Нал / Безнал */}
                 <div className="compact-type-switcher" style={{
                     display: 'inline-flex',
                     background: '#2d2d2d',
@@ -196,7 +227,7 @@ const FinanceReport: React.FC = () => {
                     </button>
                 </div>
 
-                {/* 3. Баланс на начало */}
+                {/* Начальный баланс */}
                 <div className="previous-balance-container" style={{ margin: 0 }}>
                     <label style={{ marginRight: '8px' }}>Начальный баланс:</label>
                     <input
@@ -209,7 +240,7 @@ const FinanceReport: React.FC = () => {
                     />
                 </div>
 
-                {/* 4. Общий итоговый баланс */}
+                {/* Общий итоговый баланс */}
                 <div className="total-salary-display" style={{ margin: 0 }}>
                     <span className="total-label">ОБЩИЙ БАЛАНС:</span>
                     <span className="total-value" style={{ marginLeft: '8px', color: totals.finalBalance >= 0 ? 'var(--primary-green)' : 'var(--error-red)' }}>
@@ -231,6 +262,7 @@ const FinanceReport: React.FC = () => {
                 {activeTab === 'NON_CASH' && <div className="summary-widget expense"><span className="widget-title">Кредит</span><span className="widget-amount">{totals.credit.toFixed(2)}</span></div>}
                 <div className="summary-widget expense"><span className="widget-title">З/п</span><span className="widget-amount">{totals.salary.toFixed(2)}</span></div>
                 {activeTab === 'NON_CASH' && <div className="summary-widget expense"><span className="widget-title">Налоги</span><span className="widget-amount">{totals.taxes.toFixed(2)}</span></div>}
+                {activeTab === 'NON_CASH' && <div className="summary-widget expense"><span className="widget-title">Реклама</span><span className="widget-amount">{totals.advertising.toFixed(2)}</span></div>}
                 <div className="summary-widget expense"><span className="widget-title">Прочее</span><span className="widget-amount">{totals.other.toFixed(2)}</span></div>
             </div>
 
@@ -241,8 +273,8 @@ const FinanceReport: React.FC = () => {
                     <tr>
                         <th rowSpan={2} style={{ width: '10%', verticalAlign: 'middle' }}>Дата</th>
                         <th rowSpan={2} style={{ width: '12%', verticalAlign: 'middle' }}>Приход</th>
-                        {/* Динамический colSpan: 3 для наличных, 7 для безналичных */}
-                        <th colSpan={activeTab === 'CASH' ? 3 : 7} style={{ width: '60%' }}>Расход</th>
+                        {/* colSpan: 3 для наличных, 8 для безналичных */}
+                        <th colSpan={activeTab === 'CASH' ? 3 : 8} style={{ width: '60%' }}>Расход</th>
                         <th rowSpan={2} style={{ width: '18%', verticalAlign: 'middle' }}>Действия</th>
                     </tr>
                     <tr>
@@ -252,6 +284,7 @@ const FinanceReport: React.FC = () => {
                         {activeTab === 'NON_CASH' && <th>Кредит</th>}
                         <th>З/п</th>
                         {activeTab === 'NON_CASH' && <th>Налоги</th>}
+                        {activeTab === 'NON_CASH' && <th>Реклама</th>}
                         <th>Прочее</th>
                     </tr>
                     </thead>
@@ -275,9 +308,10 @@ const FinanceReport: React.FC = () => {
                                     {activeTab === 'NON_CASH' && <td><input type="number" value={editRow.expUtilities || ''} onChange={e => setEditRow({ ...editRow, expUtilities: Number(e.target.value) })} className="inline-input" /></td>}
                                     {activeTab === 'NON_CASH' && <td><input type="number" value={editRow.expRent || ''} onChange={e => setEditRow({ ...editRow, expRent: Number(e.target.value) })} className="inline-input" /></td>}
                                     <td><input type="number" value={editRow.expMaterials || ''} onChange={e => setEditRow({ ...editRow, expMaterials: Number(e.target.value) })} className="inline-input" /></td>
-                                    {activeTab === 'NON_CASH' && <td><input type="number" value={editRow.expCredit || editRow.expCredit || ''} onChange={e => setEditRow({ ...editRow, expCredit: Number(e.target.value) })} className="inline-input" /></td>}
+                                    {activeTab === 'NON_CASH' && <td><input type="number" value={editRow.expCredit || ''} onChange={e => setEditRow({ ...editRow, expCredit: Number(e.target.value) })} className="inline-input" /></td>}
                                     <td><input type="number" value={editRow.expSalary || ''} onChange={e => setEditRow({ ...editRow, expSalary: Number(e.target.value) })} className="inline-input" /></td>
                                     {activeTab === 'NON_CASH' && <td><input type="number" value={editRow.expTaxes || ''} onChange={e => setEditRow({ ...editRow, expTaxes: Number(e.target.value) })} className="inline-input" /></td>}
+                                    {activeTab === 'NON_CASH' && <td><input type="number" value={editRow.expAdvertising || ''} onChange={e => setEditRow({ ...editRow, expAdvertising: Number(e.target.value) })} className="inline-input" /></td>}
                                     <td><input type="number" value={editRow.expOther || ''} onChange={e => setEditRow({ ...editRow, expOther: Number(e.target.value) })} className="inline-input" /></td>
                                     <td className="action-icons-cell">
                                         <button onClick={handleSaveEdit} className="icon-btn save-icon" title="Сохранить">💾</button>
@@ -297,6 +331,7 @@ const FinanceReport: React.FC = () => {
                                 {activeTab === 'NON_CASH' && <td>{record.expCredit > 0 ? record.expCredit : ''}</td>}
                                 <td>{record.expSalary > 0 ? record.expSalary : ''}</td>
                                 {activeTab === 'NON_CASH' && <td>{record.expTaxes > 0 ? record.expTaxes : ''}</td>}
+                                {activeTab === 'NON_CASH' && <td>{(record.expAdvertising || 0) > 0 ? record.expAdvertising : ''}</td>}
                                 <td>{record.expOther > 0 ? record.expOther : ''}</td>
                                 <td className="action-icons-cell">
                                     <button onClick={() => handleStartEdit(record)} className="icon-btn edit-icon" title="Редактировать">✏️</button>
@@ -325,6 +360,7 @@ const FinanceReport: React.FC = () => {
                             {activeTab === 'NON_CASH' && <td><input type="number" value={newRow.expCredit || ''} onChange={e => setNewRow({ ...newRow, expCredit: Number(e.target.value) })} className="inline-input" /></td>}
                             <td><input type="number" value={newRow.expSalary || ''} onChange={e => setNewRow({ ...newRow, expSalary: Number(e.target.value) })} className="inline-input" /></td>
                             {activeTab === 'NON_CASH' && <td><input type="number" value={newRow.expTaxes || ''} onChange={e => setNewRow({ ...newRow, expTaxes: Number(e.target.value) })} className="inline-input" /></td>}
+                            {activeTab === 'NON_CASH' && <td><input type="number" value={newRow.expAdvertising || ''} onChange={e => setNewRow({ ...newRow, expAdvertising: Number(e.target.value) })} className="inline-input" /></td>}
                             <td><input type="number" value={newRow.expOther || ''} onChange={e => setNewRow({ ...newRow, expOther: Number(e.target.value) })} className="inline-input" /></td>
                             <td className="action-icons-cell"><span className="text-muted">новая</span></td>
                         </tr>
