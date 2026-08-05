@@ -19,6 +19,7 @@ import FinanceReport from "./components/FinanceReport/FinanceReport";
 import ActsAnalytics from "./components/ActsAnalytics/ActsAnalytics";
 import Landlord from "./components/Landlord/Landlord";
 import {IndexRedirect} from "./components/IndexRedirect/IndexRedirect";
+import DebtsAnalytics from "./components/DebtsAnalytics/DebtsAnalytics";
 
 function App() {
     return (
@@ -49,6 +50,7 @@ function App() {
                                 <Route path="/reports/time-sheet" element={<Timesheet />} />
                                 <Route path="/reports/finance-report" element={<FinanceReport />} />
                                 <Route path="/reports/acts-report" element={<ActsAnalytics />} />
+                                <Route path="/reports/debts-report" element={<DebtsAnalytics />} />
                                 <Route path="/reports/landlord-report" element={<Landlord />} />
                             </Route>
                         </Route>

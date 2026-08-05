@@ -140,3 +140,12 @@ export interface TimesheetResponse {
     records: DayRecord[];
 }
 
+export interface DebtRow {
+    id?: number;
+    date: string;
+    client: string;
+    carModel: string;
+    amount: number;
+    status: 'PAID' | 'UNPAID';
+}
+

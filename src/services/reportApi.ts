@@ -1,6 +1,6 @@
 import axios from 'axios';
 import {
-    ActRow,
+    ActRow, DebtRow,
     FinanceRow,
     FinanceSummary,
     LandlordRecord,
@@ -147,4 +147,14 @@ export const reportAPI = {
      */
     deleteLandlordRecord: (id: number) =>
         reportApi.delete<LandlordSummary>(`/reports/landlord/records/${id}`),
+
+    getDebtsSummary:(year: number, month: number) =>
+        reportApi.get<DebtRow[]>('/debt', { params: { year, month } }),
+
+
+    saveDebtRecord: (data: DebtRow) =>
+        reportApi.post('/debt', data),
+
+    deleteDebtRecord: (id: number) =>
+        reportApi.delete(`/debt/${id}`),
 };

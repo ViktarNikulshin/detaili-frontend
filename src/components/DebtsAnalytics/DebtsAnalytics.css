@@ -1,0 +1,14 @@
+.acts-analytics-container {
+    width: 100%;
+}
+
+.acts-table th,
+.acts-table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Декоративные линии статусов */
+.status-paid-widget   { border-left: 3px solid var(--color-success) !important; }
+.status-unpaid-widget { border-left: 3px solid var(--color-error) !important; }
+.status-cash-widget   { border-left: 3px solid #ffb74d !important; }
