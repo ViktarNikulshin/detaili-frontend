@@ -1,11 +1,26 @@
 .order-form {
+    --color-primary-green: #4a826d;
+    --color-primary-blue: #5babff;
+    --color-success: #28a745;
+    --color-error: #dc3545;
+    --text-filled: #c0c0c0;
+    --text-muted: #888888;
+    --bg-input-dark: rgba(65, 65, 65, 0.9);
+    --border-color: rgba(74, 130, 109, 0.3);
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --transition-normal: 0.3s ease;
+}
+
+.order-form {
     display: flex;
     flex-direction: column;
     gap: 20px;
     max-width: 520px;
     margin: 50px auto;
     padding: 35px;
-    background: var(--bg-main);
+    background: var(--bg-main, rgba(51, 51, 51, 0.95));
     background-image: linear-gradient(135deg, rgba(74, 130, 109, 0.1), rgba(91, 171, 255, 0.1));
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
@@ -22,6 +37,7 @@
     background: var(--bg-input-dark);
     color: var(--text-filled);
     width: 100%;
+    box-sizing: border-box;
 }
 
 .order-form button[type="submit"] {
@@ -34,6 +50,188 @@
     cursor: pointer;
     font-size: 17px;
     transition: all var(--transition-normal);
+}
+
+.order-form button[type="submit"]:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.order-form button[type="submit"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ------------------------------------------- */
+/* Группы полей и ошибки */
+/* ------------------------------------------- */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text-filled);
+}
+
+.error {
+    border-color: var(--color-error) !important;
+}
+
+.error-text {
+    color: var(--color-error);
+    font-size: 13px;
+    padding-left: 2px;
+}
+
+/* ------------------------------------------- */
+/* Выбор услуг (чекбоксы) */
+/* ------------------------------------------- */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.checkbox-group > label {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text-filled);
+}
+
+.checkbox-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.work-type-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border-bottom: 1px solid var(--border-color);
+    transition: background var(--transition-normal);
+}
+
+.work-type-wrapper:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.work-type-wrapper:last-child {
+    border-bottom: none;
+}
+
+.checkbox-item-with-comment {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 10px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-primary-green);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.checkbox-item label {
+    font-size: 15px;
+    color: var(--text-filled);
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.edit-comment-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: var(--color-primary-blue);
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.edit-comment-btn:hover {
+    opacity: 1;
+}
+
+.comment-input-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 0 0 28px;
+}
+
+.comment-input {
+    flex-grow: 1;
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+}
+
+.comment-save-btn {
+    background-color: var(--color-primary-blue);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 8px 14px;
+    font-weight: 500;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color var(--transition-normal);
+}
+
+.comment-save-btn:hover {
+    opacity: 0.9;
+}
+
+/* ------------------------------------------- */
+/* Стоимость каждой услуги (в одну строку с чекбоксом) */
+/* ------------------------------------------- */
+.order-form input.work-cost-input {
+    width: 4.5em;
+    max-width: 4.5em;
+    min-width: 0;
+    flex: 0 0 auto;
+    flex-shrink: 0;
+    padding: 6px 8px !important;
+    font-size: 14px !important;
+    text-align: right;
+}
+
+/* Убираем стрелки-скролл у числового поля */
+.work-cost-input::-webkit-outer-spin-button,
+.work-cost-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.work-cost-input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 /* Тосты Уведомлений */
@@ -61,4 +259,54 @@
 @keyframes fadeOutTop {
     from { opacity: 1; transform: translateX(-50%) translateY(0); }
     to   { opacity: 0; transform: translateX(-50%) translateY(-30px); }
+}
+
+/* Поле итоговой стоимости: подсказка, что сумма считается автоматически */
+.order-cost-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    padding-left: 2px;
+}
+
+/* ------------------------------------------- */
+/* Мобильная адаптация */
+/* ------------------------------------------- */
+@media (max-width: 550px) {
+    .order-form {
+        margin: 20px 10px;
+        padding: 20px;
+        gap: 15px;
+    }
+
+    .checkbox-item-with-comment {
+        flex-wrap: wrap;
+    }
+
+    .comment-input-container {
+        flex-direction: column;
+        align-items: stretch;
+        padding-left: 0;
+    }
+
+    .comment-save-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .work-cost-container {
+        padding-left: 0;
+    }
+
+    .work-cost-input {
+        max-width: 100%;
+    }
+
+    .notification {
+        top: 10px;
+        width: calc(100% - 30px);
+        left: 15px;
+        transform: none;
+        font-size: 15px;
+        padding: 12px 15px;
+    }
 }

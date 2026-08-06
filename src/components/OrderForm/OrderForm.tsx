@@ -41,6 +41,11 @@ const schema = Yup.object().shape({
                     code: Yup.string().required(),
                     color: Yup.string().optional().nullable(),
                 }).required(),
+                cost: Yup.number()
+                    .typeError("Введите стоимость услуги")
+                    .min(0, "Стоимость не может быть отрицательной")
+                    .optional()
+                    .nullable(),
                 comment: Yup.string().nullable().optional(),
             })
         )
@@ -161,19 +166,37 @@ const OrderForm: React.FC = () => {
         }
     };
 
+    const calcTotalCost = (works: any[]) =>
+        (works || []).reduce((sum, w) => sum + (Number(w?.cost) || 0), 0);
+
     const handleWorkTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const workTypeId = Number(e.target.value);
         const isChecked = e.target.checked;
         const currentWorks = watch("works") || [];
+        let updatedWorks;
 
         if (isChecked) {
             const workTypeToAdd = allWorkTypes.find(wt => wt.id === workTypeId);
             if (!workTypeToAdd) return;
-            const newWork: any = { workType: workTypeToAdd, comment: "" };
-            setValue("works", [...currentWorks, newWork], { shouldValidate: true });
+            const newWork: any = { workType: workTypeToAdd, comment: "", cost: 0 };
+            updatedWorks = [...currentWorks, newWork];
         } else {
-            setValue("works", currentWorks.filter(w => w.workType.id !== workTypeId), { shouldValidate: true });
+            updatedWorks = currentWorks.filter(w => w.workType.id !== workTypeId);
         }
+
+        setValue("works", updatedWorks, { shouldValidate: true });
+        setValue("orderCost", calcTotalCost(updatedWorks), { shouldValidate: true });
+    };
+
+    const handleWorkCostChange = (workTypeId: number, value: string) => {
+        const currentWorks = watch("works") || [];
+        const numericValue = value === "" ? 0 : Number(value);
+        const updatedWorks = currentWorks.map(w =>
+            w.workType.id === workTypeId ? { ...w, cost: numericValue } : w
+        );
+
+        setValue("works", updatedWorks, { shouldValidate: true });
+        setValue("orderCost", calcTotalCost(updatedWorks), { shouldValidate: true });
     };
 
     if (loading && id) return <p>Загрузка заказа...</p>;
@@ -243,6 +266,19 @@ const OrderForm: React.FC = () => {
                                             )}
                                             <label htmlFor={`work-type-${workType.id}`}>{workType.name}</label>
                                         </div>
+
+                                        {isChecked && workInForm && (
+                                            <input
+                                                id={`work-cost-${workType.id}`}
+                                                type="number"
+                                                min="0"
+                                                className="work-cost-input"
+                                                placeholder="Стоимость"
+                                                value={workInForm.cost ?? 0}
+                                                onChange={(e) => handleWorkCostChange(workType.id, e.target.value)}
+                                                onWheel={(e) => e.currentTarget.blur()}
+                                            />
+                                        )}
 
                                         {isChecked && (
                                             <button type="button" className="edit-comment-btn"
@@ -326,7 +362,9 @@ const OrderForm: React.FC = () => {
                     <label htmlFor="orderCost">Стоимость заказа:</label>
                     <input id="orderCost" type="number"
                            placeholder="Стоимость" {...register("orderCost", { valueAsNumber: true })}
-                           className={errors.orderCost ? "error" : ""} />
+                           className={errors.orderCost ? "error" : ""}
+                           onWheel={(e) => e.currentTarget.blur()} />
+                    <span className="order-cost-hint">Считается автоматически по выбранным услугам, при необходимости можно скорректировать вручную</span>
                     {errors.orderCost && <span className="error-text">{errors.orderCost.message}</span>}
                 </div>
 
