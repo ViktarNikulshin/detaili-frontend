@@ -269,6 +269,68 @@
 }
 
 /* ------------------------------------------- */
+/* Кнопки формы (Сохранить/Обновить + Отмена в режиме модалки) */
+/* ------------------------------------------- */
+.order-form-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.order-form-actions button[type="submit"] {
+    flex: 1;
+}
+
+.order-form-cancel-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-color);
+    color: var(--text-filled);
+    font-weight: 600;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 15px;
+    transition: all var(--transition-normal);
+}
+
+.order-form-cancel-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.order-form-cancel-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ------------------------------------------- */
+/* Режим модалки (как у карточки события): та же тёмная карточка */
+/* .modal-overlay/.modal-content/.modal-header/.close-button переиспользуют стили EventModal.css */
+/* ------------------------------------------- */
+.order-form-modal-content {
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    /* Скрываем визуальную полосу скролла, сам скролл контента остаётся доступен */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.order-form-modal-content::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+.order-form--modal {
+    margin: 0;
+    max-width: none;
+    padding: 0;
+    background: none;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+}
+
+/* ------------------------------------------- */
 /* Мобильная адаптация */
 /* ------------------------------------------- */
 @media (max-width: 550px) {

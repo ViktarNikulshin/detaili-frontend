@@ -61,9 +61,22 @@ const schema = Yup.object().shape({
 
 type OrderFormValues = Yup.InferType<typeof schema>;
 
-const OrderForm: React.FC = () => {
-    const { id } = useParams<{ id: string }>();
+interface OrderFormProps {
+    /** "page" — обычная страница (/orders/new, /orders/:id), "modal" — всплывающее окно поверх календаря */
+    mode?: "page" | "modal";
+    /** ID заказа для редактирования в режиме модалки (в режиме страницы ID берётся из URL) */
+    orderId?: string;
+    /** Вызывается при закрытии модалки (кнопка закрытия, клик по фону или после успешного сохранения) */
+    onClose?: () => void;
+    /** Вызывается после успешного создания/обновления заказа (например, чтобы обновить события календаря) */
+    onSuccess?: () => void;
+}
+
+const OrderForm: React.FC<OrderFormProps> = ({ mode = "page", orderId, onClose, onSuccess }) => {
+    const { id: idFromRoute } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const isModal = mode === "modal";
+    const id = isModal ? orderId : idFromRoute;
 
     const [loading, setLoading] = useState(false);
     const [allWorkTypes, setAllWorkTypes] = useState<WorkType[]>([]);
@@ -159,7 +172,17 @@ const OrderForm: React.FC = () => {
                 showNotification("Заказ успешно создан!", "success");
             }
 
-            setTimeout(() => navigate("/calendar"), 1000);
+            if (onSuccess) {
+                onSuccess();
+            }
+
+            setTimeout(() => {
+                if (isModal) {
+                    if (onClose) onClose();
+                } else {
+                    navigate("/calendar");
+                }
+            }, 1000);
         } catch (error) {
             console.error("Ошибка сохранения:", error);
             showNotification("Произошла ошибка при сохранении заказа!", "error");
@@ -201,7 +224,7 @@ const OrderForm: React.FC = () => {
 
     if (loading && id) return <p>Загрузка заказа...</p>;
 
-    return (
+    const formContent = (
         <>
             {notification.visible && (
                 <div className={`notification ${notification.type}`}>
@@ -209,7 +232,7 @@ const OrderForm: React.FC = () => {
                 </div>
             )}
 
-            <form onSubmit={handleSubmit(onSubmit as SubmitHandler<FieldValues>)} className="order-form">
+            <form onSubmit={handleSubmit(onSubmit as SubmitHandler<FieldValues>)} className={isModal ? "order-form order-form--modal" : "order-form"}>
                 <input type="text" placeholder="Имя клиента" {...register("clientName")} className={errors.clientName ? "error" : ""} />
                 {errors.clientName && <span className="error-text">{errors.clientName.message}</span>}
 
@@ -368,9 +391,32 @@ const OrderForm: React.FC = () => {
                     {errors.orderCost && <span className="error-text">{errors.orderCost.message}</span>}
                 </div>
 
-                <button type="submit" disabled={loading}>{id ? "Обновить заказ" : "Сохранить заказ"}</button>
+                <div className="order-form-actions">
+                    <button type="submit" disabled={loading}>{id ? "Обновить заказ" : "Сохранить заказ"}</button>
+                    {isModal && (
+                        <button type="button" className="order-form-cancel-btn" onClick={onClose} disabled={loading}>
+                            Отмена
+                        </button>
+                    )}
+                </div>
             </form>
         </>
+    );
+
+    if (!isModal) {
+        return formContent;
+    }
+
+    return (
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal-content order-form-modal-content" onClick={e => e.stopPropagation()}>
+                <div className="modal-header">
+                    <h2>{id ? `Заказ №${id}` : "Новый заказ"}</h2>
+                    <button className="close-button" onClick={onClose}>&times;</button>
+                </div>
+                {formContent}
+            </div>
+        </div>
     );
 };
 

@@ -6,7 +6,6 @@ import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import moment from 'moment';
 import 'moment/locale/ru';
-import { useNavigate } from 'react-router-dom';
 import { orderAPI, OrderPayload } from '../../services/orderApi';
 import { userAPI } from '../../services/userApi';
 import { calendarEventAPI } from '../../services/calendarEventApi';
@@ -15,6 +14,7 @@ import { User } from '../../types/user';
 import './CalendarView.css';
 import EventModal from '../EventModal/EventModal';
 import CustomEventModal from '../CustomEventModal/CustomEventModal';
+import OrderForm from '../OrderForm/OrderForm';
 import { useAuth } from '../../contexts/AuthContext';
 
 moment.locale('ru');
@@ -28,7 +28,6 @@ const allStatuses = [
 ];
 
 const CalendarView: React.FC = () => {
-    const navigate = useNavigate();
     const { user } = useAuth();
     const isMaster = user?.roles?.length === 1 && user.roles[0].name === 'MASTER';
     const userIdString = user?.id ? String(user.id) : '';
@@ -43,6 +42,10 @@ const CalendarView: React.FC = () => {
     const [showCustomEventModal, setShowCustomEventModal] = useState(false);
     const [selectedCustomEvent, setSelectedCustomEvent] = useState<CustomEvent | null>(null);
     const [customEventInitialDate, setCustomEventInitialDate] = useState<Date | null>(null);
+
+    /* ---------- СОЗДАНИЕ/РЕДАКТИРОВАНИЕ ЗАКАЗА (модалка) ---------- */
+    const [showCreateOrderModal, setShowCreateOrderModal] = useState(false);
+    const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
 
     const initialMasterId = isMaster ? userIdString : 'all';
     const [selectedMasterId, setSelectedMasterId] = useState<string>(initialMasterId);
@@ -305,7 +308,7 @@ const CalendarView: React.FC = () => {
                         <button
                             type="button"
                             className="create-order-btn"
-                            onClick={() => navigate('/orders/new')}
+                            onClick={() => setShowCreateOrderModal(true)}
                         >
                             <span className="button-text-desktop">+ Создать заказ</span>
                             <span className="button-icon-mobile">+</span>
@@ -447,7 +450,11 @@ const CalendarView: React.FC = () => {
                 isOpen={showModal}
                 event={selectedEvent}
                 onClose={handleCloseModal}
-                onEdit={() => navigate(`/orders/${selectedEvent?.id}`)}
+                onEdit={() => {
+                    if (!selectedEvent) return;
+                    setEditingOrderId(String(selectedEvent.id));
+                    handleCloseModal();
+                }}
                 onStatusChanged={handleStatusChanged}
             />
 
@@ -459,6 +466,25 @@ const CalendarView: React.FC = () => {
                 onClose={handleCloseCustomEventModal}
                 onSaved={handleCustomEventSaved}
             />
+
+            {/* ---------- МОДАЛКА СОЗДАНИЯ ЗАКАЗА ---------- */}
+            {showCreateOrderModal && (
+                <OrderForm
+                    mode="modal"
+                    onClose={() => setShowCreateOrderModal(false)}
+                    onSuccess={() => calendarRef.current?.getApi().refetchEvents()}
+                />
+            )}
+
+            {/* ---------- МОДАЛКА РЕДАКТИРОВАНИЯ ЗАКАЗА ---------- */}
+            {editingOrderId && (
+                <OrderForm
+                    mode="modal"
+                    orderId={editingOrderId}
+                    onClose={() => setEditingOrderId(null)}
+                    onSuccess={() => calendarRef.current?.getApi().refetchEvents()}
+                />
+            )}
         </div>
     );
 };
