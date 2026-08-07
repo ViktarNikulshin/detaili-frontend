@@ -8,11 +8,68 @@ import { reportAPI } from '../../services/reportApi';
 import './FinanceReport.css';
 import { FinanceRow } from "../../types/report";
 
+type FinanceTotals = {
+    income: number;
+    utilities: number;
+    rent: number;
+    materials: number;
+    credit: number;
+    salary: number;
+    taxes: number;
+    advertising: number;
+    other: number;
+    totalExpense: number;
+    finalBalance: number;
+};
+
+const calcFinanceTotals = (records: FinanceRow[], startingBalance: number): FinanceTotals => {
+    const sums: FinanceTotals = {
+        income: 0,
+        utilities: 0,
+        rent: 0,
+        materials: 0,
+        credit: 0,
+        salary: 0,
+        taxes: 0,
+        advertising: 0,
+        other: 0,
+        totalExpense: 0,
+        finalBalance: 0
+    };
+
+    records.forEach(r => {
+        sums.income += (r.income || 0);
+        sums.utilities += (r.expUtilities || 0);
+        sums.rent += (r.expRent || 0);
+        sums.materials += (r.expMaterials || 0);
+        sums.credit += (r.expCredit || 0);
+        sums.salary += (r.expSalary || 0);
+        sums.taxes += (r.expTaxes || 0);
+        sums.advertising += (r.expAdvertising || 0);
+        sums.other += (r.expOther || 0);
+    });
+
+    sums.totalExpense = sums.utilities + sums.rent + sums.materials + sums.credit + sums.salary + sums.taxes + sums.advertising + sums.other;
+    sums.finalBalance = startingBalance + sums.income - sums.totalExpense;
+
+    return sums;
+};
+
 const FinanceReport: React.FC = () => {
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
     const [startingBalance, setStartingBalance] = useState<number>(0);
-    const [activeTab, setActiveTab] = useState<'NON_CASH' | 'CASH'>('NON_CASH');
+    const [activeTab, setActiveTab] = useState<'NON_CASH' | 'CASH' | 'REPORT'>('NON_CASH');
     const [records, setRecords] = useState<FinanceRow[]>([]);
+
+    const [reportData, setReportData] = useState<{
+        nonCash: { records: FinanceRow[]; startingBalance: number };
+        cash: { records: FinanceRow[]; startingBalance: number };
+    }>({
+        nonCash: { records: [], startingBalance: 0 },
+        cash: { records: [], startingBalance: 0 }
+    });
+    const [reportLoading, setReportLoading] = useState<boolean>(false);
+    const [reportError, setReportError] = useState<string | null>(null);
 
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -54,9 +111,42 @@ const FinanceReport: React.FC = () => {
         }
     }, []);
 
+    const fetchReportData = useCallback(async (date: Date) => {
+        try {
+            setReportLoading(true);
+            const year = moment(date).year();
+            const month = moment(date).month() + 1;
+
+            const [nonCashRes, cashRes] = await Promise.all([
+                reportAPI.getFinanceSummary(year, month, 'NON_CASH'),
+                reportAPI.getFinanceSummary(year, month, 'CASH'),
+            ]);
+
+            setReportData({
+                nonCash: {
+                    records: nonCashRes.data.records || [],
+                    startingBalance: nonCashRes.data.startingBalance || 0
+                },
+                cash: {
+                    records: cashRes.data.records || [],
+                    startingBalance: cashRes.data.startingBalance || 0
+                }
+            });
+            setReportError(null);
+        } catch (err) {
+            setReportError('Не удалось загрузить сводный отчет.');
+        } finally {
+            setReportLoading(false);
+        }
+    }, []);
+
     useEffect(() => {
-        fetchFinanceData(currentDate, activeTab);
-    }, [currentDate, activeTab, fetchFinanceData]);
+        if (activeTab === 'REPORT') {
+            fetchReportData(currentDate);
+        } else {
+            fetchFinanceData(currentDate, activeTab);
+        }
+    }, [currentDate, activeTab, fetchFinanceData, fetchReportData]);
 
     const handleSaveBalance = async () => {
         try {
@@ -69,38 +159,29 @@ const FinanceReport: React.FC = () => {
         }
     };
 
-    const totals = useMemo(() => {
-        const sums = {
-            income: 0,
-            utilities: 0,
-            rent: 0,
-            materials: 0,
-            credit: 0,
-            salary: 0,
-            taxes: 0,
-            advertising: 0,
-            other: 0,
-            totalExpense: 0,
-            finalBalance: 0
-        };
+    const totals = useMemo(() => calcFinanceTotals(records, startingBalance), [records, startingBalance]);
 
-        records.forEach(r => {
-            sums.income += (r.income || 0);
-            sums.utilities += (r.expUtilities || 0);
-            sums.rent += (r.expRent || 0);
-            sums.materials += (r.expMaterials || 0);
-            sums.credit += (r.expCredit || 0);
-            sums.salary += (r.expSalary || 0);
-            sums.taxes += (r.expTaxes || 0);
-            sums.advertising += (r.expAdvertising || 0);
-            sums.other += (r.expOther || 0);
-        });
-
-        sums.totalExpense = sums.utilities + sums.rent + sums.materials + sums.credit + sums.salary + sums.taxes + sums.advertising + sums.other;
-        sums.finalBalance = startingBalance + sums.income - sums.totalExpense;
-
-        return sums;
-    }, [records, startingBalance]);
+    const nonCashTotals = useMemo(
+        () => calcFinanceTotals(reportData.nonCash.records, reportData.nonCash.startingBalance),
+        [reportData.nonCash]
+    );
+    const cashTotals = useMemo(
+        () => calcFinanceTotals(reportData.cash.records, reportData.cash.startingBalance),
+        [reportData.cash]
+    );
+    const combinedTotals = useMemo(() => ({
+        income: nonCashTotals.income + cashTotals.income,
+        utilities: nonCashTotals.utilities + cashTotals.utilities,
+        rent: nonCashTotals.rent + cashTotals.rent,
+        materials: nonCashTotals.materials + cashTotals.materials,
+        credit: nonCashTotals.credit + cashTotals.credit,
+        salary: nonCashTotals.salary + cashTotals.salary,
+        taxes: nonCashTotals.taxes + cashTotals.taxes,
+        advertising: nonCashTotals.advertising + cashTotals.advertising,
+        other: nonCashTotals.other + cashTotals.other,
+        totalExpense: nonCashTotals.totalExpense + cashTotals.totalExpense,
+        finalBalance: nonCashTotals.finalBalance + cashTotals.finalBalance,
+    }), [nonCashTotals, cashTotals]);
 
     const handlePrevMonth = () => setCurrentDate(prev => moment(prev).subtract(1, 'month').toDate());
     const handleNextMonth = () => setCurrentDate(prev => moment(prev).add(1, 'month').toDate());
@@ -118,6 +199,7 @@ const FinanceReport: React.FC = () => {
 
     const handleSaveEdit = async () => {
         if (!editRow || !editRow.id) return;
+        if (activeTab === 'REPORT') return;
         try {
             await reportAPI.saveFinanceRecord({ ...editRow, financeType: activeTab });
             await fetchFinanceData(currentDate, activeTab);
@@ -131,6 +213,7 @@ const FinanceReport: React.FC = () => {
 
     const handleSaveNewRecord = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (activeTab === 'REPORT') return;
         try {
             await reportAPI.saveFinanceRecord({ ...newRow, financeType: activeTab });
             await fetchFinanceData(currentDate, activeTab);
@@ -155,6 +238,7 @@ const FinanceReport: React.FC = () => {
 
     const handleDeleteRecord = async (id: number) => {
         if (!window.confirm('Вы уверены, что хотите удалить эту операцию?')) return;
+        if (activeTab === 'REPORT') return;
         try {
             await reportAPI.deleteFinanceRecord(id);
             await fetchFinanceData(currentDate, activeTab);
@@ -225,29 +309,160 @@ const FinanceReport: React.FC = () => {
                     >
                         <span>💵</span> Наличные
                     </button>
+                    <button
+                        type="button"
+                        onClick={() => setActiveTab('REPORT')}
+                        style={{
+                            background: activeTab === 'REPORT' ? 'var(--primary-green)' : 'transparent',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            padding: '6px 14px',
+                            cursor: 'pointer',
+                            fontSize: '13px',
+                            fontWeight: activeTab === 'REPORT' ? 'bold' : 'normal',
+                            transition: 'all 0.2s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                        }}
+                    >
+                        <span>📊</span> Отчет
+                    </button>
                 </div>
 
-                {/* Начальный баланс */}
-                <div className="previous-balance-container" style={{ margin: 0 }}>
-                    <label style={{ marginRight: '8px' }}>Начальный баланс:</label>
-                    <input
-                        type="number"
-                        value={startingBalance}
-                        onChange={(e) => setStartingBalance(Number(e.target.value) || 0)}
-                        onBlur={handleSaveBalance}
-                        className="previous-balance-input"
-                        style={{ width: '100px', textAlign: 'center' }}
-                    />
-                </div>
+                {/* Начальный баланс (не показываем на вкладке отчёта) */}
+                {activeTab !== 'REPORT' && (
+                    <div className="previous-balance-container" style={{ margin: 0 }}>
+                        <label style={{ marginRight: '8px' }}>Начальный баланс:</label>
+                        <input
+                            type="number"
+                            value={startingBalance}
+                            onChange={(e) => setStartingBalance(Number(e.target.value) || 0)}
+                            onBlur={handleSaveBalance}
+                            className="previous-balance-input"
+                            style={{ width: '100px', textAlign: 'center' }}
+                        />
+                    </div>
+                )}
 
-                {/* Общий итоговый баланс */}
-                <div className="total-salary-display" style={{ margin: 0 }}>
-                    <span className="total-label">ОБЩИЙ БАЛАНС:</span>
-                    <span className="total-value" style={{ marginLeft: '8px', color: totals.finalBalance >= 0 ? 'var(--primary-green)' : 'var(--error-red)' }}>
-                        {totals.finalBalance.toFixed(2)} ₽
-                    </span>
-                </div>
+                {/* Общий итоговый баланс (не показываем на вкладке отчёта, там свой блок балансов) */}
+                {activeTab !== 'REPORT' && (
+                    <div className="total-salary-display" style={{ margin: 0 }}>
+                        <span className="total-label">ОБЩИЙ БАЛАНС:</span>
+                        <span className="total-value" style={{ marginLeft: '8px', color: totals.finalBalance >= 0 ? 'var(--primary-green)' : 'var(--error-red)' }}>
+                            {totals.finalBalance.toFixed(2)} ₽
+                        </span>
+                    </div>
+                )}
             </div>
+
+            {activeTab === 'REPORT' ? (
+                <>
+                    {/* Индикаторы загрузки и ошибок для отчёта */}
+                    {reportError && <div className="report-error" style={{ marginTop: '15px' }}>{reportError}</div>}
+                    {reportLoading && <div className="report-loading" style={{ marginTop: '15px' }}>Загрузка данных...</div>}
+
+                    {/* ИТОГОВЫЕ БАЛАНСЫ ПО ТИПАМ */}
+                    <div className="finance-summary-widgets-grid" style={{ marginTop: '20px' }}>
+                        <div className="summary-widget expense">
+                            <span className="widget-title">Баланс безнал</span>
+                            <span className="widget-amount" style={{ color: nonCashTotals.finalBalance >= 0 ? 'var(--primary-green)' : 'var(--error-red)' }}>
+                                {nonCashTotals.finalBalance.toFixed(2)}
+                            </span>
+                        </div>
+                        <div className="summary-widget expense">
+                            <span className="widget-title">Баланс нал</span>
+                            <span className="widget-amount" style={{ color: cashTotals.finalBalance >= 0 ? 'var(--primary-green)' : 'var(--error-red)' }}>
+                                {cashTotals.finalBalance.toFixed(2)}
+                            </span>
+                        </div>
+                        <div className="summary-widget income">
+                            <span className="widget-title">Общий баланс</span>
+                            <span className="widget-amount" style={{ color: combinedTotals.finalBalance >= 0 ? 'var(--primary-green)' : 'var(--error-red)' }}>
+                                {combinedTotals.finalBalance.toFixed(2)}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* СВОДНАЯ ТАБЛИЦА ПО СТАТЬЯМ */}
+                    <div className="table-wrapper no-border-radius-bottom" style={{ marginTop: '20px' }}>
+                        <table className="report-table salary-log-table">
+                            <thead>
+                            <tr>
+                                <th style={{ width: '34%' }}>Статья</th>
+                                <th style={{ width: '22%' }}>Наличные</th>
+                                <th style={{ width: '22%' }}>Безналичные</th>
+                                <th style={{ width: '22%' }}>Итого</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td className="text-left-aligned">Приход</td>
+                                <td>{cashTotals.income.toFixed(2)}</td>
+                                <td>{nonCashTotals.income.toFixed(2)}</td>
+                                <td className="text-right-aligned">{combinedTotals.income.toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                                <td className="text-left-aligned">Коммуналка</td>
+                                <td>{cashTotals.utilities.toFixed(2)}</td>
+                                <td>{nonCashTotals.utilities.toFixed(2)}</td>
+                                <td className="text-right-aligned">{combinedTotals.utilities.toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                                <td className="text-left-aligned">Аренда</td>
+                                <td>{cashTotals.rent.toFixed(2)}</td>
+                                <td>{nonCashTotals.rent.toFixed(2)}</td>
+                                <td className="text-right-aligned">{combinedTotals.rent.toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                                <td className="text-left-aligned">Материалы</td>
+                                <td>{cashTotals.materials.toFixed(2)}</td>
+                                <td>{nonCashTotals.materials.toFixed(2)}</td>
+                                <td className="text-right-aligned">{combinedTotals.materials.toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                                <td className="text-left-aligned">Кредит</td>
+                                <td>{cashTotals.credit.toFixed(2)}</td>
+                                <td>{nonCashTotals.credit.toFixed(2)}</td>
+                                <td className="text-right-aligned">{combinedTotals.credit.toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                                <td className="text-left-aligned">З/п</td>
+                                <td>{cashTotals.salary.toFixed(2)}</td>
+                                <td>{nonCashTotals.salary.toFixed(2)}</td>
+                                <td className="text-right-aligned">{combinedTotals.salary.toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                                <td className="text-left-aligned">Налоги</td>
+                                <td>{cashTotals.taxes.toFixed(2)}</td>
+                                <td>{nonCashTotals.taxes.toFixed(2)}</td>
+                                <td className="text-right-aligned">{combinedTotals.taxes.toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                                <td className="text-left-aligned">Реклама</td>
+                                <td>{cashTotals.advertising.toFixed(2)}</td>
+                                <td>{nonCashTotals.advertising.toFixed(2)}</td>
+                                <td className="text-right-aligned">{combinedTotals.advertising.toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                                <td className="text-left-aligned">Прочее</td>
+                                <td>{cashTotals.other.toFixed(2)}</td>
+                                <td>{nonCashTotals.other.toFixed(2)}</td>
+                                <td className="text-right-aligned">{combinedTotals.other.toFixed(2)}</td>
+                            </tr>
+                            <tr style={{ fontWeight: 700 }}>
+                                <td className="text-left-aligned">Итого расход</td>
+                                <td>{cashTotals.totalExpense.toFixed(2)}</td>
+                                <td>{nonCashTotals.totalExpense.toFixed(2)}</td>
+                                <td className="text-right-aligned">{combinedTotals.totalExpense.toFixed(2)}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </>
+            ) : (
+            <>
 
             {/* Индикаторы загрузки и ошибок */}
             {error && <div className="report-error" style={{ marginTop: '15px' }}>{error}</div>}
@@ -390,6 +605,8 @@ const FinanceReport: React.FC = () => {
                         Отмена
                     </button>
                 </div>
+            )}
+            </>
             )}
         </div>
     );
