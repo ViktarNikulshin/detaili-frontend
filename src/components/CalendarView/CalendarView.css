@@ -79,6 +79,46 @@ html, body, #root {
     color: var(--text-primary);
 }
 
+/* Контейнер кнопок "Создать заказ" / "Добавить событие" в хедере календаря */
+.calendar-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* Общий стиль кнопок хедера календаря ("Создать заказ" / "Добавить событие") */
+.create-order-btn,
+.add-custom-event-button {
+    background: linear-gradient(135deg, var(--primary-green), #5babff);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    white-space: nowrap;
+    box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+}
+
+.create-order-btn:hover,
+.add-custom-event-button:hover {
+    background: linear-gradient(135deg, #5babff, var(--primary-green));
+    transform: translateY(-1px);
+}
+
+.create-order-btn .button-icon-mobile,
+.add-custom-event-button .button-icon-mobile {
+    display: none;
+}
+
 /* 1. КОМПАКТНАЯ СЕКЦИЯ ФИЛЬТРОВ */
 .calendar-filters {
     display: flex;
@@ -308,12 +348,46 @@ html, body, #root {
 }
 
 /* ========================================================= */
+/* КАРТОЧКИ ПРОИЗВОЛЬНЫХ СОБЫТИЙ (не заказы)                */
+/* ========================================================= */
+.fc-custom-event-card--custom .fc-custom-event-body--custom {
+    background: linear-gradient(135deg, rgba(166, 126, 255, 0.85), rgba(91, 171, 255, 0.75));
+    gap: 4px;
+}
+
+.fc-custom-event-icon {
+    font-size: 10px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+/* ========================================================= */
 /* МОБИЛЬНАЯ АДАПТАЦИЯ (СМАРТФОНЫ)                           */
 /* ========================================================= */
 @media (max-width: 768px) {
     .calendar-container {
         padding: 4px;
         gap: 4px;
+    }
+
+    .create-order-btn .button-text-desktop,
+    .add-custom-event-button .button-text-desktop {
+        display: none;
+    }
+
+    .create-order-btn .button-icon-mobile,
+    .add-custom-event-button .button-icon-mobile {
+        display: block;
+        font-size: 16px;
+    }
+
+    .create-order-btn,
+    .add-custom-event-button {
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        border-radius: 50%;
+        flex-shrink: 0;
     }
 
     /* Фильтры располагаются в горизонтальную плотную строку */

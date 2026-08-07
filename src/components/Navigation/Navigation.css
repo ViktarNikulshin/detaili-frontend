@@ -99,60 +99,7 @@
     box-shadow: 0 4px 10px rgba(74, 130, 109, 0.3); /* Тень с оттенком #4a826d */
 }
 
-/* ------------------------------------------- */
-/* СТИЛИ КНОПКИ 'Создать заказ' */
-/* ------------------------------------------- */
-
-.create-order-btn {
-    background: linear-gradient(135deg, #4a826d, #5babff);
-    border: none;
-    color: white;
-    font-weight: 600;
-    padding: 8px 16px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 15px;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-}
-
-.create-order-btn:hover {
-    background: linear-gradient(135deg, #5babff, #4a826d);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(91, 171, 255, 0.4); /* Тень с оттенком #5babff */
-}
-
-/* Скрываем мобильную иконку по умолчанию */
-.create-order-btn .button-icon-mobile {
-    display: none;
-}
-
-/* ------------------------------------------- */
-/* АДАПТИВНОСТЬ: КНОПКА ПРЕВРАЩАЕТСЯ В "+" */
-/* ------------------------------------------- */
-
 @media (max-width: 550px) {
-    .create-order-btn .button-text-desktop {
-        display: none;
-    }
-
-    .create-order-btn .button-icon-mobile {
-        display: block;
-        font-size: 20px;
-        font-weight: 700;
-    }
-
-    .create-order-btn {
-        width: 40px;
-        height: 40px;
-        padding: 0;
-        border-radius: 50%;
-        flex-shrink: 0;
-    }
-
     .navigation {
         padding: 8px 12px;
     }

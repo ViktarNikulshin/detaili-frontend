@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom'; // <-- Добавили useLocation
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import logo from '../asserts/fd6cad63-cb26-4d08-bcf6-0c4f7d152eed.jpg'
 import './Navigation.css'
@@ -7,14 +7,9 @@ import './Navigation.css'
 const Navigation: React.FC = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
-    const location = useLocation(); // <-- Получаем объект текущего местоположения
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const isNotMaster = !!user?.roles?.some(role => role.name === 'ADMIN' || role.name === 'MANAGER');
     const isAdmin = user?.roles?.some(r => r.name === 'ADMIN');
-
-    // Проверяем, находится ли пользователь именно на странице календаря
-    const isCalendarPage = location.pathname === '/calendar';
 
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -77,10 +72,6 @@ const Navigation: React.FC = () => {
         navigate('/dictionaries/work-types');
     };
 
-    const handleCreateOrder = () => {
-        navigate('/orders/new');
-    };
-
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -102,16 +93,6 @@ const Navigation: React.FC = () => {
             <div className="nav-brand">
                 <img src={logo} alt="CGP" className="nav-logo" />
                 <Link to="/">CGP</Link>
-            </div>
-
-            {/* --- ИЗМЕНЕНО УСЛОВИЕ ОТОБРАЖЕНИЯ --- */}
-            <div className="nav-actions">
-                {isNotMaster && isCalendarPage && ( // Показываем, если Админ И страница календаря
-                    <button className="create-order-btn" onClick={handleCreateOrder}>
-                        <span className="button-text-desktop">+ Создать заказ</span>
-                        <span className="button-icon-mobile">+</span>
-                    </button>
-                )}
             </div>
 
             <div className="nav-user" ref={menuRef}>

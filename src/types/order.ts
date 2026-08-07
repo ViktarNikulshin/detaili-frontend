@@ -27,6 +27,7 @@ export interface InfoSource {
 
 export interface CalendarEvent {
     id: number;
+    entityType?: 'ORDER';
     title: string;
     start: Date;
     end: Date;
@@ -37,6 +38,19 @@ export interface CalendarEvent {
     status: string;
     works: Work[];
 }
+
+/**
+ * Произвольное событие календаря, не привязанное к заказу
+ * (напоминание, встреча и т.п.). Задаётся только датой и описанием.
+ */
+export interface CustomEvent {
+    id: number;
+    entityType: 'CUSTOM_EVENT';
+    date: string; // ISO-строка даты, формат YYYY-MM-DD
+    description: string;
+}
+
+export type CalendarSelection = CalendarEvent | CustomEvent;
 
 export interface Work {
     id?: number;

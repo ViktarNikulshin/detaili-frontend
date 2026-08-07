@@ -9,10 +9,12 @@ import 'moment/locale/ru';
 import { useNavigate } from 'react-router-dom';
 import { orderAPI, OrderPayload } from '../../services/orderApi';
 import { userAPI } from '../../services/userApi';
-import { CalendarEvent, Order } from '../../types/order';
+import { calendarEventAPI } from '../../services/calendarEventApi';
+import { CalendarEvent, CustomEvent, Order } from '../../types/order';
 import { User } from '../../types/user';
 import './CalendarView.css';
 import EventModal from '../EventModal/EventModal';
+import CustomEventModal from '../CustomEventModal/CustomEventModal';
 import { useAuth } from '../../contexts/AuthContext';
 
 moment.locale('ru');
@@ -30,11 +32,17 @@ const CalendarView: React.FC = () => {
     const { user } = useAuth();
     const isMaster = user?.roles?.length === 1 && user.roles[0].name === 'MASTER';
     const userIdString = user?.id ? String(user.id) : '';
+    const canCreateOrderOrEvent = !isMaster;
 
     const [showModal, setShowModal] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
     const [masters, setMasters] = useState<User[]>([]);
     const [mastersLoading, setMastersLoading] = useState(true);
+
+    /* ---------- ПРОИЗВОЛЬНЫЕ СОБЫТИЯ (не заказы) ---------- */
+    const [showCustomEventModal, setShowCustomEventModal] = useState(false);
+    const [selectedCustomEvent, setSelectedCustomEvent] = useState<CustomEvent | null>(null);
+    const [customEventInitialDate, setCustomEventInitialDate] = useState<Date | null>(null);
 
     const initialMasterId = isMaster ? userIdString : 'all';
     const [selectedMasterId, setSelectedMasterId] = useState<string>(initialMasterId);
@@ -117,9 +125,54 @@ const CalendarView: React.FC = () => {
         [masterFilter, statusFilter]
     );
 
+    /* ---------- FETCH ПРОИЗВОЛЬНЫХ СОБЫТИЙ (eventSources) ---------- */
+    const fetchCustomEvents = useCallback(
+        async (fetchInfo: any, successCallback: any, failureCallback: any) => {
+            try {
+                const { start, end } = fetchInfo;
+                const response = await calendarEventAPI.getEvents(
+                    moment(start).format('YYYY-MM-DD'),
+                    moment(end).format('YYYY-MM-DD')
+                );
+
+                const customCalendarEvents = response.data.map((customEvent: CustomEvent) => ({
+                    id: `${customEvent.id}`,
+                    title: customEvent.description,
+                    start: customEvent.date,
+                    allDay: true,
+                    extendedProps: {
+                        entityType: 'CUSTOM_EVENT',
+                        originalId: customEvent.id,
+                        description: customEvent.description,
+                        date: customEvent.date,
+                    },
+                }));
+
+                successCallback(customCalendarEvents);
+            } catch (err) {
+                console.error('Ошибка загрузки событий календаря:', err);
+                failureCallback(err);
+            }
+        },
+        []
+    );
+
     /* ---------- ОБРАБОТЧИКИ ---------- */
     const handleEventClick = useCallback((clickInfo: any) => {
         const ev = clickInfo.event;
+
+        if (ev.extendedProps.entityType === 'CUSTOM_EVENT') {
+            setSelectedCustomEvent({
+                id: ev.extendedProps.originalId,
+                entityType: 'CUSTOM_EVENT',
+                date: ev.extendedProps.date,
+                description: ev.extendedProps.description,
+            });
+            setCustomEventInitialDate(null);
+            setShowCustomEventModal(true);
+            return;
+        }
+
         setSelectedEvent({
             id: ev.id,
             title: ev.title,
@@ -144,9 +197,52 @@ const CalendarView: React.FC = () => {
         calendarRef.current?.getApi().refetchEvents();
     };
 
-    /* ---------- ОБНОВЛЕННЫЙ ОБРАБОТЧИК ПЕРЕТАСКИВАНИЯ И РЕЦАЙЗА ---------- */
+    /* ---------- ОБРАБОТЧИКИ ПРОИЗВОЛЬНЫХ СОБЫТИЙ ---------- */
+    const handleOpenCreateCustomEvent = (initialDate: Date | null = null) => {
+        setSelectedCustomEvent(null);
+        setCustomEventInitialDate(initialDate);
+        setShowCustomEventModal(true);
+    };
+
+    const handleCloseCustomEventModal = () => {
+        setShowCustomEventModal(false);
+        setSelectedCustomEvent(null);
+        setCustomEventInitialDate(null);
+    };
+
+    const handleCustomEventSaved = () => {
+        calendarRef.current?.getApi().refetchEvents();
+    };
+
+    const handleDateClick = useCallback((dateClickInfo: any) => {
+        handleOpenCreateCustomEvent(dateClickInfo.date);
+    }, []);
+
+    /* ---------- ПЕРЕТАСКИВАНИЕ/РЕСАЙЗ ПРОИЗВОЛЬНОГО СОБЫТИЯ ---------- */
+    const handleCustomEventUpdate = async (info: any) => {
+        const { event } = info;
+        const originalId = event.extendedProps.originalId;
+
+        try {
+            await calendarEventAPI.update(originalId, {
+                date: moment(event.start).format('YYYY-MM-DD'),
+                description: event.extendedProps.description,
+            });
+            calendarRef.current?.getApi().refetchEvents();
+        } catch (err) {
+            console.error('Ошибка обновления события:', err);
+            info.revert();
+        }
+    };
+
+    /* ---------- ОБНОВЛЕННЫЙ ОБРАБОТЧИК ПЕРЕТАСКИВАНИЯ И РЕЦАЙЗА ЗАКАЗОВ ---------- */
     const handleEventUpdate = async (info: any) => {
         const { event } = info;
+
+        if (event.extendedProps.entityType === 'CUSTOM_EVENT') {
+            return handleCustomEventUpdate(info);
+        }
+
         const id = event.id;
 
         try {
@@ -203,6 +299,27 @@ const CalendarView: React.FC = () => {
             {/* ---------- ХЕДЕР ---------- */}
             <div className="calendar-header">
                 <h1>Календарь заказов</h1>
+
+                {canCreateOrderOrEvent && (
+                    <div className="calendar-header-actions">
+                        <button
+                            type="button"
+                            className="create-order-btn"
+                            onClick={() => navigate('/orders/new')}
+                        >
+                            <span className="button-text-desktop">+ Создать заказ</span>
+                            <span className="button-icon-mobile">+</span>
+                        </button>
+                        <button
+                            type="button"
+                            className="add-custom-event-button"
+                            onClick={() => handleOpenCreateCustomEvent()}
+                        >
+                            <span className="button-text-desktop">+ Добавить событие</span>
+                            <span className="button-icon-mobile">+</span>
+                        </button>
+                    </div>
+                )}
 
                 <div className="calendar-filters">
                     {!isMaster && (
@@ -272,14 +389,32 @@ const CalendarView: React.FC = () => {
                     eventDrop={handleEventUpdate}
                     eventResize={handleEventUpdate}
                     eventClick={handleEventClick}
+                    dateClick={canCreateOrderOrEvent ? handleDateClick : undefined}
                     noEventsContent="Нет событий в выбранном диапазоне"
                     eventSources={[
                         {
                             events: fetchEvents,
                             id: 'orders-source',
                         },
+                        {
+                            events: fetchCustomEvents,
+                            id: 'custom-events-source',
+                        },
                     ]}
                     eventContent={(eventInfo) => {
+                        if (eventInfo.event.extendedProps.entityType === 'CUSTOM_EVENT') {
+                            return (
+                                <div className="fc-custom-event-card fc-custom-event-card--custom">
+                                    <div className="fc-custom-event-body fc-custom-event-body--custom">
+                                        <span className="fc-custom-event-icon">📌</span>
+                                        <span className="fc-custom-event-title" title={eventInfo.event.title}>
+                                            {eventInfo.event.title}
+                                        </span>
+                                    </div>
+                                </div>
+                            );
+                        }
+
                         const colors: string[] = eventInfo.event.extendedProps.workColors || [];
                         return (
                             <div className="fc-custom-event-card">
@@ -307,13 +442,22 @@ const CalendarView: React.FC = () => {
                 />
             </div>
 
-            {/* ---------- МОДАЛКА ---------- */}
+            {/* ---------- МОДАЛКА ЗАКАЗА ---------- */}
             <EventModal
                 isOpen={showModal}
                 event={selectedEvent}
                 onClose={handleCloseModal}
                 onEdit={() => navigate(`/orders/${selectedEvent?.id}`)}
                 onStatusChanged={handleStatusChanged}
+            />
+
+            {/* ---------- МОДАЛКА ПРОИЗВОЛЬНОГО СОБЫТИЯ ---------- */}
+            <CustomEventModal
+                isOpen={showCustomEventModal}
+                event={selectedCustomEvent}
+                initialDate={customEventInitialDate}
+                onClose={handleCloseCustomEventModal}
+                onSaved={handleCustomEventSaved}
             />
         </div>
     );
