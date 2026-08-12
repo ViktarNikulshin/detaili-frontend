@@ -91,6 +91,7 @@ export interface FinanceRow {
     expSalary: number;
     expTaxes: number;
     expAdvertising?: number;
+    expPartners: number;
     expOther: number;
     financeType?: 'NON_CASH' | 'CASH';
 }

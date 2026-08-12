@@ -17,6 +17,7 @@ type FinanceTotals = {
     salary: number;
     taxes: number;
     advertising: number;
+    partners: number;
     other: number;
     totalExpense: number;
     finalBalance: number;
@@ -32,6 +33,7 @@ const calcFinanceTotals = (records: FinanceRow[], startingBalance: number): Fina
         salary: 0,
         taxes: 0,
         advertising: 0,
+        partners: 0,
         other: 0,
         totalExpense: 0,
         finalBalance: 0
@@ -46,10 +48,11 @@ const calcFinanceTotals = (records: FinanceRow[], startingBalance: number): Fina
         sums.salary += (r.expSalary || 0);
         sums.taxes += (r.expTaxes || 0);
         sums.advertising += (r.expAdvertising || 0);
+        sums.partners += (r.expPartners || 0);
         sums.other += (r.expOther || 0);
     });
 
-    sums.totalExpense = sums.utilities + sums.rent + sums.materials + sums.credit + sums.salary + sums.taxes + sums.advertising + sums.other;
+    sums.totalExpense = sums.utilities + sums.rent + sums.materials + sums.credit + sums.salary + sums.taxes + sums.advertising + sums.partners + sums.other;
     sums.finalBalance = startingBalance + sums.income - sums.totalExpense;
 
     return sums;
@@ -85,6 +88,7 @@ const FinanceReport: React.FC = () => {
         expSalary: 0,
         expTaxes: 0,
         expAdvertising: 0,
+        expPartners: 0,
         expOther: 0
     });
 
@@ -178,6 +182,7 @@ const FinanceReport: React.FC = () => {
         salary: nonCashTotals.salary + cashTotals.salary,
         taxes: nonCashTotals.taxes + cashTotals.taxes,
         advertising: nonCashTotals.advertising + cashTotals.advertising,
+        partners: nonCashTotals.partners + cashTotals.partners,
         other: nonCashTotals.other + cashTotals.other,
         totalExpense: nonCashTotals.totalExpense + cashTotals.totalExpense,
         finalBalance: nonCashTotals.finalBalance + cashTotals.finalBalance,
@@ -228,6 +233,7 @@ const FinanceReport: React.FC = () => {
                 expSalary: 0,
                 expTaxes: 0,
                 expAdvertising: 0,
+                expPartners: 0,
                 expOther: 0
             });
         } catch (err) {
@@ -446,6 +452,12 @@ const FinanceReport: React.FC = () => {
                                 <td className="text-right-aligned">{combinedTotals.advertising.toFixed(2)}</td>
                             </tr>
                             <tr>
+                                <td className="text-left-aligned">Партнеры</td>
+                                <td>{cashTotals.partners.toFixed(2)}</td>
+                                <td>{nonCashTotals.partners.toFixed(2)}</td>
+                                <td className="text-right-aligned">{combinedTotals.partners.toFixed(2)}</td>
+                            </tr>
+                            <tr>
                                 <td className="text-left-aligned">Прочее</td>
                                 <td>{cashTotals.other.toFixed(2)}</td>
                                 <td>{nonCashTotals.other.toFixed(2)}</td>
@@ -478,6 +490,7 @@ const FinanceReport: React.FC = () => {
                 <div className="summary-widget expense"><span className="widget-title">З/п</span><span className="widget-amount">{totals.salary.toFixed(2)}</span></div>
                 {activeTab === 'NON_CASH' && <div className="summary-widget expense"><span className="widget-title">Налоги</span><span className="widget-amount">{totals.taxes.toFixed(2)}</span></div>}
                 {activeTab === 'NON_CASH' && <div className="summary-widget expense"><span className="widget-title">Реклама</span><span className="widget-amount">{totals.advertising.toFixed(2)}</span></div>}
+                {activeTab === 'CASH' && <div className="summary-widget expense"><span className="widget-title">Партнеры</span><span className="widget-amount">{totals.partners.toFixed(2)}</span></div>}
                 <div className="summary-widget expense"><span className="widget-title">Прочее</span><span className="widget-amount">{totals.other.toFixed(2)}</span></div>
             </div>
 
@@ -488,8 +501,8 @@ const FinanceReport: React.FC = () => {
                     <tr>
                         <th rowSpan={2} style={{ width: '10%', verticalAlign: 'middle' }}>Дата</th>
                         <th rowSpan={2} style={{ width: '12%', verticalAlign: 'middle' }}>Приход</th>
-                        {/* colSpan: 3 для наличных, 8 для безналичных */}
-                        <th colSpan={activeTab === 'CASH' ? 3 : 8} style={{ width: '60%' }}>Расход</th>
+                        {/* colSpan: 4 для наличных, 8 для безналичных */}
+                        <th colSpan={activeTab === 'CASH' ? 4 : 8} style={{ width: '60%' }}>Расход</th>
                         <th rowSpan={2} style={{ width: '18%', verticalAlign: 'middle' }}>Действия</th>
                     </tr>
                     <tr>
@@ -500,6 +513,7 @@ const FinanceReport: React.FC = () => {
                         <th>З/п</th>
                         {activeTab === 'NON_CASH' && <th>Налоги</th>}
                         {activeTab === 'NON_CASH' && <th>Реклама</th>}
+                        {activeTab === "CASH" && <th>Партнеры</th>}
                         <th>Прочее</th>
                     </tr>
                     </thead>
@@ -527,6 +541,7 @@ const FinanceReport: React.FC = () => {
                                     <td><input type="number" value={editRow.expSalary || ''} onChange={e => setEditRow({ ...editRow, expSalary: Number(e.target.value) })} className="inline-input" /></td>
                                     {activeTab === 'NON_CASH' && <td><input type="number" value={editRow.expTaxes || ''} onChange={e => setEditRow({ ...editRow, expTaxes: Number(e.target.value) })} className="inline-input" /></td>}
                                     {activeTab === 'NON_CASH' && <td><input type="number" value={editRow.expAdvertising || ''} onChange={e => setEditRow({ ...editRow, expAdvertising: Number(e.target.value) })} className="inline-input" /></td>}
+                                    {activeTab === 'CASH' && <td><input type="number" value={editRow.expPartners || ''} onChange={e => setEditRow({ ...editRow, expPartners: Number(e.target.value) })} className="inline-input" /></td>}
                                     <td><input type="number" value={editRow.expOther || ''} onChange={e => setEditRow({ ...editRow, expOther: Number(e.target.value) })} className="inline-input" /></td>
                                     <td className="action-icons-cell">
                                         <button onClick={handleSaveEdit} className="icon-btn save-icon" title="Сохранить">💾</button>
@@ -547,6 +562,7 @@ const FinanceReport: React.FC = () => {
                                 <td>{record.expSalary > 0 ? record.expSalary : ''}</td>
                                 {activeTab === 'NON_CASH' && <td>{record.expTaxes > 0 ? record.expTaxes : ''}</td>}
                                 {activeTab === 'NON_CASH' && <td>{(record.expAdvertising || 0) > 0 ? record.expAdvertising : ''}</td>}
+                                {activeTab === 'CASH' && <td>{(record.expPartners || 0) > 0 ? record.expPartners : ''}</td>}
                                 <td>{record.expOther > 0 ? record.expOther : ''}</td>
                                 <td className="action-icons-cell">
                                     <button onClick={() => handleStartEdit(record)} className="icon-btn edit-icon" title="Редактировать">✏️</button>
@@ -576,6 +592,7 @@ const FinanceReport: React.FC = () => {
                             <td><input type="number" value={newRow.expSalary || ''} onChange={e => setNewRow({ ...newRow, expSalary: Number(e.target.value) })} className="inline-input" /></td>
                             {activeTab === 'NON_CASH' && <td><input type="number" value={newRow.expTaxes || ''} onChange={e => setNewRow({ ...newRow, expTaxes: Number(e.target.value) })} className="inline-input" /></td>}
                             {activeTab === 'NON_CASH' && <td><input type="number" value={newRow.expAdvertising || ''} onChange={e => setNewRow({ ...newRow, expAdvertising: Number(e.target.value) })} className="inline-input" /></td>}
+                            {activeTab === 'CASH' && <td><input type="number" value={newRow.expPartners || ''} onChange={e => setNewRow({ ...newRow, expPartners: Number(e.target.value) })} className="inline-input" /></td>}
                             <td><input type="number" value={newRow.expOther || ''} onChange={e => setNewRow({ ...newRow, expOther: Number(e.target.value) })} className="inline-input" /></td>
                             <td className="action-icons-cell"><span className="text-muted">новая</span></td>
                         </tr>
