@@ -148,8 +148,8 @@ export const reportAPI = {
     deleteLandlordRecord: (id: number) =>
         reportApi.delete<LandlordSummary>(`/reports/landlord/records/${id}`),
 
-    getDebtsSummary:(year: number, month: number) =>
-        reportApi.get<DebtRow[]>('/debt', { params: { year, month } }),
+    getDebtsSummary:(year: number, month: number, type: 'CLIENT' | 'PARTNER' = 'CLIENT') =>
+        reportApi.get<DebtRow[]>('/debt', { params: { year, month, type } }),
 
 
     saveDebtRecord: (data: DebtRow) =>

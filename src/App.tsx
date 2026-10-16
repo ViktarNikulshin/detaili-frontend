@@ -51,6 +51,7 @@ function App() {
                                 <Route path="/reports/finance-report" element={<FinanceReport />} />
                                 <Route path="/reports/acts-report" element={<ActsAnalytics />} />
                                 <Route path="/reports/debts-report" element={<DebtsAnalytics />} />
+                                <Route path="/reports/partner-debts-report" element={<DebtsAnalytics debtType="PARTNER" />} />
                                 <Route path="/reports/landlord-report" element={<Landlord />} />
                             </Route>
                         </Route>

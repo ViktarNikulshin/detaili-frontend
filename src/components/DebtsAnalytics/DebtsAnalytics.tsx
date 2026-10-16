@@ -8,7 +8,7 @@ import { reportAPI } from '../../services/reportApi';
 import { DebtRow } from '../../types/report';
 import './DebtsAnalytics.css'; // Используются общие стили таблиц
 
-const DebtsAnalytics: React.FC = () => {
+const DebtsAnalytics: React.FC<{ debtType?: 'CLIENT' | 'PARTNER' }> = ({ debtType = 'CLIENT' }) => {
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
     const [records, setRecords] = useState<DebtRow[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
@@ -20,7 +20,8 @@ const DebtsAnalytics: React.FC = () => {
         client: '',
         carModel: '',
         amount: 0,
-        status: 'UNPAID'
+        status: 'UNPAID',
+        debtType
     });
 
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -34,7 +35,7 @@ const DebtsAnalytics: React.FC = () => {
             const year = moment(date).year();
             const month = moment(date).month() + 1;
 
-            const response = await reportAPI.getDebtsSummary(year, month);
+            const response = await reportAPI.getDebtsSummary(year, month, debtType);
             setRecords(response.data || []);
             setError(null);
         } catch (err) {
@@ -42,7 +43,7 @@ const DebtsAnalytics: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [debtType]);
 
     useEffect(() => {
         fetchDebtsData(currentDate);
@@ -95,7 +96,8 @@ const DebtsAnalytics: React.FC = () => {
                 client: '',
                 carModel: '',
                 amount: 0,
-                status: 'UNPAID'
+                status: 'UNPAID',
+                debtType
             });
         } catch (err) {
             alert('Ошибка при добавлении записи долга');

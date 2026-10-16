@@ -149,5 +149,6 @@ export interface DebtRow {
     carModel: string;
     amount: number;
     status: 'PAID' | 'UNPAID';
+    debtType?: 'CLIENT' | 'PARTNER';
 }
 

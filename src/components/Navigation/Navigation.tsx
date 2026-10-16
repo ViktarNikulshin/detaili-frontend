@@ -52,6 +52,10 @@ const Navigation: React.FC = () => {
         setIsMenuOpen(false);
         navigate('/reports/debts-report');
     }
+    const handlePartnerDebtsReport = () => {
+        setIsMenuOpen(false);
+        navigate('/reports/partner-debts-report');
+    }
     const handleLandlordReport = () => {
         setIsMenuOpen(false);
         navigate('/reports/landlord-report');
@@ -130,6 +134,9 @@ const Navigation: React.FC = () => {
                                 </div>
                                 <div className="menu-item" onClick={handleDebtsReport}>
                                     Долги
+                                </div>
+                                <div className="menu-item" onClick={handlePartnerDebtsReport}>
+                                    Долги партнёрам
                                 </div>
                                 {/*<div className="menu-item" onClick={handleReport}>*/}
                                 {/*    Отчет*/}
