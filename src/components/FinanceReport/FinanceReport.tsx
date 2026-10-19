@@ -8,68 +8,146 @@ import { reportAPI } from '../../services/reportApi';
 import './FinanceReport.css';
 import { FinanceRow } from "../../types/report";
 
+type FinanceTabType = 'NON_CASH' | 'CASH' | 'CURRENT_ACCOUNT';
+type ActiveTab = FinanceTabType | 'REPORT';
+
+type ExpenseKey =
+    | 'expUtilities'
+    | 'expRent'
+    | 'expMaterials'
+    | 'expCredit'
+    | 'expSalary'
+    | 'expTaxes'
+    | 'expAdvertising'
+    | 'expPartners'
+    | 'expCurrentAccount'
+    | 'expOther';
+
+const EXPENSE_FIELDS: { key: ExpenseKey; label: string }[] = [
+    { key: 'expUtilities', label: 'Коммуналка' },
+    { key: 'expRent', label: 'Аренда' },
+    { key: 'expMaterials', label: 'Материалы' },
+    { key: 'expCredit', label: 'Кредит' },
+    { key: 'expSalary', label: 'З/п' },
+    { key: 'expTaxes', label: 'Налоги' },
+    { key: 'expAdvertising', label: 'Реклама' },
+    { key: 'expPartners', label: 'Партнеры' },
+    { key: 'expCurrentAccount', label: 'Текущий счёт' },
+    { key: 'expOther', label: 'Прочее' },
+];
+
+// В сводном отчёте перевод на текущий счёт — внутренняя операция, не расход
+const REPORT_EXPENSE_FIELDS = EXPENSE_FIELDS.filter(f => f.key !== 'expCurrentAccount');
+
+const TAB_FIELDS: Record<FinanceTabType, ExpenseKey[]> = {
+    NON_CASH: ['expUtilities', 'expRent', 'expMaterials', 'expCredit', 'expSalary', 'expTaxes', 'expAdvertising', 'expCurrentAccount', 'expOther'],
+    CASH: ['expMaterials', 'expSalary', 'expPartners', 'expOther'],
+    CURRENT_ACCOUNT: ['expUtilities', 'expRent', 'expMaterials', 'expCredit', 'expSalary', 'expTaxes', 'expAdvertising', 'expOther'],
+};
+
+const TAB_LABELS: Record<FinanceTabType, { icon: string; label: string }> = {
+    NON_CASH: { icon: '💳', label: 'Карт-счёт' },
+    CASH: { icon: '💵', label: 'Наличные' },
+    CURRENT_ACCOUNT: { icon: '🏦', label: 'Текущий счёт' },
+};
+
+const emptyRow = (): FinanceRow => ({
+    date: format(new Date(), "yyyy-MM-dd"),
+    income: 0,
+    expUtilities: 0,
+    expRent: 0,
+    expMaterials: 0,
+    expCredit: 0,
+    expSalary: 0,
+    expTaxes: 0,
+    expAdvertising: 0,
+    expPartners: 0,
+    expOther: 0,
+    expCurrentAccount: 0
+});
+
 type FinanceTotals = {
     income: number;
-    utilities: number;
-    rent: number;
-    materials: number;
-    credit: number;
-    salary: number;
-    taxes: number;
-    advertising: number;
-    partners: number;
-    other: number;
+    expenses: Record<ExpenseKey, number>;
     totalExpense: number;
     finalBalance: number;
 };
 
-const calcFinanceTotals = (records: FinanceRow[], startingBalance: number): FinanceTotals => {
-    const sums: FinanceTotals = {
-        income: 0,
-        utilities: 0,
-        rent: 0,
-        materials: 0,
-        credit: 0,
-        salary: 0,
-        taxes: 0,
-        advertising: 0,
-        partners: 0,
-        other: 0,
-        totalExpense: 0,
-        finalBalance: 0
-    };
+const emptyExpenses = (): Record<ExpenseKey, number> => ({
+    expUtilities: 0,
+    expRent: 0,
+    expMaterials: 0,
+    expCredit: 0,
+    expSalary: 0,
+    expTaxes: 0,
+    expAdvertising: 0,
+    expPartners: 0,
+    expCurrentAccount: 0,
+    expOther: 0
+});
+
+const calcFinanceTotals = (
+    records: FinanceRow[],
+    startingBalance: number,
+    fields: { key: ExpenseKey; label: string }[] = EXPENSE_FIELDS,
+    includeAutoIncome: boolean = true
+): FinanceTotals => {
+    const expenses = emptyExpenses();
+    let income = 0;
 
     records.forEach(r => {
-        sums.income += (r.income || 0);
-        sums.utilities += (r.expUtilities || 0);
-        sums.rent += (r.expRent || 0);
-        sums.materials += (r.expMaterials || 0);
-        sums.credit += (r.expCredit || 0);
-        sums.salary += (r.expSalary || 0);
-        sums.taxes += (r.expTaxes || 0);
-        sums.advertising += (r.expAdvertising || 0);
-        sums.partners += (r.expPartners || 0);
-        sums.other += (r.expOther || 0);
+        // Авто-приход в текущем счёте — это перевод, а не реальный доход
+        const isAutoIncome = !includeAutoIncome && r.sourceRecordId != null;
+        if (!isAutoIncome) {
+            income += (r.income || 0);
+        }
+        fields.forEach(({ key }) => {
+            expenses[key] += (Number(r[key]) || 0);
+        });
     });
 
-    sums.totalExpense = sums.utilities + sums.rent + sums.materials + sums.credit + sums.salary + sums.taxes + sums.advertising + sums.partners + sums.other;
-    sums.finalBalance = startingBalance + sums.income - sums.totalExpense;
+    const totalExpense = fields.reduce((sum, { key }) => sum + expenses[key], 0);
 
-    return sums;
+    return {
+        income,
+        expenses,
+        totalExpense,
+        finalBalance: startingBalance + income - totalExpense
+    };
+};
+
+const combineTotals = (...totals: FinanceTotals[]): FinanceTotals => {
+    const expenses = emptyExpenses();
+    let income = 0;
+    let totalExpense = 0;
+    let finalBalance = 0;
+
+    totals.forEach(t => {
+        income += t.income;
+        totalExpense += t.totalExpense;
+        finalBalance += t.finalBalance;
+        EXPENSE_FIELDS.forEach(({ key }) => {
+            expenses[key] += t.expenses[key];
+        });
+    });
+
+    return { income, expenses, totalExpense, finalBalance };
 };
 
 const FinanceReport: React.FC = () => {
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
     const [startingBalance, setStartingBalance] = useState<number>(0);
-    const [activeTab, setActiveTab] = useState<'NON_CASH' | 'CASH' | 'REPORT'>('NON_CASH');
+    const [activeTab, setActiveTab] = useState<ActiveTab>('NON_CASH');
     const [records, setRecords] = useState<FinanceRow[]>([]);
 
     const [reportData, setReportData] = useState<{
         nonCash: { records: FinanceRow[]; startingBalance: number };
         cash: { records: FinanceRow[]; startingBalance: number };
+        currentAccount: { records: FinanceRow[]; startingBalance: number };
     }>({
         nonCash: { records: [], startingBalance: 0 },
-        cash: { records: [], startingBalance: 0 }
+        cash: { records: [], startingBalance: 0 },
+        currentAccount: { records: [], startingBalance: 0 }
     });
     const [reportLoading, setReportLoading] = useState<boolean>(false);
     const [reportError, setReportError] = useState<string | null>(null);
@@ -78,26 +156,14 @@ const FinanceReport: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
 
     const [isAdding, setIsAdding] = useState<boolean>(false);
-    const [newRow, setNewRow] = useState<FinanceRow>({
-        date: format(new Date(), "yyyy-MM-dd"),
-        income: 0,
-        expUtilities: 0,
-        expRent: 0,
-        expMaterials: 0,
-        expCredit: 0,
-        expSalary: 0,
-        expTaxes: 0,
-        expAdvertising: 0,
-        expPartners: 0,
-        expOther: 0
-    });
+    const [newRow, setNewRow] = useState<FinanceRow>(emptyRow());
 
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editRow, setEditRow] = useState<FinanceRow | null>(null);
 
     const monthLabel = useMemo(() => moment(currentDate).locale('ru').format('MMMM YYYY').toUpperCase(), [currentDate]);
 
-    const fetchFinanceData = useCallback(async (date: Date, type: 'NON_CASH' | 'CASH') => {
+    const fetchFinanceData = useCallback(async (date: Date, type: FinanceTabType) => {
         try {
             setLoading(true);
             const year = moment(date).year();
@@ -121,9 +187,10 @@ const FinanceReport: React.FC = () => {
             const year = moment(date).year();
             const month = moment(date).month() + 1;
 
-            const [nonCashRes, cashRes] = await Promise.all([
+            const [nonCashRes, cashRes, currentAccountRes] = await Promise.all([
                 reportAPI.getFinanceSummary(year, month, 'NON_CASH'),
                 reportAPI.getFinanceSummary(year, month, 'CASH'),
+                reportAPI.getFinanceSummary(year, month, 'CURRENT_ACCOUNT'),
             ]);
 
             setReportData({
@@ -134,6 +201,10 @@ const FinanceReport: React.FC = () => {
                 cash: {
                     records: cashRes.data.records || [],
                     startingBalance: cashRes.data.startingBalance || 0
+                },
+                currentAccount: {
+                    records: currentAccountRes.data.records || [],
+                    startingBalance: currentAccountRes.data.startingBalance || 0
                 }
             });
             setReportError(null);
@@ -153,6 +224,7 @@ const FinanceReport: React.FC = () => {
     }, [currentDate, activeTab, fetchFinanceData, fetchReportData]);
 
     const handleSaveBalance = async () => {
+        if (activeTab === 'REPORT') return;
         try {
             const year = moment(currentDate).year();
             const month = moment(currentDate).month() + 1;
@@ -165,28 +237,41 @@ const FinanceReport: React.FC = () => {
 
     const totals = useMemo(() => calcFinanceTotals(records, startingBalance), [records, startingBalance]);
 
-    const nonCashTotals = useMemo(
+    // Виджеты балансов считаем по фактическим операциям (перевод не искажает баланс счёта)
+    const nonCashBalance = useMemo(
         () => calcFinanceTotals(reportData.nonCash.records, reportData.nonCash.startingBalance),
         [reportData.nonCash]
     );
-    const cashTotals = useMemo(
+    const cashBalance = useMemo(
         () => calcFinanceTotals(reportData.cash.records, reportData.cash.startingBalance),
         [reportData.cash]
     );
-    const combinedTotals = useMemo(() => ({
-        income: nonCashTotals.income + cashTotals.income,
-        utilities: nonCashTotals.utilities + cashTotals.utilities,
-        rent: nonCashTotals.rent + cashTotals.rent,
-        materials: nonCashTotals.materials + cashTotals.materials,
-        credit: nonCashTotals.credit + cashTotals.credit,
-        salary: nonCashTotals.salary + cashTotals.salary,
-        taxes: nonCashTotals.taxes + cashTotals.taxes,
-        advertising: nonCashTotals.advertising + cashTotals.advertising,
-        partners: nonCashTotals.partners + cashTotals.partners,
-        other: nonCashTotals.other + cashTotals.other,
-        totalExpense: nonCashTotals.totalExpense + cashTotals.totalExpense,
-        finalBalance: nonCashTotals.finalBalance + cashTotals.finalBalance,
-    }), [nonCashTotals, cashTotals]);
+    const currentAccountBalance = useMemo(
+        () => calcFinanceTotals(reportData.currentAccount.records, reportData.currentAccount.startingBalance),
+        [reportData.currentAccount]
+    );
+    const combinedBalance = useMemo(
+        () => combineTotals(nonCashBalance, cashBalance, currentAccountBalance),
+        [nonCashBalance, cashBalance, currentAccountBalance]
+    );
+
+    // Таблица отчёта: перевод на текущий счёт и авто-приход исключены, чтобы не задваивать суммы
+    const nonCashTotals = useMemo(
+        () => calcFinanceTotals(reportData.nonCash.records, reportData.nonCash.startingBalance, REPORT_EXPENSE_FIELDS),
+        [reportData.nonCash]
+    );
+    const cashTotals = useMemo(
+        () => calcFinanceTotals(reportData.cash.records, reportData.cash.startingBalance, REPORT_EXPENSE_FIELDS),
+        [reportData.cash]
+    );
+    const currentAccountTotals = useMemo(
+        () => calcFinanceTotals(reportData.currentAccount.records, reportData.currentAccount.startingBalance, REPORT_EXPENSE_FIELDS, false),
+        [reportData.currentAccount]
+    );
+    const combinedTotals = useMemo(
+        () => combineTotals(nonCashTotals, cashTotals, currentAccountTotals),
+        [nonCashTotals, cashTotals, currentAccountTotals]
+    );
 
     const handlePrevMonth = () => setCurrentDate(prev => moment(prev).subtract(1, 'month').toDate());
     const handleNextMonth = () => setCurrentDate(prev => moment(prev).add(1, 'month').toDate());
@@ -223,19 +308,7 @@ const FinanceReport: React.FC = () => {
             await reportAPI.saveFinanceRecord({ ...newRow, financeType: activeTab });
             await fetchFinanceData(currentDate, activeTab);
             setIsAdding(false);
-            setNewRow({
-                date: format(new Date(), "yyyy-MM-dd"),
-                income: 0,
-                expUtilities: 0,
-                expRent: 0,
-                expMaterials: 0,
-                expCredit: 0,
-                expSalary: 0,
-                expTaxes: 0,
-                expAdvertising: 0,
-                expPartners: 0,
-                expOther: 0
-            });
+            setNewRow(emptyRow());
         } catch (err) {
             alert('Ошибка при добавлении записи');
             console.error(err);
@@ -254,6 +327,23 @@ const FinanceReport: React.FC = () => {
         }
     };
 
+    const visibleFields = activeTab === 'REPORT' ? [] : TAB_FIELDS[activeTab];
+
+    const tabButtonStyle = (tab: ActiveTab): React.CSSProperties => ({
+        background: activeTab === tab ? 'var(--primary-green)' : 'transparent',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '6px',
+        padding: '6px 14px',
+        cursor: 'pointer',
+        fontSize: '13px',
+        fontWeight: activeTab === tab ? 'bold' : 'normal',
+        transition: 'all 0.2s ease',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px'
+    });
+
     return (
         <div className="report-container salary-logging-container">
 
@@ -267,7 +357,7 @@ const FinanceReport: React.FC = () => {
                     <button className="arrow-btn" onClick={handleNextMonth}> &rarr; </button>
                 </div>
 
-                {/* Переключатель Нал / Безнал */}
+                {/* Переключатель счетов */}
                 <div className="compact-type-switcher" style={{
                     display: 'inline-flex',
                     background: '#2d2d2d',
@@ -275,63 +365,20 @@ const FinanceReport: React.FC = () => {
                     borderRadius: '8px',
                     border: '1px solid rgba(255, 255, 255, 0.1)'
                 }}>
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('NON_CASH')}
-                        style={{
-                            background: activeTab === 'NON_CASH' ? 'var(--primary-green)' : 'transparent',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '6px',
-                            padding: '6px 14px',
-                            cursor: 'pointer',
-                            fontSize: '13px',
-                            fontWeight: activeTab === 'NON_CASH' ? 'bold' : 'normal',
-                            transition: 'all 0.2s ease',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px'
-                        }}
-                    >
-                        <span>💳</span> Безналичные
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('CASH')}
-                        style={{
-                            background: activeTab === 'CASH' ? 'var(--primary-green)' : 'transparent',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '6px',
-                            padding: '6px 14px',
-                            cursor: 'pointer',
-                            fontSize: '13px',
-                            fontWeight: activeTab === 'CASH' ? 'bold' : 'normal',
-                            transition: 'all 0.2s ease',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px'
-                        }}
-                    >
-                        <span>💵</span> Наличные
-                    </button>
+                    {(Object.keys(TAB_LABELS) as FinanceTabType[]).map(tab => (
+                        <button
+                            key={tab}
+                            type="button"
+                            onClick={() => setActiveTab(tab)}
+                            style={tabButtonStyle(tab)}
+                        >
+                            <span>{TAB_LABELS[tab].icon}</span> {TAB_LABELS[tab].label}
+                        </button>
+                    ))}
                     <button
                         type="button"
                         onClick={() => setActiveTab('REPORT')}
-                        style={{
-                            background: activeTab === 'REPORT' ? 'var(--primary-green)' : 'transparent',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '6px',
-                            padding: '6px 14px',
-                            cursor: 'pointer',
-                            fontSize: '13px',
-                            fontWeight: activeTab === 'REPORT' ? 'bold' : 'normal',
-                            transition: 'all 0.2s ease',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px'
-                        }}
+                        style={tabButtonStyle('REPORT')}
                     >
                         <span>📊</span> Отчет
                     </button>
@@ -352,7 +399,7 @@ const FinanceReport: React.FC = () => {
                     </div>
                 )}
 
-                {/* Общий итоговый баланс (не показываем на вкладке отчёта, там свой блок балансов) */}
+                {/* Общий итоговый баланс (не показываем на вкладке отчёта) */}
                 {activeTab !== 'REPORT' && (
                     <div className="total-salary-display" style={{ margin: 0 }}>
                         <span className="total-label">ОБЩИЙ БАЛАНС:</span>
@@ -372,21 +419,27 @@ const FinanceReport: React.FC = () => {
                     {/* ИТОГОВЫЕ БАЛАНСЫ ПО ТИПАМ */}
                     <div className="finance-summary-widgets-grid" style={{ marginTop: '20px' }}>
                         <div className="summary-widget expense">
-                            <span className="widget-title">Баланс безнал</span>
-                            <span className="widget-amount" style={{ color: nonCashTotals.finalBalance >= 0 ? 'var(--primary-green)' : 'var(--error-red)' }}>
-                                {nonCashTotals.finalBalance.toFixed(2)}
+                            <span className="widget-title">Баланс карт-счёт</span>
+                            <span className="widget-amount" style={{ color: nonCashBalance.finalBalance >= 0 ? 'var(--primary-green)' : 'var(--error-red)' }}>
+                                {nonCashBalance.finalBalance.toFixed(2)}
                             </span>
                         </div>
                         <div className="summary-widget expense">
                             <span className="widget-title">Баланс нал</span>
-                            <span className="widget-amount" style={{ color: cashTotals.finalBalance >= 0 ? 'var(--primary-green)' : 'var(--error-red)' }}>
-                                {cashTotals.finalBalance.toFixed(2)}
+                            <span className="widget-amount" style={{ color: cashBalance.finalBalance >= 0 ? 'var(--primary-green)' : 'var(--error-red)' }}>
+                                {cashBalance.finalBalance.toFixed(2)}
+                            </span>
+                        </div>
+                        <div className="summary-widget expense">
+                            <span className="widget-title">Баланс текущий счёт</span>
+                            <span className="widget-amount" style={{ color: currentAccountBalance.finalBalance >= 0 ? 'var(--primary-green)' : 'var(--error-red)' }}>
+                                {currentAccountBalance.finalBalance.toFixed(2)}
                             </span>
                         </div>
                         <div className="summary-widget income">
                             <span className="widget-title">Общий баланс</span>
-                            <span className="widget-amount" style={{ color: combinedTotals.finalBalance >= 0 ? 'var(--primary-green)' : 'var(--error-red)' }}>
-                                {combinedTotals.finalBalance.toFixed(2)}
+                            <span className="widget-amount" style={{ color: combinedBalance.finalBalance >= 0 ? 'var(--primary-green)' : 'var(--error-red)' }}>
+                                {combinedBalance.finalBalance.toFixed(2)}
                             </span>
                         </div>
                     </div>
@@ -396,10 +449,11 @@ const FinanceReport: React.FC = () => {
                         <table className="report-table salary-log-table">
                             <thead>
                             <tr>
-                                <th style={{ width: '34%' }}>Статья</th>
-                                <th style={{ width: '22%' }}>Наличные</th>
-                                <th style={{ width: '22%' }}>Безналичные</th>
-                                <th style={{ width: '22%' }}>Итого</th>
+                                <th style={{ width: '28%' }}>Статья</th>
+                                <th style={{ width: '18%' }}>Наличные</th>
+                                <th style={{ width: '18%' }}>Карт-счёт</th>
+                                <th style={{ width: '18%' }}>Текущий счёт</th>
+                                <th style={{ width: '18%' }}>Итого</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -407,66 +461,23 @@ const FinanceReport: React.FC = () => {
                                 <td className="text-left-aligned">Приход</td>
                                 <td>{cashTotals.income.toFixed(2)}</td>
                                 <td>{nonCashTotals.income.toFixed(2)}</td>
+                                <td>{currentAccountTotals.income.toFixed(2)}</td>
                                 <td className="text-right-aligned">{combinedTotals.income.toFixed(2)}</td>
                             </tr>
-                            <tr>
-                                <td className="text-left-aligned">Коммуналка</td>
-                                <td>{cashTotals.utilities.toFixed(2)}</td>
-                                <td>{nonCashTotals.utilities.toFixed(2)}</td>
-                                <td className="text-right-aligned">{combinedTotals.utilities.toFixed(2)}</td>
-                            </tr>
-                            <tr>
-                                <td className="text-left-aligned">Аренда</td>
-                                <td>{cashTotals.rent.toFixed(2)}</td>
-                                <td>{nonCashTotals.rent.toFixed(2)}</td>
-                                <td className="text-right-aligned">{combinedTotals.rent.toFixed(2)}</td>
-                            </tr>
-                            <tr>
-                                <td className="text-left-aligned">Материалы</td>
-                                <td>{cashTotals.materials.toFixed(2)}</td>
-                                <td>{nonCashTotals.materials.toFixed(2)}</td>
-                                <td className="text-right-aligned">{combinedTotals.materials.toFixed(2)}</td>
-                            </tr>
-                            <tr>
-                                <td className="text-left-aligned">Кредит</td>
-                                <td>{cashTotals.credit.toFixed(2)}</td>
-                                <td>{nonCashTotals.credit.toFixed(2)}</td>
-                                <td className="text-right-aligned">{combinedTotals.credit.toFixed(2)}</td>
-                            </tr>
-                            <tr>
-                                <td className="text-left-aligned">З/п</td>
-                                <td>{cashTotals.salary.toFixed(2)}</td>
-                                <td>{nonCashTotals.salary.toFixed(2)}</td>
-                                <td className="text-right-aligned">{combinedTotals.salary.toFixed(2)}</td>
-                            </tr>
-                            <tr>
-                                <td className="text-left-aligned">Налоги</td>
-                                <td>{cashTotals.taxes.toFixed(2)}</td>
-                                <td>{nonCashTotals.taxes.toFixed(2)}</td>
-                                <td className="text-right-aligned">{combinedTotals.taxes.toFixed(2)}</td>
-                            </tr>
-                            <tr>
-                                <td className="text-left-aligned">Реклама</td>
-                                <td>{cashTotals.advertising.toFixed(2)}</td>
-                                <td>{nonCashTotals.advertising.toFixed(2)}</td>
-                                <td className="text-right-aligned">{combinedTotals.advertising.toFixed(2)}</td>
-                            </tr>
-                            <tr>
-                                <td className="text-left-aligned">Партнеры</td>
-                                <td>{cashTotals.partners.toFixed(2)}</td>
-                                <td>{nonCashTotals.partners.toFixed(2)}</td>
-                                <td className="text-right-aligned">{combinedTotals.partners.toFixed(2)}</td>
-                            </tr>
-                            <tr>
-                                <td className="text-left-aligned">Прочее</td>
-                                <td>{cashTotals.other.toFixed(2)}</td>
-                                <td>{nonCashTotals.other.toFixed(2)}</td>
-                                <td className="text-right-aligned">{combinedTotals.other.toFixed(2)}</td>
-                            </tr>
+                            {REPORT_EXPENSE_FIELDS.map(({ key, label }) => (
+                                <tr key={key}>
+                                    <td className="text-left-aligned">{label}</td>
+                                    <td>{cashTotals.expenses[key].toFixed(2)}</td>
+                                    <td>{nonCashTotals.expenses[key].toFixed(2)}</td>
+                                    <td>{currentAccountTotals.expenses[key].toFixed(2)}</td>
+                                    <td className="text-right-aligned">{combinedTotals.expenses[key].toFixed(2)}</td>
+                                </tr>
+                            ))}
                             <tr style={{ fontWeight: 700 }}>
                                 <td className="text-left-aligned">Итого расход</td>
                                 <td>{cashTotals.totalExpense.toFixed(2)}</td>
                                 <td>{nonCashTotals.totalExpense.toFixed(2)}</td>
+                                <td>{currentAccountTotals.totalExpense.toFixed(2)}</td>
                                 <td className="text-right-aligned">{combinedTotals.totalExpense.toFixed(2)}</td>
                             </tr>
                             </tbody>
@@ -483,15 +494,15 @@ const FinanceReport: React.FC = () => {
             {/* СВОДНЫЕ ВИДЖЕТЫ */}
             <div className="finance-summary-widgets-grid" style={{ marginTop: '20px' }}>
                 <div className="summary-widget income"><span className="widget-title">Приход</span><span className="widget-amount">+{totals.income.toFixed(2)}</span></div>
-                {activeTab === 'NON_CASH' && <div className="summary-widget expense"><span className="widget-title">Коммуналка</span><span className="widget-amount">{totals.utilities.toFixed(2)}</span></div>}
-                {activeTab === 'NON_CASH' && <div className="summary-widget expense"><span className="widget-title">Аренда</span><span className="widget-amount">{totals.rent.toFixed(2)}</span></div>}
-                <div className="summary-widget expense"><span className="widget-title">Материалы</span><span className="widget-amount">{totals.materials.toFixed(2)}</span></div>
-                {activeTab === 'NON_CASH' && <div className="summary-widget expense"><span className="widget-title">Кредит</span><span className="widget-amount">{totals.credit.toFixed(2)}</span></div>}
-                <div className="summary-widget expense"><span className="widget-title">З/п</span><span className="widget-amount">{totals.salary.toFixed(2)}</span></div>
-                {activeTab === 'NON_CASH' && <div className="summary-widget expense"><span className="widget-title">Налоги</span><span className="widget-amount">{totals.taxes.toFixed(2)}</span></div>}
-                {activeTab === 'NON_CASH' && <div className="summary-widget expense"><span className="widget-title">Реклама</span><span className="widget-amount">{totals.advertising.toFixed(2)}</span></div>}
-                {activeTab === 'CASH' && <div className="summary-widget expense"><span className="widget-title">Партнеры</span><span className="widget-amount">{totals.partners.toFixed(2)}</span></div>}
-                <div className="summary-widget expense"><span className="widget-title">Прочее</span><span className="widget-amount">{totals.other.toFixed(2)}</span></div>
+                {visibleFields.map(key => {
+                    const label = EXPENSE_FIELDS.find(f => f.key === key)?.label || key;
+                    return (
+                        <div key={key} className="summary-widget expense">
+                            <span className="widget-title">{label}</span>
+                            <span className="widget-amount">{totals.expenses[key].toFixed(2)}</span>
+                        </div>
+                    );
+                })}
             </div>
 
             {/* ТАБЛИЦА */}
@@ -501,25 +512,19 @@ const FinanceReport: React.FC = () => {
                     <tr>
                         <th rowSpan={2} style={{ width: '10%', verticalAlign: 'middle' }}>Дата</th>
                         <th rowSpan={2} style={{ width: '12%', verticalAlign: 'middle' }}>Приход</th>
-                        {/* colSpan: 4 для наличных, 8 для безналичных */}
-                        <th colSpan={activeTab === 'CASH' ? 4 : 8} style={{ width: '60%' }}>Расход</th>
+                        <th colSpan={visibleFields.length} style={{ width: '60%' }}>Расход</th>
                         <th rowSpan={2} style={{ width: '18%', verticalAlign: 'middle' }}>Действия</th>
                     </tr>
                     <tr>
-                        {activeTab === 'NON_CASH' && <th>Коммуналка</th>}
-                        {activeTab === 'NON_CASH' && <th>Аренда</th>}
-                        <th>Материалы</th>
-                        {activeTab === 'NON_CASH' && <th>Кредит</th>}
-                        <th>З/п</th>
-                        {activeTab === 'NON_CASH' && <th>Налоги</th>}
-                        {activeTab === 'NON_CASH' && <th>Реклама</th>}
-                        {activeTab === "CASH" && <th>Партнеры</th>}
-                        <th>Прочее</th>
+                        {visibleFields.map(key => (
+                            <th key={key}>{EXPENSE_FIELDS.find(f => f.key === key)?.label || key}</th>
+                        ))}
                     </tr>
                     </thead>
                     <tbody>
                     {records.map((record, index) => {
                         const isEditing = record.id === editingId;
+                        const isAuto = record.sourceRecordId != null;
 
                         if (isEditing && editRow) {
                             return (
@@ -534,15 +539,16 @@ const FinanceReport: React.FC = () => {
                                         />
                                     </td>
                                     <td><input type="number" value={editRow.income || ''} onChange={e => setEditRow({ ...editRow, income: Number(e.target.value) })} className="inline-input" /></td>
-                                    {activeTab === 'NON_CASH' && <td><input type="number" value={editRow.expUtilities || ''} onChange={e => setEditRow({ ...editRow, expUtilities: Number(e.target.value) })} className="inline-input" /></td>}
-                                    {activeTab === 'NON_CASH' && <td><input type="number" value={editRow.expRent || ''} onChange={e => setEditRow({ ...editRow, expRent: Number(e.target.value) })} className="inline-input" /></td>}
-                                    <td><input type="number" value={editRow.expMaterials || ''} onChange={e => setEditRow({ ...editRow, expMaterials: Number(e.target.value) })} className="inline-input" /></td>
-                                    {activeTab === 'NON_CASH' && <td><input type="number" value={editRow.expCredit || ''} onChange={e => setEditRow({ ...editRow, expCredit: Number(e.target.value) })} className="inline-input" /></td>}
-                                    <td><input type="number" value={editRow.expSalary || ''} onChange={e => setEditRow({ ...editRow, expSalary: Number(e.target.value) })} className="inline-input" /></td>
-                                    {activeTab === 'NON_CASH' && <td><input type="number" value={editRow.expTaxes || ''} onChange={e => setEditRow({ ...editRow, expTaxes: Number(e.target.value) })} className="inline-input" /></td>}
-                                    {activeTab === 'NON_CASH' && <td><input type="number" value={editRow.expAdvertising || ''} onChange={e => setEditRow({ ...editRow, expAdvertising: Number(e.target.value) })} className="inline-input" /></td>}
-                                    {activeTab === 'CASH' && <td><input type="number" value={editRow.expPartners || ''} onChange={e => setEditRow({ ...editRow, expPartners: Number(e.target.value) })} className="inline-input" /></td>}
-                                    <td><input type="number" value={editRow.expOther || ''} onChange={e => setEditRow({ ...editRow, expOther: Number(e.target.value) })} className="inline-input" /></td>
+                                    {visibleFields.map(key => (
+                                        <td key={key}>
+                                            <input
+                                                type="number"
+                                                value={Number(editRow[key]) || ''}
+                                                onChange={e => setEditRow({ ...editRow, [key]: Number(e.target.value) })}
+                                                className="inline-input"
+                                            />
+                                        </td>
+                                    ))}
                                     <td className="action-icons-cell">
                                         <button onClick={handleSaveEdit} className="icon-btn save-icon" title="Сохранить">💾</button>
                                         <button onClick={handleCancelEdit} className="icon-btn cancel-icon" title="Отмена">❌</button>
@@ -555,18 +561,18 @@ const FinanceReport: React.FC = () => {
                             <tr key={record.id || index}>
                                 <td>{moment(record.date).format('DD.MM.YYYY')}</td>
                                 <td style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>{record.income > 0 ? record.income : ''}</td>
-                                {activeTab === 'NON_CASH' && <td>{record.expUtilities > 0 ? record.expUtilities : ''}</td>}
-                                {activeTab === 'NON_CASH' && <td>{record.expRent > 0 ? record.expRent : ''}</td>}
-                                <td>{record.expMaterials > 0 ? record.expMaterials : ''}</td>
-                                {activeTab === 'NON_CASH' && <td>{record.expCredit > 0 ? record.expCredit : ''}</td>}
-                                <td>{record.expSalary > 0 ? record.expSalary : ''}</td>
-                                {activeTab === 'NON_CASH' && <td>{record.expTaxes > 0 ? record.expTaxes : ''}</td>}
-                                {activeTab === 'NON_CASH' && <td>{(record.expAdvertising || 0) > 0 ? record.expAdvertising : ''}</td>}
-                                {activeTab === 'CASH' && <td>{(record.expPartners || 0) > 0 ? record.expPartners : ''}</td>}
-                                <td>{record.expOther > 0 ? record.expOther : ''}</td>
+                                {visibleFields.map(key => (
+                                    <td key={key}>{Number(record[key]) > 0 ? record[key] : ''}</td>
+                                ))}
                                 <td className="action-icons-cell">
-                                    <button onClick={() => handleStartEdit(record)} className="icon-btn edit-icon" title="Редактировать">✏️</button>
-                                    <button onClick={() => record.id && handleDeleteRecord(record.id)} className="icon-btn delete-icon" title="Удалить">🗑️</button>
+                                    {isAuto ? (
+                                        <span className="text-muted" title="Создано автоматически из статьи «Текущий счёт» карт-счёта">🔗 авто</span>
+                                    ) : (
+                                        <>
+                                            <button onClick={() => handleStartEdit(record)} className="icon-btn edit-icon" title="Редактировать">✏️</button>
+                                            <button onClick={() => record.id && handleDeleteRecord(record.id)} className="icon-btn delete-icon" title="Удалить">🗑️</button>
+                                        </>
+                                    )}
                                 </td>
                             </tr>
                         );
@@ -585,15 +591,16 @@ const FinanceReport: React.FC = () => {
                                 />
                             </td>
                             <td><input type="number" value={newRow.income || ''} onChange={e => setNewRow({ ...newRow, income: Number(e.target.value) })} className="inline-input" /></td>
-                            {activeTab === 'NON_CASH' && <td><input type="number" value={newRow.expUtilities || ''} onChange={e => setNewRow({ ...newRow, expUtilities: Number(e.target.value) })} className="inline-input" /></td>}
-                            {activeTab === 'NON_CASH' && <td><input type="number" value={newRow.expRent || ''} onChange={e => setNewRow({ ...newRow, expRent: Number(e.target.value) })} className="inline-input" /></td>}
-                            <td><input type="number" value={newRow.expMaterials || ''} onChange={e => setNewRow({ ...newRow, expMaterials: Number(e.target.value) })} className="inline-input" /></td>
-                            {activeTab === 'NON_CASH' && <td><input type="number" value={newRow.expCredit || ''} onChange={e => setNewRow({ ...newRow, expCredit: Number(e.target.value) })} className="inline-input" /></td>}
-                            <td><input type="number" value={newRow.expSalary || ''} onChange={e => setNewRow({ ...newRow, expSalary: Number(e.target.value) })} className="inline-input" /></td>
-                            {activeTab === 'NON_CASH' && <td><input type="number" value={newRow.expTaxes || ''} onChange={e => setNewRow({ ...newRow, expTaxes: Number(e.target.value) })} className="inline-input" /></td>}
-                            {activeTab === 'NON_CASH' && <td><input type="number" value={newRow.expAdvertising || ''} onChange={e => setNewRow({ ...newRow, expAdvertising: Number(e.target.value) })} className="inline-input" /></td>}
-                            {activeTab === 'CASH' && <td><input type="number" value={newRow.expPartners || ''} onChange={e => setNewRow({ ...newRow, expPartners: Number(e.target.value) })} className="inline-input" /></td>}
-                            <td><input type="number" value={newRow.expOther || ''} onChange={e => setNewRow({ ...newRow, expOther: Number(e.target.value) })} className="inline-input" /></td>
+                            {visibleFields.map(key => (
+                                <td key={key}>
+                                    <input
+                                        type="number"
+                                        value={Number(newRow[key]) || ''}
+                                        onChange={e => setNewRow({ ...newRow, [key]: Number(e.target.value) })}
+                                        className="inline-input"
+                                    />
+                                </td>
+                            ))}
                             <td className="action-icons-cell"><span className="text-muted">новая</span></td>
                         </tr>
                     )}

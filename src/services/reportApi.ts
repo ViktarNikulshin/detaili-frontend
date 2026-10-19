@@ -84,7 +84,7 @@ export const reportAPI = {
     /**
      * Получить данные по безналичным операциям за месяц (баланс + список записей)
      */
-    getFinanceSummary: (year: number, month: number, type: string) =>
+    getFinanceSummary: (year: number, month: number, type: 'NON_CASH' | 'CASH' | 'CURRENT_ACCOUNT') =>
         reportApi.get<FinanceSummary>('/finance/summary', { params: { year, month, type } }),
 
     /**
@@ -102,7 +102,7 @@ export const reportAPI = {
     /**
      * Обновить баланс на начало отчетного периода
      */
-    saveFinanceBalance: (year: number, month: number, amount: number, type: string) =>
+    saveFinanceBalance: (year: number, month: number, amount: number, type: 'NON_CASH' | 'CASH' | 'CURRENT_ACCOUNT') =>
         reportApi.post('/finance/balance', { year, month, amount, type }),
 
     // --- Акты выполненных работ ---

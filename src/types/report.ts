@@ -93,7 +93,9 @@ export interface FinanceRow {
     expAdvertising?: number;
     expPartners: number;
     expOther: number;
-    financeType?: 'NON_CASH' | 'CASH';
+    expCurrentAccount?: number;
+    sourceRecordId?: number | null;
+    financeType?: 'NON_CASH' | 'CASH' | 'CURRENT_ACCOUNT';
 }
 
 export interface FinanceSummary {
