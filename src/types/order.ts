@@ -5,6 +5,7 @@ export interface Order {
     clientName: string;
     clientPhone: string;
     carBrand: string;
+    comment?: string | null;
     vin: string;
     works: Work[];
     arrivalDate: string;
@@ -34,6 +35,7 @@ export interface CalendarEvent {
     clientName: string;
     clientPhone: string;
     carBrand: string;
+    comment?: string | null;
     cost: number;
     status: string;
     works: Work[];
@@ -46,7 +48,8 @@ export interface CalendarEvent {
 export interface CustomEvent {
     id: number;
     entityType: 'CUSTOM_EVENT';
-    date: string; // ISO-строка даты, формат YYYY-MM-DD
+    date: string; // ISO-строка даты и времени, формат YYYY-MM-DDTHH:mm
+    endDate?: string | null;
     description: string;
 }
 

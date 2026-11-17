@@ -31,6 +31,7 @@ const schema = Yup.object().shape({
     clientName: Yup.string().required("Введите имя клиента"),
     clientPhone: Yup.string().required("Введите телефон"),
     carBrand: Yup.string().required("Введите марку автомобиля"),
+    comment: Yup.string().nullable().default(""),
     works: Yup.array()
         .of(
             Yup.object().shape({
@@ -98,6 +99,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ mode = "page", orderId, onClose, 
             clientName: "",
             clientPhone: "",
             carBrand: "",
+            comment: "",
             works: [],
             arrivalDate: "",
             deliveryDate: "",
@@ -142,6 +144,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ mode = "page", orderId, onClose, 
                     clientName: order.clientName || "",
                     clientPhone: order.clientPhone || "",
                     carBrand: typeof order.carBrand === "object" ? order.carBrand?.name : order.carBrand || "",
+                    comment: order.comment || "",
                     works: order.works || [],
                     arrivalDate,
                     deliveryDate,
@@ -379,6 +382,16 @@ const OrderForm: React.FC<OrderFormProps> = ({ mode = "page", orderId, onClose, 
                         )} />
                         {errors.deliveryDate && <span className="error-text">{errors.deliveryDate.message}</span>}
                     </div>
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="comment">Комментарий:</label>
+                    <textarea
+                        id="comment"
+                        rows={4}
+                        placeholder="Комментарий к заказу"
+                        {...register("comment")}
+                    />
                 </div>
 
                 <div className="form-group">

@@ -19,7 +19,8 @@ calendarEventApi.interceptors.request.use((config) => {
 });
 
 export interface CustomEventPayload {
-    date: string; // YYYY-MM-DD
+    date: string; // YYYY-MM-DDTHH:mm
+    endDate?: string | null;
     description: string;
 }
 

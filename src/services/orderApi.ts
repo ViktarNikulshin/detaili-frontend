@@ -19,6 +19,7 @@ export interface OrderPayload {
     clientName: string;
     clientPhone: string;
     carBrand: string;
+    comment?: string | null;
     vin: string;
     works: Work[]; // Changed from WorkPayload[] to Work[]
     arrivalDate: string;

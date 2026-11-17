@@ -142,12 +142,14 @@ const CalendarView: React.FC = () => {
                     id: `${customEvent.id}`,
                     title: customEvent.description,
                     start: customEvent.date,
-                    allDay: true,
+                    end: customEvent.endDate || undefined,
+                    allDay: false,
                     extendedProps: {
                         entityType: 'CUSTOM_EVENT',
                         originalId: customEvent.id,
                         description: customEvent.description,
                         date: customEvent.date,
+                         endDate: customEvent.endDate,
                     },
                 }));
 
@@ -169,6 +171,7 @@ const CalendarView: React.FC = () => {
                 id: ev.extendedProps.originalId,
                 entityType: 'CUSTOM_EVENT',
                 date: ev.extendedProps.date,
+                endDate: ev.extendedProps.endDate,
                 description: ev.extendedProps.description,
             });
             setCustomEventInitialDate(null);
@@ -228,7 +231,8 @@ const CalendarView: React.FC = () => {
 
         try {
             await calendarEventAPI.update(originalId, {
-                date: moment(event.start).format('YYYY-MM-DD'),
+                date: moment(event.start).format('YYYY-MM-DDTHH:mm'),
+                endDate: event.end ? moment(event.end).format('YYYY-MM-DDTHH:mm') : null,
                 description: event.extendedProps.description,
             });
             calendarRef.current?.getApi().refetchEvents();

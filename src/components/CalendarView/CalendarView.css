@@ -1,32 +1,37 @@
-/* ========================================================= */
-/* ЦВЕТОВАЯ ПАЛИТРА И ПЕРЕМЕННЫЕ (Благородный зеленый)      */
-/* ========================================================= */
 :root {
-    /* Фирменные зеленые акценты */
-    --primary-green: #4a826d;
-    --dark-green: #254438;
-    --mint-green: #8ec4aa;
+    /* Google Calendar Dark Theme Palette */
+    --google-dark-bg: #1e1f22;
+    --google-dark-surface: #1e1f22;
+    --google-dark-surface-container: #2b2d31;
+    --google-dark-border: #3c4043;
+    --google-dark-text-primary: #e3e3e3;
+    --google-dark-text-secondary: #9aa0a6;
+    --google-dark-hover: #303134;
+    --google-dark-today: #004a77;
+    --google-blue: #8ab4f8;
+    --google-blue-bg: rgba(138, 180, 248, 0.15);
 
-    /* Текст */
-    --text-primary: #e0e0e0;
-    --text-secondary: #1a3c47;
-    --text-muted: #888888;
+    /* Map to existing semantic variables */
+    --primary-green: #8ab4f8;
+    --dark-green: #202124;
+    --mint-green: #8ab4f8;
 
-    /* Фоны */
-    --bg-main: rgba(51, 51, 51, 0.95);
-    --bg-secondary: rgba(173, 183, 176, 0.9);
-    --bg-header: #333333;
-    --bg-input: #ffffff;
+    --text-primary: var(--google-dark-text-primary);
+    --text-secondary: var(--google-dark-text-secondary);
+    --text-muted: #9aa0a6;
 
-    /* Границы и тени */
-    --border-color: rgba(74, 130, 109, 0.3);
+    --bg-main: var(--google-dark-bg);
+    --bg-secondary: #202124;
+    --bg-header: #202124;
+    --bg-input: #2b2d31;
+
+    --border-color: #3c4043;
     --border-light: rgba(255, 255, 255, 0.1);
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 12px rgba(74, 130, 109, 0.2);
+    --shadow-sm: none;
+    --shadow-md: none;
 
-    /* Компактные внешние отступы */
-    --calendar-padding: clamp(6px, 1.5vw, 12px);
-    --calendar-gap: 6px;
+    --calendar-padding: 8px;
+    --calendar-gap: 8px;
 }
 
 /* ========================================================= */
@@ -36,9 +41,9 @@ html, body, #root {
     margin: 0;
     padding: 0;
     height: 100dvh;
-    background-color: var(--bg-main);
-    color: var(--text-primary);
-    font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--google-dark-bg);
+    color: var(--google-dark-text-primary);
+    font-family: 'Roboto', 'Inter', 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
 }
@@ -51,35 +56,35 @@ html, body, #root {
     flex-direction: column;
     height: 100dvh;
     box-sizing: border-box;
-    background: var(--bg-main);
-    background-image: linear-gradient(
-            135deg,
-            rgba(74, 130, 109, 0.08),
-            rgba(37, 68, 56, 0.15)
-    );
+    background: var(--google-dark-bg);
+    background-image: none;
     padding: var(--calendar-padding);
     gap: var(--calendar-gap);
     overflow: hidden;
 }
 
-/* Сверхкомпактная заголовочная часть */
+/* Заголовок */
 .calendar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-shrink: 0;
-    gap: 8px;
+    gap: 12px;
+    background-color: #202124;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--google-dark-border);
 }
 
 .calendar-header h1 {
-    font-size: clamp(16px, 3vw, 20px);
-    font-weight: 700;
+    font-size: 18px;
+    font-weight: 500;
     margin: 0;
-    letter-spacing: 0.5px;
-    color: var(--text-primary);
+    color: var(--google-dark-text-primary);
+    letter-spacing: normal;
 }
 
-/* Контейнер кнопок "Создать заказ" / "Добавить событие" в хедере календаря */
+/* Контейнер кнопок */
 .calendar-header-actions {
     display: flex;
     align-items: center;
@@ -87,31 +92,32 @@ html, body, #root {
     flex-shrink: 0;
 }
 
-/* Общий стиль кнопок хедера календаря ("Создать заказ" / "Добавить событие") */
+/* Кнопки создания */
 .create-order-btn,
 .add-custom-event-button {
-    background: linear-gradient(135deg, var(--primary-green), #5babff);
+    background: #1a73e8;
     border: none;
     color: white;
-    font-weight: 600;
-    padding: 6px 14px;
-    border-radius: 6px;
+    font-weight: 500;
+    padding: 6px 16px;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 12px;
-    transition: all 0.2s ease;
+    font-size: 13px;
+    transition: background 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 6px;
     white-space: nowrap;
-    box-shadow: var(--shadow-sm);
+    box-shadow: none;
     flex-shrink: 0;
 }
 
 .create-order-btn:hover,
 .add-custom-event-button:hover {
-    background: linear-gradient(135deg, #5babff, var(--primary-green));
-    transform: translateY(-1px);
+    background: #1b66c9;
+    box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+    transform: none;
 }
 
 .create-order-btn .button-icon-mobile,
@@ -119,56 +125,56 @@ html, body, #root {
     display: none;
 }
 
-/* 1. КОМПАКТНАЯ СЕКЦИЯ ФИЛЬТРОВ */
+/* ФИЛЬТРЫ */
 .calendar-filters {
     display: flex;
     align-items: center;
-    background: var(--bg-secondary);
-    padding: 4px 10px; /* Минимальный вертикальный padding */
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
     gap: 8px;
     flex-wrap: wrap;
 }
 
 .calendar-filters label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--google-dark-text-secondary);
     white-space: nowrap;
 }
 
 .calendar-filters select {
-    background: var(--bg-input);
-    color: var(--text-secondary);
-    border: 1px solid var(--border-color);
-    padding: 3px 22px 3px 8px;
-    min-height: 28px; /* Уменьшено с 40px до 28px */
+    background: #2b2d31;
+    color: var(--google-dark-text-primary);
+    border: 1px solid var(--google-dark-border);
+    padding: 4px 24px 4px 10px;
+    min-height: 32px;
     border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 400;
     outline: none;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: border-color 0.2s ease;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%234a826d' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%239aa0a6' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 6px center;
+    background-position: right 8px center;
 }
 
 .calendar-filters select:focus {
-    border-color: var(--primary-green);
+    border-color: #8ab4f8;
 }
 
 /* Подложка календаря */
 .calendar-wrapper {
     flex-grow: 1;
-    background: var(--bg-secondary);
-    border-radius: 6px;
-    padding: 6px; /* Минимальные отступы внутри подложки */
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-md);
+    background: #202124;
+    border-radius: 8px;
+    padding: 8px;
+    border: 1px solid var(--google-dark-border);
+    box-shadow: none;
     overflow: hidden;
     min-height: 0;
     display: flex;
@@ -176,119 +182,141 @@ html, body, #root {
 }
 
 /* ========================================================= */
-/* 2. КОМПАКТНАЯ ПАНЕЛЬ И СЕТКА FULLCALENDAR                */
+/* FULLCALENDAR GOOGLE THEME OVERRIDES                       */
 /* ========================================================= */
 .fc {
     height: 100%;
     width: 100%;
-    --fc-border-color: rgba(74, 130, 109, 0.25);
+    --fc-border-color: #3c4043;
+    --fc-page-bg-color: #202124;
+    --fc-neutral-bg-color: transparent;
+    --fc-list-event-hover-bg-color: #303134;
 }
 
-/* Сжатие шапки переключателей в FullCalendar */
+/* Шапка FullCalendar */
 .fc .fc-toolbar {
-    margin-bottom: 6px !important; /* Уменьшен отступ снизу от кнопок до сетки */
-    gap: 4px !important;
+    margin-bottom: 8px !important;
+    gap: 8px !important;
 }
 
-/* Компактный заголовок текущего месяца */
+/* Заголовок месяца в стиле Google */
 .fc-toolbar-title {
-    font-size: clamp(13px, 2.8vw, 16px) !important;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
-    background: linear-gradient(90deg, var(--dark-green), var(--primary-green));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: 18px !important;
+    font-weight: 500 !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    -webkit-text-fill-color: var(--google-dark-text-primary) !important;
+    color: var(--google-dark-text-primary) !important;
 }
 
-/* Компактные кнопки управления */
+/* Кнопки FullCalendar */
 .fc .fc-button {
-    background: var(--dark-green) !important;
-    border: none !important;
-    color: #ffffff !important;
+    background: #3c4043 !important;
+    border: 1px solid #5f6368 !important;
+    color: #e3e3e3 !important;
     border-radius: 4px !important;
-    padding: 4px 8px !important; /* Минимальный padding внутри кнопок */
-    min-height: 28px !important;  /* Высота кнопок снижена до 28px */
+    padding: 6px 12px !important;
+    min-height: 32px !important;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
-    font-size: 11px;
-    text-transform: capitalize;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.2s ease !important;
+    font-weight: 500;
+    font-size: 13px;
+    text-transform: none !important;
+    box-shadow: none !important;
+    transition: background 0.2s ease !important;
 }
 
 .fc .fc-button:hover {
-    background: var(--primary-green) !important;
+    background: #4f5358 !important;
+    border-color: #70757a !important;
 }
 
 .fc .fc-button-primary:not(:disabled).fc-button-active,
 .fc .fc-button-primary:not(:disabled):active {
-    background: var(--primary-green) !important;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.3) !important;
+    background: #8ab4f8 !important;
+    border-color: #8ab4f8 !important;
+    color: #202124 !important;
 }
 
 .fc .fc-button-group > .fc-button:not(:first-child) {
-    margin-left: 2px;
+    margin-left: -1px;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
+
+.fc .fc-button-group > .fc-button:not(:last-child) {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
 }
 
 /* Шапка дней недели */
 .fc-col-header-cell {
-    background: var(--bg-header) !important;
-    padding: 4px 0 !important;
-    border-bottom: 2px solid var(--primary-green) !important;
+    background: #202124 !important;
+    padding: 8px 0 !important;
+    border-bottom: 1px solid var(--google-dark-border) !important;
 }
 
 .fc-col-header-cell-cushion {
-    color: var(--mint-green) !important;
+    color: var(--google-dark-text-secondary) !important;
     text-transform: uppercase;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 11px;
+    letter-spacing: 0.8px;
     text-decoration: none !important;
 }
 
-/* Числа месяцев в ячейках */
+/* Числа месяцев */
 .fc-daygrid-day-number {
-    color: var(--text-secondary) !important;
-    padding: 2px 4px !important;
-    font-weight: 600;
+    color: var(--google-dark-text-primary) !important;
+    padding: 4px 8px !important;
+    font-weight: 400;
     font-size: 12px;
     text-decoration: none !important;
 }
 
 /* Подсветка текущего дня */
 .fc-day-today {
-    background-color: rgba(74, 130, 109, 0.22) !important;
+    background-color: rgba(138, 180, 248, 0.08) !important;
 }
 
 .fc-day-today .fc-daygrid-day-number {
-    color: var(--text-secondary) !important;
-    font-weight: 800;
+    background-color: #1a73e8;
+    color: #ffffff !important;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 2px;
+    font-weight: 500;
 }
 
 /* Временная сетка (Неделя / День) */
 .fc-timegrid-slot {
-    height: 34px !important; /* Уменьшена высота временных слотов */
+    height: 40px !important;
+    border-bottom: 1px solid #3c4043 !important;
 }
 
 .fc-timegrid-slot-label-cushion {
-    color: var(--text-secondary);
+    color: var(--google-dark-text-secondary);
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 400;
 }
 
-/* Повестка дня (Список) */
+/* Повестка дня */
 .fc-list-day-cushion {
-    background-color: var(--bg-header) !important;
-    padding: 4px 8px !important;
+    background-color: #2b2d31 !important;
+    padding: 8px 12px !important;
 }
 
 .fc-list-day-text, .fc-list-day-side-text {
-    color: var(--mint-green) !important;
-    font-weight: 600;
-    font-size: 12px;
+    color: var(--google-blue) !important;
+    font-weight: 500;
+    font-size: 13px;
 }
 
 /* ========================================================= */
@@ -297,10 +325,11 @@ html, body, #root {
 .fc-event {
     background-color: transparent !important;
     border: none !important;
-    border-radius: 3px !important;
+    border-radius: 4px !important;
     overflow: hidden !important;
     cursor: pointer;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    margin: 1px 2px !important;
 }
 
 .fc-custom-event-card {
@@ -309,8 +338,9 @@ html, body, #root {
     width: 100%;
     height: 100%;
     position: relative;
-    min-height: 18px;
+    min-height: 20px;
     overflow: hidden;
+    border-radius: 4px;
 }
 
 .fc-custom-bg-colors {
@@ -319,6 +349,7 @@ html, body, #root {
     display: flex;
     flex-direction: column;
     z-index: 1;
+    opacity: 0.85;
 }
 
 .fc-custom-color-segment {
@@ -329,40 +360,46 @@ html, body, #root {
 .fc-custom-event-body {
     position: relative;
     z-index: 2;
-    padding: 1px 4px;
+    padding: 2px 6px;
     height: 100%;
     display: flex;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.35);
+    background-color: rgba(32, 33, 36, 0.65);
 }
 
 .fc-custom-event-title {
-    font-size: 10px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 500;
     color: #ffffff !important;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
-    line-height: 1.1;
+    line-height: 1.2;
 }
 
 /* ========================================================= */
-/* КАРТОЧКИ ПРОИЗВОЛЬНЫХ СОБЫТИЙ (не заказы)                */
+/* КАРТОЧКИ ПРОИЗВОЛЬНЫХ СОБЫТИЙ                            */
 /* ========================================================= */
 .fc-custom-event-card--custom .fc-custom-event-body--custom {
-    background: linear-gradient(135deg, rgba(166, 126, 255, 0.85), rgba(91, 171, 255, 0.75));
+    background: #8ab4f8;
+    color: #202124 !important;
     gap: 4px;
 }
 
+.fc-custom-event-card--custom .fc-custom-event-title {
+    color: #202124 !important;
+    font-weight: 500;
+}
+
 .fc-custom-event-icon {
-    font-size: 10px;
+    font-size: 11px;
     flex-shrink: 0;
     line-height: 1;
 }
 
 /* ========================================================= */
-/* МОБИЛЬНАЯ АДАПТАЦИЯ (СМАРТФОНЫ)                           */
+/* МОБИЛЬНАЯ АДАПТАЦИЯ                                       */
 /* ========================================================= */
 @media (max-width: 768px) {
     .calendar-container {
@@ -378,122 +415,68 @@ html, body, #root {
     .create-order-btn .button-icon-mobile,
     .add-custom-event-button .button-icon-mobile {
         display: block;
-        font-size: 16px;
+        font-size: 18px;
     }
 
     .create-order-btn,
     .add-custom-event-button {
-        width: 34px;
-        height: 34px;
+        width: 36px;
+        height: 36px;
         padding: 0;
         border-radius: 50%;
-        flex-shrink: 0;
     }
 
-    /* Фильтры располагаются в горизонтальную плотную строку */
     .calendar-filters {
-        padding: 4px 6px;
-        gap: 6px;
-        justify-content: space-between;
+        padding: 4px;
+        gap: 4px;
     }
 
     .calendar-filters select {
         flex: 1 1 auto;
-        min-width: 100px;
-    }
-
-    /* Панель кнопок календаря делится на 2 плотные строки вместо огромного стека */
-    .fc .fc-toolbar {
-        display: grid;
-        grid-template-columns: auto 1fr auto;
-        align-items: center;
-        gap: 4px !important;
-    }
-
-    .fc .fc-toolbar-chunk:nth-child(1) {
-        grid-column: 1;
-    }
-
-    .fc .fc-toolbar-chunk:nth-child(2) {
-        grid-column: 2;
-        text-align: center;
-    }
-
-    .fc .fc-toolbar-chunk:nth-child(3) {
-        grid-column: 1 / -1; /* Кнопки Месяц/Неделя/День встают плотной строкой снизу */
-        display: flex;
-        justify-content: space-between;
-        margin-top: 2px;
-    }
-
-    .fc .fc-button {
-        padding: 4px 2px !important;
-        font-size: 10px;
-        flex: 1;
+        min-width: 90px;
+        font-size: 12px;
     }
 }
+
 /* ========================================================= */
 /* ПРИНУДИТЕЛЬНО В ОДНУ СТРОКУ (FULLCALENDAR TOOLBAR)        */
 /* ========================================================= */
-
-/* 1. Контейнер шапки — отменяем переносы и сетки */
 .fc .fc-toolbar {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
     justify-content: space-between !important;
     align-items: center !important;
-    gap: 4px !important;
-    margin-bottom: 6px !important;
+    gap: 8px !important;
+    margin-bottom: 8px !important;
     width: 100% !important;
 }
 
-/* 2. Левый и правый блоки шапки — внутри только в строку */
 .fc .fc-toolbar-chunk {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
     white-space: nowrap !important;
-    gap: 2px !important;
+    gap: 4px !important;
     flex-shrink: 1 !important;
 }
 
-/* 3. Название месяца — компактное, не переносится */
 .fc .fc-toolbar-title {
-    font-size: clamp(10px, 2.5vw, 13px) !important;
-    font-weight: 700 !important;
+    font-size: 16px !important;
+    font-weight: 500 !important;
     white-space: nowrap !important;
-    margin: 0 3px !important;
-    line-height: 1 !important;
+    margin: 0 6px !important;
 }
 
-/* 4. Микро-кнопки для сохранения места */
 .fc .fc-button {
-    padding: 3px 5px !important;
-    font-size: 10px !important;
-    min-height: 26px !important;
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    min-height: 30px !important;
     white-space: nowrap !important;
     border-radius: 4px !important;
 }
 
-/* 5. Группа кнопок (Месяц/Неделя/День) */
 .fc .fc-button-group {
     display: flex !important;
     flex-wrap: nowrap !important;
-}
-
-/* 6. Сброс мобильных медиа-запросов, которые разбивали шапку на колонки */
-@media (max-width: 768px) {
-    .fc .fc-toolbar {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        grid-template-columns: none !important;
-    }
-
-    .fc .fc-toolbar-chunk:nth-child(3) {
-        grid-column: auto !important;
-        margin-top: 0 !important;
-        width: auto !important;
-    }
 }

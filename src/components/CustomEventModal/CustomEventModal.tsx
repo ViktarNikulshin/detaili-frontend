@@ -22,6 +22,7 @@ const CustomEventModal: React.FC<CustomEventModalProps> = ({
     const isEditing = !!event;
 
     const [date, setDate] = useState<string>('');
+    const [endDate, setEndDate] = useState<string>('');
     const [description, setDescription] = useState<string>('');
     const [saving, setSaving] = useState(false);
     const [deleting, setDeleting] = useState(false);
@@ -31,10 +32,13 @@ const CustomEventModal: React.FC<CustomEventModalProps> = ({
         if (!isOpen) return;
 
         if (event) {
-            setDate(event.date ? moment(event.date).format('YYYY-MM-DD') : '');
+            setDate(event.date ? moment(event.date).format('YYYY-MM-DDTHH:mm') : '');
+            setEndDate(event.endDate ? moment(event.endDate).format('YYYY-MM-DDTHH:mm') : '');
             setDescription(event.description || '');
         } else {
-            setDate(initialDate ? moment(initialDate).format('YYYY-MM-DD') : moment().format('YYYY-MM-DD'));
+            const start = initialDate ? moment(initialDate) : moment().startOf('hour');
+            setDate(start.format('YYYY-MM-DDTHH:mm'));
+            setEndDate(start.clone().add(1, 'hour').format('YYYY-MM-DDTHH:mm'));
             setDescription('');
         }
         setError(null);
@@ -44,7 +48,11 @@ const CustomEventModal: React.FC<CustomEventModalProps> = ({
 
     const handleSave = async () => {
         if (!date) {
-            setError('Укажите дату события');
+            setError('Укажите дату и время начала события');
+            return;
+        }
+        if (endDate && moment(endDate).isSameOrBefore(moment(date))) {
+            setError('Время окончания должно быть позже начала');
             return;
         }
         if (!description.trim()) {
@@ -56,9 +64,9 @@ const CustomEventModal: React.FC<CustomEventModalProps> = ({
         setError(null);
         try {
             if (isEditing && event) {
-                await calendarEventAPI.update(event.id, { date, description: description.trim() });
+                await calendarEventAPI.update(event.id, { date, endDate: endDate || null, description: description.trim() });
             } else {
-                await calendarEventAPI.create({ date, description: description.trim() });
+                await calendarEventAPI.create({ date, endDate: endDate || null, description: description.trim() });
             }
             onSaved();
             onClose();
@@ -98,12 +106,24 @@ const CustomEventModal: React.FC<CustomEventModalProps> = ({
 
                 <div className="modal-body">
                     <div className="custom-event-field">
-                        <label htmlFor="custom-event-date">Дата:</label>
+                        <label htmlFor="custom-event-date">Начало:</label>
                         <input
                             id="custom-event-date"
-                            type="date"
+                            type="datetime-local"
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
+                            className="custom-event-input"
+                        />
+                    </div>
+
+                    <div className="custom-event-field">
+                        <label htmlFor="custom-event-end-date">Окончание:</label>
+                        <input
+                            id="custom-event-end-date"
+                            type="datetime-local"
+                            value={endDate}
+                            min={date || undefined}
+                            onChange={(e) => setEndDate(e.target.value)}
                             className="custom-event-input"
                         />
                     </div>

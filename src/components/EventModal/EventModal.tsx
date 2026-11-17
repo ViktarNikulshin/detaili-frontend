@@ -96,6 +96,12 @@ const EventModal: React.FC<EventModalProps> = ({
                     {/* Основная информация о заказе */}
                     <p>Клиент: <strong>{event.clientName}</strong> ({event.clientPhone})</p>
                     <p>Автомобиль: <strong>{carBrandName || '—'}</strong></p>
+                     {event.comment && (
+                         <div className="order-comment" style={{ marginTop: '12px', padding: '10px', borderRadius: '6px', background: '#1e293b', whiteSpace: 'pre-wrap' }}>
+                             <strong>Комментарий:</strong>
+                             <div style={{ marginTop: '6px' }}>{event.comment}</div>
+                         </div>
+                     )}
                     <p>Статус: <span className={`status-tag status-${event.status.toLowerCase()}`}>{event.status}</span></p>
                     {!isMaster && (
                         <p>Стоимость: <strong>{event.cost}</strong></p>
