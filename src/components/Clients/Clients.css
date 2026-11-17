@@ -1,0 +1,438 @@
+/* ============================================================
+   ВКЛАДКА «КЛИЕНТСКАЯ БАЗА»
+   ============================================================ */
+
+.clients-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 28px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px);
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(100, 180, 220, 0.25);
+    font-family: "Segoe UI", sans-serif;
+    color: #1a3c47;
+}
+
+.clients-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.clients-container h1 {
+    margin: 0;
+    color: #1a3c47;
+    font-size: 1.5em;
+}
+
+.clients-export-btn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #5ac8fa, #00c3ff);
+    color: white;
+    font-weight: 600;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 15px;
+}
+
+.clients-export-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0, 195, 255, 0.4);
+}
+
+.clients-search {
+    width: 100%;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+    border: 1px solid rgba(90, 200, 250, 0.4);
+    border-radius: 12px;
+    font-size: 15px;
+    font-family: "Segoe UI", sans-serif;
+    background: rgba(255, 255, 255, 0.85);
+    color: #1a3c47;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.clients-search:focus {
+    border-color: #00c3ff;
+    box-shadow: 0 0 0 3px rgba(0, 195, 255, 0.15);
+}
+
+/* ---------------- Таблица ---------------- */
+
+.clients-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid rgba(90, 200, 250, 0.4);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.clients-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 700px;
+}
+
+.clients-table th,
+.clients-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid rgba(90, 200, 250, 0.3);
+    white-space: nowrap;
+    color: #1a3c47;
+}
+
+.clients-table thead th {
+    text-transform: uppercase;
+    background: rgba(0, 195, 255, 0.1);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    border-bottom: 2px solid rgba(0, 195, 255, 0.4);
+}
+
+.clients-table tbody td {
+    font-size: 15px;
+}
+
+.clients-table tbody tr:nth-child(even) {
+    background: rgba(0, 195, 255, 0.04);
+}
+
+.clients-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.clients-table .text-center {
+    text-align: center;
+}
+
+.clients-table th.sortable {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    user-select: none;
+}
+
+.clients-table th.sortable:hover {
+    background: rgba(0, 195, 255, 0.18);
+}
+
+.clients-table tbody tr {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.clients-table tbody tr:hover {
+    background-color: rgba(0, 195, 255, 0.08);
+}
+
+.clients-row-selected {
+    background-color: rgba(0, 195, 255, 0.14) !important;
+}
+
+.clients-name-cell {
+    font-weight: 600;
+}
+
+.clients-empty,
+.clients-message {
+    text-align: center;
+    padding: 30px;
+    font-size: 1.1em;
+    color: #1a3c47;
+}
+
+.clients-message {
+    margin-top: 50px;
+}
+
+.clients-message.error,
+.clients-drawer-loading.error {
+    color: #dc3545;
+}
+
+/* ============================================================
+   DRAWER — карточка клиента
+   ============================================================ */
+
+.clients-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 60, 71, 0.35);
+    backdrop-filter: blur(2px);
+    z-index: 1000;
+    animation: drawer-fade-in 0.2s ease;
+}
+
+.clients-drawer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: min(480px, 100vw);
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(16px);
+    box-shadow: -8px 0 30px rgba(26, 60, 71, 0.25);
+    border-radius: 20px 0 0 20px;
+    padding: 28px;
+    overflow-y: auto;
+    font-family: "Segoe UI", sans-serif;
+    color: #1a3c47;
+    animation: drawer-slide-in 0.25s ease;
+}
+
+@keyframes drawer-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes drawer-slide-in {
+    from { transform: translateX(40px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.clients-drawer-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 195, 255, 0.12);
+    color: #1a3c47;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.clients-drawer-close:hover {
+    background: rgba(0, 195, 255, 0.25);
+}
+
+.clients-drawer-loading {
+    text-align: center;
+    padding: 60px 0;
+    color: #1a3c47;
+    font-size: 1.1em;
+}
+
+.clients-drawer-header h2 {
+    margin: 0 0 14px;
+    padding-right: 36px;
+    color: #1a3c47;
+    word-break: break-word;
+}
+
+.clients-drawer-contacts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.clients-drawer-btn {
+    padding: 9px 16px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.clients-drawer-btn.call {
+    background: linear-gradient(135deg, #28a745, #218838);
+}
+
+.clients-drawer-btn.whatsapp {
+    background: linear-gradient(135deg, #25d366, #1eb856);
+}
+
+.clients-drawer-btn.order {
+    background: linear-gradient(135deg, #5ac8fa, #00c3ff);
+}
+
+.clients-drawer-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+/* ---------------- Статистика ---------------- */
+
+.clients-drawer-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.clients-stat {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(90, 200, 250, 0.4);
+    border-radius: 14px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.clients-stat-title {
+    font-size: 0.85em;
+    color: #55707a;
+}
+
+.clients-stat-value {
+    font-size: 1.15em;
+    font-weight: 600;
+}
+
+/* ---------------- Авто ---------------- */
+
+.clients-drawer-cars {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.clients-drawer-subtitle {
+    font-weight: 600;
+    font-size: 0.95em;
+    color: #1a3c47;
+    margin-bottom: 6px;
+}
+
+.clients-drawer-cars .clients-drawer-subtitle {
+    margin-bottom: 0;
+}
+
+.clients-car-chip {
+    background: rgba(90, 200, 250, 0.18);
+    border: 1px solid rgba(90, 200, 250, 0.5);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.9em;
+    color: #1a3c47;
+}
+
+/* ---------------- История заказов ---------------- */
+
+.clients-drawer-history {
+    margin-bottom: 20px;
+}
+
+.clients-drawer-empty {
+    color: #55707a;
+    padding: 14px 0;
+}
+
+.clients-order-item {
+    display: grid;
+    grid-template-columns: 92px 1fr auto 84px;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(90, 200, 250, 0.35);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clients-order-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 195, 255, 0.2);
+}
+
+.clients-order-date {
+    font-size: 0.9em;
+    color: #55707a;
+    white-space: nowrap;
+}
+
+.clients-order-car {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.clients-order-cost {
+    text-align: right;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.clients-order-status {
+    font-size: 0.8em;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+.status-new {
+    background: rgba(90, 200, 250, 0.18);
+    color: #0d6efd;
+}
+
+.status-in-progress {
+    background: rgba(255, 183, 77, 0.18);
+    color: #b26a00;
+}
+
+.status-completed {
+    background: rgba(40, 167, 69, 0.15);
+    color: #218838;
+}
+
+.status-cancelled {
+    background: rgba(220, 53, 69, 0.12);
+    color: #dc3545;
+}
+
+/* ---------------- Адаптив ---------------- */
+
+@media (max-width: 640px) {
+    .clients-container {
+        padding: 18px;
+        margin: 20px auto;
+    }
+
+    .clients-drawer {
+        width: 100vw;
+        border-radius: 0;
+        padding: 20px;
+    }
+
+    .clients-order-item {
+        grid-template-columns: 1fr auto;
+    }
+
+    .clients-order-date,
+    .clients-order-cost {
+        grid-column: span 1;
+    }
+
+    .clients-order-car {
+        grid-column: span 2;
+        order: 3;
+    }
+}

@@ -372,3 +372,45 @@
         padding: 12px 15px;
     }
 }
+/* ---------------- Подсказка по клиенту из базы ---------------- */
+
+.order-form .client-hint {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: 1px solid rgba(74, 130, 109, 0.5);
+    background: rgba(74, 130, 109, 0.15);
+    font-size: 14px;
+    color: var(--text-filled);
+}
+
+.order-form .client-hint-text {
+    line-height: 1.4;
+}
+
+.order-form .client-hint-text strong {
+    color: #ffffff;
+}
+
+.order-form .client-hint-btn {
+    background: linear-gradient(135deg, var(--color-primary-green), var(--color-primary-blue));
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all var(--transition-normal);
+    flex-shrink: 0;
+}
+
+.order-form .client-hint-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}

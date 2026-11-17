@@ -20,6 +20,7 @@ import ActsAnalytics from "./components/ActsAnalytics/ActsAnalytics";
 import Landlord from "./components/Landlord/Landlord";
 import {IndexRedirect} from "./components/IndexRedirect/IndexRedirect";
 import DebtsAnalytics from "./components/DebtsAnalytics/DebtsAnalytics";
+import Clients from "./components/Clients/Clients";
 
 function App() {
     return (
@@ -43,6 +44,7 @@ function App() {
                                 <Route path="/users/new" element={<UserForm />} />
                                 <Route path="/users" element={<Users />} />
                                 <Route path="/users/:id" element={<UserRoleForm />} />
+                                <Route path="/clients" element={<Clients />} />
                                 <Route path="/reports/masters" element={<MasterReport />} />
                                 <Route path="/reports/master/:masterId" element={<MasterDetailReport />} />
                                 <Route path="/dictionaries/work-types" element={<WorkTypeDictionaryManager />} />

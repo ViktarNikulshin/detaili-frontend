@@ -71,6 +71,11 @@ const Navigation: React.FC = () => {
         navigate('/users');
     };
 
+    const handleClients = () => {
+        setIsMenuOpen(false);
+        navigate('/clients');
+    };
+
     const handleWorkDictionary = () => {
         setIsMenuOpen(false);
         navigate('/dictionaries/work-types');
@@ -143,6 +148,9 @@ const Navigation: React.FC = () => {
                                 {/*</div>*/}
                                 <div className="menu-item" onClick={handleUsersAndRoles}>
                                     Пользователи и роли
+                                </div>
+                                <div className="menu-item" onClick={handleClients}>
+                                    Клиентская база
                                 </div>
                                 <div className="menu-item" onClick={handleWorkDictionary}>
                                     Справочник работ

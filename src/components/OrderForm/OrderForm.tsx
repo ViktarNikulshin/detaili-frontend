@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Controller, FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { orderAPI, OrderPayload } from "../../services/orderApi";
+import { clientAPI } from "../../services/clientApi";
+import { ClientDetails } from "../../types/client";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import "./OrderForm.css";
@@ -76,6 +78,7 @@ interface OrderFormProps {
 const OrderForm: React.FC<OrderFormProps> = ({ mode = "page", orderId, onClose, onSuccess }) => {
     const { id: idFromRoute } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
     const isModal = mode === "modal";
     const id = isModal ? orderId : idFromRoute;
 
@@ -84,6 +87,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ mode = "page", orderId, onClose, 
     const [editingCommentForWork, setEditingCommentForWork] = useState<number | null>(null);
     const [notification, setNotification] = useState<Notification>({ message: "", type: "success", visible: false });
     const [dictionariesLoaded, setDictionariesLoaded] = useState(false);
+    const [clientHint, setClientHint] = useState<ClientDetails | null>(null);
 
     const {
         control,
@@ -108,10 +112,58 @@ const OrderForm: React.FC<OrderFormProps> = ({ mode = "page", orderId, onClose, 
     });
 
     const selectedWorks = watch("works");
+    const clientPhoneValue = watch("clientPhone");
 
     const showNotification = (message: string, type: "success" | "error") => {
         setNotification({ message, type, visible: true });
         setTimeout(() => setNotification(prev => ({ ...prev, visible: false })), 2000);
+    };
+
+    // Предзаполнение из клиентской базы (переход «+ Новый заказ» из карточки клиента)
+    useEffect(() => {
+        if (id) return;
+        const state = location.state as { clientPhone?: string; clientName?: string } | null;
+        if (state?.clientPhone) {
+            setValue("clientPhone", state.clientPhone, { shouldValidate: true });
+        }
+        if (state?.clientName && state.clientName !== "null") {
+            setValue("clientName", state.clientName, { shouldValidate: true });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id]);
+
+    // Подсказка по клиенту при вводе телефона (только при создании заказа)
+    useEffect(() => {
+        if (id) return;
+        const digits = (clientPhoneValue || "").replace(/\D/g, "");
+        if (digits.length < 9) {
+            setClientHint(null);
+            return;
+        }
+        const normalized = digits.length === 12 && digits.startsWith("375") ? `+${digits}` : digits;
+
+        const timer = setTimeout(async () => {
+            try {
+                const response = await clientAPI.findByPhone(normalized);
+                setClientHint(response.data && response.data.id ? response.data : null);
+            } catch {
+                setClientHint(null);
+            }
+        }, 600);
+
+        return () => clearTimeout(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [clientPhoneValue, id]);
+
+    const applyClientHint = () => {
+        if (!clientHint) return;
+        if (clientHint.name && clientHint.name !== "null") {
+            setValue("clientName", clientHint.name, { shouldValidate: true });
+        }
+        const lastOrder = clientHint.orders?.find(o => o.carBrand && o.status !== "CANCELLED");
+        if (lastOrder?.carBrand) {
+            setValue("carBrand", lastOrder.carBrand, { shouldValidate: true });
+        }
     };
 
     useEffect(() => {
@@ -245,6 +297,20 @@ const OrderForm: React.FC<OrderFormProps> = ({ mode = "page", orderId, onClose, 
                                     placeholder="Телефон" inputStyle={{ width: "100%", height: "52px" }} />
                     )} />
                     {errors.clientPhone && <span className="error-text">{errors.clientPhone.message}</span>}
+                    {!id && clientHint && (
+                        <div className="client-hint">
+                            <span className="client-hint-text">
+                                👤 Клиент из базы: <strong>{clientHint.name}</strong>
+                                {" · заказов: "}{clientHint.ordersCount}
+                                {clientHint.lastVisitDate
+                                    ? ` · последний визит ${new Date(clientHint.lastVisitDate).toLocaleDateString("ru-RU")}`
+                                    : ""}
+                            </span>
+                            <button type="button" className="client-hint-btn" onClick={applyClientHint}>
+                                Заполнить
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 <div className="form-group">
