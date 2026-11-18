@@ -112,6 +112,7 @@ const CalendarView: React.FC = () => {
                             clientName: order.clientName,
                             clientPhone: order.clientPhone,
                             carBrand: order.carBrand,
+                            comment: order.comment,
                             works: order.works,
                             status: order.status,
                             workColors: workColors.length > 0 ? workColors : ['#3b82f6']
@@ -187,6 +188,7 @@ const CalendarView: React.FC = () => {
             clientName: ev.extendedProps.clientName,
             clientPhone: ev.extendedProps.clientPhone,
             carBrand: ev.extendedProps.carBrand,
+            comment: ev.extendedProps.comment,
             cost: ev.extendedProps.cost,
             works: ev.extendedProps.works,
             status: ev.extendedProps.status,
