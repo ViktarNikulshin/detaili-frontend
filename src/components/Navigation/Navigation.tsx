@@ -29,6 +29,11 @@ const Navigation: React.FC = () => {
         navigate('/reports/salary-log');
     }
 
+    const handleEmployeeProductivity = () => {
+        setIsMenuOpen(false);
+        navigate('/reports/productivity');
+    }
+
     const handleTimesheet = () => {
         setIsMenuOpen(false);
         navigate('/reports/time-sheet');
@@ -124,6 +129,9 @@ const Navigation: React.FC = () => {
                             <>
                                 <div className="menu-item" onClick={handleMasterSalary}>
                                     Ведение ЗП 🛠️
+                                </div>
+                                <div className="menu-item" onClick={handleEmployeeProductivity}>
+                                    Продуктивность сотрудника
                                 </div>
                                 <div className="menu-item" onClick={handleTimesheet}>
                                     Табель

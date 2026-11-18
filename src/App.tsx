@@ -14,6 +14,7 @@ import MasterReport from "./components/Reports/MasterReport";
 import MasterDetailReport from "./components/Reports/MasterDetailReport";
 import WorkTypeDictionaryManager from "./components/WorkTypeDictionaryManager/WorkTypeDictionaryManager";
 import MasterSalaryLog from "./components/MasterSalary/MasterSalaryLog";
+import EmployeeProductivity from "./components/EmployeeProductivity/EmployeeProductivity";
 import Timesheet from "./components/Timesheet/Timesheet";
 import FinanceReport from "./components/FinanceReport/FinanceReport";
 import ActsAnalytics from "./components/ActsAnalytics/ActsAnalytics";
@@ -49,6 +50,7 @@ function App() {
                                 <Route path="/reports/master/:masterId" element={<MasterDetailReport />} />
                                 <Route path="/dictionaries/work-types" element={<WorkTypeDictionaryManager />} />
                                 <Route path="/reports/salary-log" element={<MasterSalaryLog />} />
+                                <Route path="/reports/productivity" element={<EmployeeProductivity />} />
                                 <Route path="/reports/time-sheet" element={<Timesheet />} />
                                 <Route path="/reports/finance-report" element={<FinanceReport />} />
                                 <Route path="/reports/acts-report" element={<ActsAnalytics />} />

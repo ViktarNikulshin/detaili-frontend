@@ -9,6 +9,7 @@ import {
     MasterDetailReport,
     MasterSalary,
     MasterWeeklyReport,
+    ProductivityRecord,
     TimesheetResponse,
 } from "../types/report";
 
@@ -157,4 +158,25 @@ export const reportAPI = {
 
     deleteDebtRecord: (id: number) =>
         reportApi.delete(`/debt/${id}`),
+
+    // --- Продуктивность сотрудника ---
+
+    /**
+     * Получить записи продуктивности сотрудника за месяц (year, month)
+     */
+    getProductivityRecords: (employeeId: number | string, year: number, month: number) =>
+        reportApi.get<ProductivityRecord[]>('/productivity', { params: { employeeId, year, month } }),
+
+    /**
+     * Создать или обновить запись продуктивности
+     * (УСН, налоги и прибыль пересчитываются на бэке)
+     */
+    saveProductivityRecord: (data: ProductivityRecord) =>
+        reportApi.post<ProductivityRecord>('/productivity', data),
+
+    /**
+     * Удалить запись продуктивности
+     */
+    deleteProductivityRecord: (id: number) =>
+        reportApi.delete(`/productivity/${id}`),
 };

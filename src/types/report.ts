@@ -154,3 +154,23 @@ export interface DebtRow {
     debtType?: 'CLIENT' | 'PARTNER';
 }
 
+/**
+ * Запись продуктивности сотрудника.
+ * УСН = 6% от чека; Налоги = 58% от З/П;
+ * Прибыль = чек - УСН - З/П - Налоги - Аренда/место - Материалы.
+ */
+export interface ProductivityRecord {
+    id?: number;
+    employeeId?: number;
+    date: string; // Формат YYYY-MM-DD
+    workTypeId?: number | null;
+    workTypeName: string; // Услуга из справочника типов работ
+    checkAmount: number; // Чек (вручную)
+    usnAmount: number; // УСН (6% от чека)
+    salary: number; // З/П (вручную)
+    taxesAmount: number; // Налоги (58% от З/П)
+    rentAmount: number; // Аренда/место (вручную)
+    materialsAmount: number; // Материалы (вручную)
+    profit: number; // Прибыль (расчётная)
+}
+

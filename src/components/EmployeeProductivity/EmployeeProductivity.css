@@ -1,0 +1,615 @@
+/* ============================================
+   ПРОДУКТИВНОСТЬ СОТРУДНИКА - STYLES
+   ============================================ */
+/* ============================================
+   CSS VARIABLES & THEME
+   ============================================ */
+.productivity-container {
+    --prod-primary-blue: #5babff;
+    --prod-primary-green: #4a826d;
+    --prod-accent-purple: #a67eff;
+    --prod-error-red: #dc3545;
+    --prod-success-green: #28a745;
+    --prod-text-primary: #e0e0e0;
+    --prod-text-secondary: #1a3c47;
+    --prod-text-muted: #888888;
+    --prod-bg-main: rgba(51, 51, 51, 0.95);
+    --prod-bg-secondary: rgb(173 183 176 / 0.9);
+    --prod-bg-input: #ffffff;
+    --prod-bg-header: #333333;
+    --prod-border-color: rgba(74, 130, 109, 0.3);
+    --prod-border-light: rgba(255, 255, 255, 0.1);
+    --prod-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --prod-shadow-md: 0 4px 12px rgba(74, 130, 109, 0.2);
+    --prod-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
+    --prod-spacing-xs: 8px;
+    --prod-spacing-sm: 12px;
+    --prod-spacing-md: 20px;
+    --prod-spacing-lg: 35px;
+    --prod-spacing-xl: 50px;
+    --prod-radius-sm: 4px;
+    --prod-radius-md: 8px;
+    --prod-transition-fast: 0.2s ease;
+    --prod-transition-normal: 0.3s ease;
+
+    max-width: 100%;
+    width: 100%;
+    margin: var(--prod-spacing-xl) auto;
+    padding: var(--prod-spacing-lg);
+    background: var(--prod-bg-main);
+    background-image: linear-gradient(
+            135deg,
+            rgba(74, 130, 109, 0.1),
+            rgba(91, 171, 255, 0.1)
+    );
+    border-radius: var(--prod-radius-md);
+    border: 1px solid var(--prod-border-color);
+    box-shadow: var(--prod-shadow-md);
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: var(--prod-text-primary);
+    box-sizing: border-box;
+}
+
+/* ============================================
+   FILTERS SECTION
+   ============================================ */
+.productivity-container .salary-filters {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--prod-spacing-lg);
+    margin-bottom: var(--prod-spacing-md);
+    background: var(--prod-bg-secondary);
+    padding: var(--prod-spacing-md);
+    border-radius: var(--prod-radius-md);
+    border: 1px solid var(--prod-border-color);
+    flex-wrap: wrap;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.productivity-container .month-navigation-inline {
+    display: flex;
+    align-items: center;
+    gap: var(--prod-spacing-sm);
+}
+
+.productivity-container .month-label {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--prod-text-primary);
+    min-width: 170px;
+    text-align: center;
+    text-transform: uppercase;
+    background: linear-gradient(90deg, var(--prod-primary-green), var(--prod-primary-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.productivity-container .arrow-btn {
+    background: var(--prod-primary-blue);
+    border: none;
+    color: #fff;
+    border-radius: var(--prod-radius-sm);
+    padding: 6px 12px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all var(--prod-transition-fast);
+    box-shadow: var(--prod-shadow-sm);
+}
+
+.productivity-container .arrow-btn:hover {
+    background: var(--prod-primary-green);
+    transform: translateY(-2px);
+    box-shadow: var(--prod-shadow-md);
+}
+
+.productivity-container .arrow-btn:active {
+    transform: translateY(0);
+}
+
+/* Employee select */
+.productivity-container .master-select-inline {
+    display: flex;
+    align-items: center;
+    gap: var(--prod-spacing-sm);
+}
+
+.productivity-container .master-select-inline label {
+    font-size: 15px;
+    color: var(--prod-text-primary);
+    font-weight: 500;
+}
+
+.productivity-container .dropdown-select {
+    background: var(--prod-bg-input);
+    color: var(--prod-text-secondary);
+    padding: 8px 36px 8px 14px;
+    border-radius: var(--prod-radius-sm);
+    border: 1px solid var(--prod-border-color);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--prod-transition-fast);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234a826d' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+
+.productivity-container .dropdown-select:hover {
+    border-color: var(--prod-primary-blue);
+}
+
+.productivity-container .dropdown-select:focus {
+    outline: none;
+    border-color: var(--prod-primary-blue);
+    box-shadow: 0 0 0 3px rgba(91, 171, 255, 0.2);
+}
+
+/* ============================================
+   TOTAL (ПРИБЫЛЬ) DISPLAY
+   ============================================ */
+.productivity-container .total-salary-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.productivity-container .total-salary-display .total-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--prod-text-primary);
+    letter-spacing: 0.5px;
+}
+
+.productivity-container .total-salary-display .total-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--prod-primary-green);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* ============================================
+   TABLE SECTION
+   ============================================ */
+.productivity-container .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--prod-radius-md) var(--prod-radius-md) 0 0;
+    border: 1px solid var(--prod-border-color);
+    background: var(--prod-bg-secondary);
+    box-shadow: var(--prod-shadow-sm);
+}
+
+.productivity-container .table-wrapper.no-border-radius-bottom {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: none;
+}
+
+.productivity-container .report-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 1150px;
+}
+
+.productivity-container .report-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--prod-bg-header);
+    color: var(--prod-primary-blue);
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    padding: 16px 12px;
+    text-align: center;
+    border-bottom: 2px solid var(--prod-primary-green);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.productivity-container .report-table tbody td {
+    padding: 14px 12px;
+    text-align: center;
+    color: var(--prod-text-secondary);
+    font-size: 15px;
+    border-bottom: 1px solid var(--prod-border-light);
+    transition: background var(--prod-transition-fast);
+}
+
+.productivity-container .report-table tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+.productivity-container .report-table tbody tr:hover {
+    background-color: rgba(91, 171, 255, 0.08);
+}
+
+.productivity-container .text-left-aligned {
+    text-align: left !important;
+    padding-left: 24px !important;
+}
+
+.productivity-container .text-right-aligned {
+    text-align: right !important;
+    padding-right: 24px !important;
+    font-weight: 600;
+    color: var(--prod-primary-green);
+}
+
+/* Расчетные колонки (УСН, Налоги) */
+.productivity-container .computed-cell {
+    font-style: italic;
+    color: var(--prod-text-muted) !important;
+    font-weight: 500;
+    text-align: right !important;
+    padding-right: 24px !important;
+}
+
+/* Колонка Прибыль */
+.productivity-container .profit-cell {
+    font-weight: 700 !important;
+    color: var(--prod-primary-blue) !important;
+}
+
+.productivity-container .profit-negative {
+    color: var(--prod-error-red) !important;
+}
+
+/* ============================================
+   EDITABLE ROW (ADD NEW RECORD)
+   ============================================ */
+.productivity-container .editable-row {
+    background: linear-gradient(135deg, rgba(91, 171, 255, 0.15), rgba(74, 130, 109, 0.15)) !important;
+    animation: prodSlideIn 0.3s ease;
+}
+
+@keyframes prodSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.productivity-container .inline-input,
+.productivity-container .inline-select {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--prod-bg-input);
+    border: 1px solid var(--prod-primary-blue);
+    color: var(--prod-text-secondary);
+    border-radius: var(--prod-radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    box-sizing: border-box;
+    transition: all var(--prod-transition-fast);
+}
+
+.productivity-container .inline-input:focus,
+.productivity-container .inline-select:focus {
+    outline: none;
+    border-color: var(--prod-primary-green);
+    box-shadow: 0 0 0 3px rgba(74, 130, 109, 0.2);
+}
+
+.productivity-container .inline-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235babff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+    cursor: pointer;
+}
+
+/* ============================================
+   ACTION BUTTONS
+   ============================================ */
+.productivity-container .add-row-green-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #2b5126, #35632f);
+    color: #ffffff;
+    border: none;
+    padding: 14px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 0 0 var(--prod-radius-md) var(--prod-radius-md);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--prod-spacing-sm);
+    transition: all var(--prod-transition-normal);
+    box-shadow: var(--prod-shadow-md);
+}
+
+.productivity-container .add-row-green-btn:hover {
+    background: linear-gradient(135deg, #35632f, #3d7037);
+    transform: translateY(-2px);
+    box-shadow: var(--prod-shadow-lg);
+}
+
+.productivity-container .plus-icon {
+    color: var(--prod-accent-purple);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.productivity-container .action-buttons-container {
+    display: flex;
+    width: 100%;
+    border-radius: 0 0 var(--prod-radius-md) var(--prod-radius-md);
+    overflow: hidden;
+}
+
+.productivity-container .save-btn {
+    flex: 1;
+    background: linear-gradient(135deg, var(--prod-success-green), #218838);
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.productivity-container .save-btn:hover {
+    background: linear-gradient(135deg, #218838, #1e7a31);
+}
+
+.productivity-container .cancel-btn {
+    flex: 0.4;
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-left: 1px solid var(--prod-border-light);
+}
+
+.productivity-container .cancel-btn:hover {
+    background: linear-gradient(135deg, #5a6268, #4e555b);
+}
+
+/* ============================================
+   LOADING & ERROR STATES
+   ============================================ */
+.productivity-container .report-loading,
+.productivity-container .report-error,
+.productivity-container .report-empty {
+    text-align: center;
+    padding: var(--prod-spacing-lg);
+    margin-top: var(--prod-spacing-md);
+    border-radius: var(--prod-radius-md);
+    font-weight: 500;
+    animation: prodFadeIn 0.3s ease;
+}
+
+@keyframes prodFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.productivity-container .report-error {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.15), rgba(255, 107, 107, 0.1));
+    color: #ff6b6b;
+    border: 1px solid rgba(220, 53, 69, 0.4);
+}
+
+.productivity-container .report-loading {
+    background: linear-gradient(135deg, rgba(74, 130, 109, 0.2), rgba(91, 171, 255, 0.1));
+    color: var(--prod-primary-blue);
+    border: 1px solid var(--prod-border-color);
+}
+
+/* ============================================
+   SCROLLBAR STYLING
+   ============================================ */
+.productivity-container .table-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.productivity-container .table-wrapper::-webkit-scrollbar-track {
+    background: var(--prod-bg-secondary);
+    border-radius: var(--prod-radius-sm);
+}
+
+.productivity-container .table-wrapper::-webkit-scrollbar-thumb {
+    background: var(--prod-primary-blue);
+    border-radius: var(--prod-radius-sm);
+}
+
+.productivity-container .table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--prod-primary-green);
+}
+
+/* ============================================
+   ACTION ICONS
+   ============================================ */
+.productivity-container .action-icons-cell {
+    text-align: center;
+    vertical-align: middle;
+    padding: 8px !important;
+}
+
+.productivity-container .action-icons-cell .icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px 8px;
+    margin: 0 2px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.productivity-container .action-icons-cell .edit-icon:hover {
+    background: rgba(91, 171, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.productivity-container .action-icons-cell .delete-icon {
+    color: var(--prod-error-red);
+}
+
+.productivity-container .action-icons-cell .delete-icon:hover {
+    background: rgba(220, 53, 69, 0.2);
+    transform: scale(1.1);
+}
+
+.productivity-container .action-icons-cell .save-icon {
+    color: var(--prod-primary-green);
+}
+
+.productivity-container .action-icons-cell .save-icon:hover {
+    background: rgba(74, 130, 109, 0.2);
+    transform: scale(1.1);
+}
+
+.productivity-container .action-icons-cell .cancel-icon {
+    color: #6c757d;
+}
+
+.productivity-container .action-icons-cell .cancel-icon:hover {
+    background: rgba(108, 117, 125, 0.2);
+    transform: scale(1.1);
+}
+
+.productivity-container .action-icons-cell .text-muted {
+    color: var(--prod-text-secondary);
+    font-size: 12px;
+    font-style: italic;
+}
+
+.productivity-container .text-muted {
+    color: var(--prod-text-secondary);
+}
+
+/* ============================================
+   EXCEL EXPORT BUTTON
+   ============================================ */
+.productivity-container .excel-export-btn {
+    background: transparent;
+    border: none;
+    color: #107c41; /* Фирменный зеленый цвет Microsoft Excel */
+    cursor: pointer;
+    padding: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--prod-radius-sm);
+    transition: all var(--prod-transition-fast);
+    margin-left: 8px;
+}
+
+.productivity-container .excel-export-btn:hover:not(:disabled) {
+    background-color: rgba(16, 124, 65, 0.15);
+    color: #1f9a55;
+    transform: translateY(-1px);
+}
+
+.productivity-container .excel-export-btn:disabled {
+    color: var(--prod-text-muted);
+    cursor: not-allowed;
+    opacity: 0.4;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 1024px) {
+    .productivity-container {
+        margin: var(--prod-spacing-md);
+        padding: var(--prod-spacing-md);
+    }
+
+    .productivity-container .salary-filters {
+        flex-direction: column;
+        gap: var(--prod-spacing-md);
+        align-items: stretch;
+    }
+
+    .productivity-container .month-navigation-inline,
+    .productivity-container .master-select-inline,
+    .productivity-container .total-salary-display {
+        justify-content: center;
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .productivity-container {
+        margin: var(--prod-spacing-sm);
+        padding: var(--prod-spacing-sm);
+        border-radius: var(--prod-radius-sm);
+    }
+
+    .productivity-container .month-label {
+        font-size: 16px;
+        min-width: 120px;
+    }
+
+    .productivity-container .total-salary-display .total-value {
+        font-size: 20px;
+    }
+
+    .productivity-container .report-table thead th {
+        font-size: 11px;
+        padding: 12px 8px;
+    }
+
+    .productivity-container .report-table tbody td {
+        font-size: 13px;
+        padding: 10px 8px;
+    }
+
+    .productivity-container .inline-input,
+    .productivity-container .inline-select {
+        font-size: 13px;
+        padding: 8px 10px;
+    }
+
+    .productivity-container .add-row-green-btn,
+    .productivity-container .action-buttons-container {
+        font-size: 14px;
+        padding: 12px 16px;
+    }
+
+    .productivity-container .dropdown-select {
+        font-size: 14px;
+        padding: 8px 32px 8px 12px;
+    }
+}
+
+/* ============================================
+   MISC
+   ============================================ */
+.productivity-container .arrow-btn,
+.productivity-container .add-row-green-btn {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Отключение стрелок (скролла) для числовых инпутов */
+.productivity-container .report-table input[type="number"]::-webkit-outer-spin-button,
+.productivity-container .report-table input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.productivity-container .report-table input[type="number"] {
+    -moz-appearance: textfield; /* Для Firefox */
+}
