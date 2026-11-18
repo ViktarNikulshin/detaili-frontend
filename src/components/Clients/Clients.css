@@ -1,36 +1,44 @@
 /* ============================================================
    ВКЛАДКА «КЛИЕНТСКАЯ БАЗА»
+   Раскладка «в один экран»: шапка и пагинатор фиксированы,
+   скроллится только тело таблицы.
    ============================================================ */
 
 .clients-container {
     max-width: 1100px;
-    margin: 40px auto;
-    padding: 28px;
+    width: calc(100% - 32px);
+    height: calc(100vh - 76px); /* высота экрана минус навигация (≈56px) и отступы */
+    margin: 10px auto;
+    padding: 20px 24px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(16px);
     border-radius: 20px;
     box-shadow: 0 6px 20px rgba(100, 180, 220, 0.25);
     font-family: "Segoe UI", sans-serif;
     color: #1a3c47;
+    overflow: hidden;
 }
 
 .clients-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    gap: 12px;
-    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 16px;
+    flex-shrink: 0;
 }
 
 .clients-container h1 {
     margin: 0;
     color: #1a3c47;
-    font-size: 1.5em;
+    font-size: 1.4em;
+    white-space: nowrap;
 }
 
 .clients-export-btn {
-    padding: 10px 20px;
+    padding: 10px 18px;
     background: linear-gradient(135deg, #5ac8fa, #00c3ff);
     color: white;
     font-weight: 600;
@@ -39,6 +47,8 @@
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 15px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .clients-export-btn:hover {
@@ -47,9 +57,9 @@
 }
 
 .clients-search {
-    width: 100%;
-    padding: 12px 16px;
-    margin-bottom: 18px;
+    flex: 1;
+    min-width: 180px;
+    padding: 11px 16px;
     border: 1px solid rgba(90, 200, 250, 0.4);
     border-radius: 12px;
     font-size: 15px;
@@ -69,7 +79,8 @@
 /* ---------------- Таблица ---------------- */
 
 .clients-table-wrapper {
-    overflow-x: auto;
+    flex: 1;
+    overflow: auto;
     -webkit-overflow-scrolling: touch;
     border: 1px solid rgba(90, 200, 250, 0.4);
     border-radius: 12px;
@@ -85,7 +96,7 @@
 
 .clients-table th,
 .clients-table td {
-    padding: 12px 15px;
+    padding: 10px 12px;
     text-align: left;
     border-bottom: 1px solid rgba(90, 200, 250, 0.3);
     white-space: nowrap;
@@ -93,8 +104,11 @@
 }
 
 .clients-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
     text-transform: uppercase;
-    background: rgba(0, 195, 255, 0.1);
+    background: #e3f4fe;
     font-weight: 600;
     font-size: 13px;
     letter-spacing: 0.03em;
@@ -124,7 +138,7 @@
 }
 
 .clients-table th.sortable:hover {
-    background: rgba(0, 195, 255, 0.18);
+    background: #d3edfd;
 }
 
 .clients-table tbody tr {
@@ -144,21 +158,112 @@
     font-weight: 600;
 }
 
-.clients-empty,
-.clients-message {
+.clients-empty {
+    padding: 40px 20px;
     text-align: center;
-    padding: 30px;
     font-size: 1.1em;
     color: #1a3c47;
 }
 
 .clients-message {
+    text-align: center;
     margin-top: 50px;
+    font-size: 1.2em;
+    color: #1a3c47;
 }
 
-.clients-message.error,
-.clients-drawer-loading.error {
+.clients-message.error {
     color: #dc3545;
+}
+
+/* ---------------- Пагинатор ---------------- */
+
+.clients-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 14px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.clients-footer-info {
+    font-size: 14px;
+    color: #55707a;
+    white-space: nowrap;
+}
+
+.clients-pager {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.clients-page-btn {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 8px;
+    border: 1px solid rgba(90, 200, 250, 0.6);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.85);
+    color: #1a3c47;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: "Segoe UI", sans-serif;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clients-page-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #5ac8fa, #00c3ff);
+    border-color: transparent;
+    color: white;
+}
+
+.clients-page-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.clients-page-btn:disabled:hover {
+    background: rgba(255, 255, 255, 0.85);
+    color: #1a3c47;
+    border-color: rgba(90, 200, 250, 0.6);
+}
+
+/* Активная страница */
+.clients-page-btn.clients-page-btn-active {
+    background: linear-gradient(135deg, #5ac8fa, #00c3ff);
+    border-color: transparent;
+    color: white;
+    opacity: 1;
+}
+
+.clients-page-dots {
+    color: #55707a;
+    padding: 0 2px;
+}
+
+.clients-page-size {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #55707a;
+    white-space: nowrap;
+}
+
+.clients-page-size select {
+    padding: 6px 10px;
+    border: 1px solid rgba(90, 200, 250, 0.4);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.85);
+    color: #1a3c47;
+    font-size: 14px;
+    font-family: "Segoe UI", sans-serif;
+    outline: none;
+    cursor: pointer;
 }
 
 /* ============================================================
@@ -226,6 +331,10 @@
     padding: 60px 0;
     color: #1a3c47;
     font-size: 1.1em;
+}
+
+.clients-drawer-loading.error {
+    color: #dc3545;
 }
 
 .clients-drawer-header h2 {
@@ -410,12 +519,31 @@
 
 /* ---------------- Адаптив ---------------- */
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
     .clients-container {
-        padding: 18px;
-        margin: 20px auto;
+        height: calc(100vh - 66px);
+        padding: 14px;
     }
 
+    .clients-header {
+        flex-wrap: wrap;
+    }
+
+    .clients-header h1 {
+        font-size: 1.2em;
+    }
+
+    .clients-search {
+        order: 3;
+        flex-basis: 100%;
+    }
+
+    .clients-footer-info {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
     .clients-drawer {
         width: 100vw;
         border-radius: 0;

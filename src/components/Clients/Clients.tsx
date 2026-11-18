@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
     ColumnDef,
-    getCoreRowModel,
-    getSortedRowModel,
+    PaginationState,
     flexRender,
+    getCoreRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table';
 import * as XLSX from 'xlsx';
@@ -19,12 +21,31 @@ declare module '@tanstack/react-table' {
     }
 }
 
+type PageNumber = number | '…';
+
+const buildPageNumbers = (current: number, total: number): PageNumber[] => {
+    if (total <= 7) {
+        return Array.from({ length: total }, (_, i) => i);
+    }
+    const pages: PageNumber[] = [0];
+    let prev: number | null = null;
+    for (let p = Math.max(1, current - 1); p <= Math.min(total - 2, current + 1); p++) {
+        if (prev !== null && p > prev + 1) pages.push('…');
+        pages.push(p);
+        prev = p;
+    }
+    if (prev !== null && prev < total - 2) pages.push('…');
+    if (total - 1 !== prev) pages.push(total - 1);
+    return pages;
+};
+
 const Clients: React.FC = () => {
     const [clients, setClients] = useState<ClientListItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [search, setSearch] = useState('');
     const [selectedId, setSelectedId] = useState<number | null>(null);
+    const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 15 });
 
     useEffect(() => {
         const fetchClients = async () => {
@@ -40,6 +61,11 @@ const Clients: React.FC = () => {
         };
         fetchClients();
     }, []);
+
+    // При смене поиска всегда возвращаемся на первую страницу
+    useEffect(() => {
+        setPagination(prev => (prev.pageIndex === 0 ? prev : { ...prev, pageIndex: 0 }));
+    }, [search]);
 
     // Поиск по имени, телефону и марке авто — локально, без запросов на каждый символ
     const filtered = useMemo(() => {
@@ -99,8 +125,12 @@ const Clients: React.FC = () => {
     const table = useReactTable({
         data: filtered,
         columns,
+        state: { pagination },
+        onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        autoResetPageIndex: false,
     });
 
     const exportToExcel = () => {
@@ -133,27 +163,32 @@ const Clients: React.FC = () => {
     if (loading) return <p className="clients-message">Загрузка клиентской базы...</p>;
     if (error) return <p className="clients-message error">{error}</p>;
 
+    const pageIndex = pagination.pageIndex;
+    const pageSize = pagination.pageSize;
+    const pageCount = table.getPageCount();
+    const firstRow = pageIndex * pageSize + 1;
+    const lastRow = Math.min((pageIndex + 1) * pageSize, filtered.length);
+
     return (
         <div className="clients-container">
             <div className="clients-header">
                 <h1>Клиентская база</h1>
+                <input
+                    type="text"
+                    className="clients-search"
+                    placeholder="Поиск: имя, телефон или марка авто..."
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                />
                 <button className="clients-export-btn" onClick={exportToExcel}>
                     📊 Экспорт в Excel
                 </button>
             </div>
 
-            <input
-                type="text"
-                className="clients-search"
-                placeholder="Поиск: имя, телефон или марка авто..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-            />
-
-            {filtered.length === 0 ? (
-                <div className="clients-empty">Клиенты не найдены.</div>
-            ) : (
-                <div className="clients-table-wrapper">
+            <div className="clients-table-wrapper">
+                {filtered.length === 0 ? (
+                    <div className="clients-empty">Клиенты не найдены.</div>
+                ) : (
                     <table className="clients-table">
                         <thead>
                         {table.getHeaderGroups().map(headerGroup => (
@@ -191,8 +226,79 @@ const Clients: React.FC = () => {
                         ))}
                         </tbody>
                     </table>
-                </div>
-            )}
+                )}
+            </div>
+
+            <div className="clients-footer">
+                <span className="clients-footer-info">
+                    {filtered.length > 0
+                        ? `Показано ${firstRow}–${lastRow} из ${filtered.length}`
+                        : ''}
+                </span>
+
+                {pageCount > 1 && (
+                    <div className="clients-pager">
+                        <button
+                            className="clients-page-btn"
+                            onClick={() => table.setPageIndex(0)}
+                            disabled={pageIndex === 0}
+                            title="Первая страница"
+                        >
+                            «
+                        </button>
+                        <button
+                            className="clients-page-btn"
+                            onClick={() => table.previousPage()}
+                            disabled={pageIndex === 0}
+                            title="Предыдущая страница"
+                        >
+                            ‹
+                        </button>
+                        {buildPageNumbers(pageIndex, pageCount).map((p, idx) =>
+                            p === '…'
+                                ? <span key={`dots-${idx}`} className="clients-page-dots">…</span>
+                                : (
+                                    <button
+                                        key={p}
+                                        className={`clients-page-btn${p === pageIndex ? ' clients-page-btn-active' : ''}`}
+                                        onClick={() => table.setPageIndex(p)}
+                                        disabled={p === pageIndex}
+                                    >
+                                        {p + 1}
+                                    </button>
+                                )
+                        )}
+                        <button
+                            className="clients-page-btn"
+                            onClick={() => table.nextPage()}
+                            disabled={pageIndex >= pageCount - 1}
+                            title="Следующая страница"
+                        >
+                            ›
+                        </button>
+                        <button
+                            className="clients-page-btn"
+                            onClick={() => table.setPageIndex(pageCount - 1)}
+                            disabled={pageIndex >= pageCount - 1}
+                            title="Последняя страница"
+                        >
+                            »
+                        </button>
+                    </div>
+                )}
+
+                <label className="clients-page-size">
+                    Строк:
+                    <select
+                        value={pageSize}
+                        onChange={e => setPagination({ pageIndex: 0, pageSize: Number(e.target.value) })}
+                    >
+                        <option value={10}>10</option>
+                        <option value={15}>15</option>
+                        <option value={25}>25</option>
+                    </select>
+                </label>
+            </div>
 
             {selectedId !== null && (
                 <ClientDrawer clientId={selectedId} onClose={() => setSelectedId(null)} />
