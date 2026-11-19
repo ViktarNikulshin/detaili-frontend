@@ -47,7 +47,7 @@ const TAB_FIELDS: Record<FinanceTabType, ExpenseKey[]> = {
 
 const TAB_LABELS: Record<FinanceTabType, { icon: string; label: string }> = {
     NON_CASH: { icon: '💳', label: 'Карт-счёт' },
-    CASH: { icon: '💵', label: 'Наличные' },
+    CASH: { icon: '💵', label: 'BYN' },
     CURRENT_ACCOUNT: { icon: '🏦', label: 'Текущий счёт' },
 };
 
@@ -450,7 +450,7 @@ const FinanceReport: React.FC = () => {
                             <thead>
                             <tr>
                                 <th style={{ width: '28%' }}>Статья</th>
-                                <th style={{ width: '18%' }}>Наличные</th>
+                                <th style={{ width: '18%' }}>BYN</th>
                                 <th style={{ width: '18%' }}>Карт-счёт</th>
                                 <th style={{ width: '18%' }}>Текущий счёт</th>
                                 <th style={{ width: '18%' }}>Итого</th>

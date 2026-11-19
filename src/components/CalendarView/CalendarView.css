@@ -341,30 +341,35 @@ html, body, #root {
     min-height: 20px;
     overflow: hidden;
     border-radius: 4px;
+    background-color: #202124; /* тёмный фон — виден, только если у заказа нет цвета услуги */
 }
 
 .fc-custom-bg-colors {
+    /* Цветной слой: карточка целиком красится под первый цвет услуги */
     position: absolute;
     inset: 0;
     display: flex;
     flex-direction: column;
     z-index: 1;
-    opacity: 0.85;
 }
 
+/* Показываем только первый цвет — остальные сегменты скрыты */
 .fc-custom-color-segment {
-    flex: 1;
-    width: 100%;
+    display: none;
+}
+
+.fc-custom-color-segment:first-child {
+    display: block;
 }
 
 .fc-custom-event-body {
     position: relative;
     z-index: 2;
     padding: 2px 6px;
-    height: 100%;
+    flex: 1; /* растягивается на всю высоту карточки */
     display: flex;
     align-items: center;
-    background-color: rgba(32, 33, 36, 0.65);
+    background-color: transparent; /* цвет задаёт слой .fc-custom-bg-colors */
 }
 
 .fc-custom-event-title {

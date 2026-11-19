@@ -1,0 +1,36 @@
+/* ==========================================================================
+   СЕТКА ПРИЛОЖЕНИЯ
+
+   ┌─────────┬──────────────────────┐
+   │         │       топбар         │
+   │ сайдбар ├──────────────────────┤
+   │         │                      │
+   │  (меню) │      контент         │
+   └─────────┴──────────────────────┘
+   ========================================================================== */
+
+.layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+        "sidebar topbar"
+        "sidebar content";
+    height: 100vh;
+}
+
+.layout-content {
+    grid-area: content;
+    overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+    /* На мобильных сайдбар скрыт и открывается поверх контента */
+    .layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto minmax(0, 1fr);
+        grid-template-areas:
+            "topbar"
+            "content";
+    }
+}

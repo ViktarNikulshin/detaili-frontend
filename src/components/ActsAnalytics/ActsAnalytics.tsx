@@ -116,7 +116,7 @@ const ActsAnalytics: React.FC = () => {
         switch (status) {
             case 'PAID': return 'Оплачен';
             case 'UNPAID': return 'Не оплачен';
-            case 'CASH': return 'Наличные';
+            case 'CASH': return 'BYN';
             default: return '';
         }
     };
@@ -153,7 +153,7 @@ const ActsAnalytics: React.FC = () => {
             <div className="finance-summary-widgets-grid" style={{ marginTop: '20px' }}>
                 <div className="summary-widget income"><span className="widget-title">Всего выставлено</span><span className="widget-amount" style={{ color: 'var(--primary-blue)' }}>{totals.totalAmount.toFixed(2)}</span></div>
                 <div className="summary-widget status-paid-widget"><span className="widget-title">Оплачен (Безнал)</span><span className="widget-amount" style={{ color: 'var(--success-green)' }}>{totals.paid.toFixed(2)}</span></div>
-                <div className="summary-widget status-cash-widget"><span className="widget-title">Наличные</span><span className="widget-amount" style={{ color: '#ffb74d' }}>{totals.cash.toFixed(2)}</span></div>
+                <div className="summary-widget status-cash-widget"><span className="widget-title">BYN</span><span className="widget-amount" style={{ color: '#ffb74d' }}>{totals.cash.toFixed(2)}</span></div>
                 <div className="summary-widget status-unpaid-widget"><span className="widget-title">Не оплачен</span><span className="widget-amount" style={{ color: 'var(--error-red)' }}>{totals.unpaid.toFixed(2)}</span></div>
             </div>
 
@@ -196,7 +196,7 @@ const ActsAnalytics: React.FC = () => {
                                         <select value={editRow.status} onChange={e => setEditRow({ ...editRow, status: e.target.value as any })} className="inline-select">
                                             <option value="PAID">Оплачен</option>
                                             <option value="UNPAID">Не оплачен</option>
-                                            <option value="CASH">Наличные</option>
+                                            <option value="CASH">BYN</option>
                                         </select>
                                     </td>
                                     <td style={{ textAlign: 'center' }}>
@@ -253,7 +253,7 @@ const ActsAnalytics: React.FC = () => {
                                 <select value={newRow.status} onChange={e => setNewRow({ ...newRow, status: e.target.value as any })} className="inline-select">
                                     <option value="PAID">Оплачен</option>
                                     <option value="UNPAID">Не оплачен</option>
-                                    <option value="CASH">Наличные</option>
+                                    <option value="CASH">BYN</option>
                                 </select>
                             </td>
                             <td style={{ textAlign: 'center' }}>
