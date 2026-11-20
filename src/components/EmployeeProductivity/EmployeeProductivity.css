@@ -257,7 +257,7 @@
 /* Колонка Прибыль */
 .productivity-container .profit-cell {
     font-weight: 700 !important;
-    color: var(--prod-primary-blue) !important;
+    color: var(--prod-primary-green) !important;
 }
 
 .productivity-container .profit-negative {

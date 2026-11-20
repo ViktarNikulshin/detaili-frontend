@@ -12,6 +12,11 @@ import {
     ProductivityRecord,
     TimesheetResponse,
 } from "../types/report";
+import {
+    PcOperation,
+    PcOperationSave,
+    PcPeriod,
+} from "../types/paymentCalendar";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
@@ -179,4 +184,54 @@ export const reportAPI = {
      */
     deleteProductivityRecord: (id: number) =>
         reportApi.delete(`/productivity/${id}`),
+
+    // --- Платёжный календарь (движение денег, остатки, кассовые разрывы) ---
+
+    /**
+     * Календарь за месяц (поступления/платежи по дням, остатки, кассовые разрывы)
+     */
+    getPaymentCalendarMonth: (year: number, month: number) =>
+        reportApi.get<PcPeriod>('/payment-calendar', { params: { year, month } }),
+
+    /**
+     * Календарь за неделю, содержащую дату (YYYY-MM-DD)
+     */
+    getPaymentCalendarWeek: (date: string) =>
+        reportApi.get<PcPeriod>('/payment-calendar/week', { params: { date } }),
+
+    /**
+     * Операции календаря за период
+     */
+    getPaymentCalendarOperations: (start: string, end: string) =>
+        reportApi.get<PcOperation[]>('/payment-calendar/operations', { params: { start, end } }),
+
+    /**
+     * Создать ручную операцию
+     */
+    savePaymentCalendarOperation: (data: PcOperationSave) =>
+        reportApi.post<PcOperation>('/payment-calendar/operations', data),
+
+    /**
+     * Изменить ручную операцию
+     */
+    updatePaymentCalendarOperation: (id: number, data: PcOperationSave) =>
+        reportApi.put<PcOperation>(`/payment-calendar/operations/${id}`, data),
+
+    /**
+     * Удалить ручную операцию
+     */
+    deletePaymentCalendarOperation: (id: number) =>
+        reportApi.delete(`/payment-calendar/operations/${id}`),
+
+    /**
+     * Явные стартовые остатки месяца по счетам
+     */
+    getPaymentCalendarBalances: (year: number, month: number) =>
+        reportApi.get<Record<string, number | null>>('/payment-calendar/balances', { params: { year, month } }),
+
+    /**
+     * Сохранить стартовый остаток счёта на месяц
+     */
+    savePaymentCalendarBalance: (year: number, month: number, account: string, amount: number) =>
+        reportApi.post('/payment-calendar/balances', { year, month, account, amount }),
 };

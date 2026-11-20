@@ -1,0 +1,546 @@
+/* ==========================================================================
+   Платёжный календарь — компактная матрица на 31 день в один экран
+   ========================================================================== */
+
+.pc-container {
+    width: 100%;
+}
+
+/* Шапка: навигация по периоду + переключатель режима + кнопка добавления */
+.pc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.pc-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.pc-mode-switcher {
+    display: inline-flex;
+    background: #2d2d2d;
+    padding: 2px;
+    border-radius: 7px;
+    border: 1px solid var(--border-light);
+}
+
+.pc-mode-switcher button {
+    background: transparent;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: var(--transition-fast);
+}
+
+.pc-mode-switcher button.active {
+    background: var(--color-primary-green);
+    font-weight: bold;
+}
+
+.pc-today-btn {
+    margin-left: 8px;
+    background: transparent;
+    color: var(--color-primary-blue);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: var(--transition-fast);
+}
+
+.pc-today-btn:hover {
+    background: rgba(91, 171, 255, 0.1);
+}
+
+/* Индикатор кассового разрыва в карточке */
+.pc-gap-widget {
+    border: 1px solid var(--status-unpaid-border);
+    background: var(--status-unpaid-bg);
+    border-radius: var(--radius-md);
+}
+
+/* Стартовые остатки */
+.pc-starting-balances {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+    margin-top: 12px;
+    background: var(--bg-secondary);
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.pc-sb-label {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.pc-sb-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+}
+
+.pc-sb-input {
+    width: 105px;
+    text-align: right;
+    padding: 3px 6px;
+    font-size: 12px;
+}
+
+.pc-currency-tag {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   Компактная матрица: 31 день по горизонтали, статьи по вертикали
+   ========================================================================== */
+
+.pc-matrix-wrapper {
+    overflow-x: auto;
+    position: relative;
+}
+
+.pc-matrix-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.pc-matrix-table th,
+.pc-matrix-table td {
+    font-size: 10.5px;
+    line-height: 1.25;
+    padding: 3px 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Закреплённая левая колонка статей */
+.pc-sticky-col {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background: var(--bg-secondary, #23272b);
+    text-align: left !important;
+    width: 138px;
+    min-width: 138px;
+    max-width: 138px;
+    padding-left: 6px !important;
+    padding-right: 4px !important;
+    border-right: 2px solid var(--border-color) !important;
+}
+
+thead .pc-sticky-col {
+    z-index: 4;
+}
+
+/* Закреплённая правая колонка Итого */
+.pc-sticky-total {
+    position: sticky;
+    right: 0;
+    z-index: 3;
+    background: var(--bg-secondary, #23272b);
+    text-align: right !important;
+    width: 66px;
+    min-width: 66px;
+    max-width: 66px;
+    padding-left: 3px !important;
+    padding-right: 5px !important;
+    border-left: 2px solid var(--border-color) !important;
+}
+
+thead .pc-sticky-total {
+    z-index: 4;
+}
+
+/* Заголовки дней */
+.pc-day-th {
+    width: 34px;
+    min-width: 34px;
+    text-align: center !important;
+    padding: 3px 1px !important;
+}
+
+.pc-day-num {
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1.15;
+}
+
+.pc-day-wd {
+    font-size: 9px;
+    font-weight: 500;
+    color: var(--text-muted);
+    line-height: 1.05;
+}
+
+.pc-weekend-col {
+    background: rgba(0, 0, 0, 0.22);
+}
+
+.pc-today-col {
+    box-shadow: inset 0 2px 0 var(--color-primary-blue);
+}
+
+.pc-gap-col-head {
+    border-bottom: 2px solid var(--color-error) !important;
+}
+
+/* Секции Поступления / Платежи */
+.pc-section-row td {
+    background: rgba(255, 255, 255, 0.04) !important;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.pc-section-title {
+    font-weight: 700;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--text-primary);
+}
+
+.pc-article-cell {
+    font-weight: 500;
+    font-size: 11px;
+    color: var(--text-primary);
+}
+
+/* Ячейки значений */
+.pc-val-cell {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.25px;
+}
+
+.pc-clickable-cell {
+    cursor: pointer;
+}
+
+.pc-clickable-cell:hover {
+    background: rgba(91, 171, 255, 0.16);
+}
+
+.pc-total-cell {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.2px;
+}
+
+/* Строки подитогов (Поступления итого / Платежи итого) */
+.pc-subtotal-row td {
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.pc-subtotal-row .pc-sticky-col,
+.pc-subtotal-row .pc-sticky-total {
+    background: #2b3036;
+}
+
+.pc-income-cell {
+    color: var(--status-paid-text) !important;
+    font-weight: 700;
+}
+
+.pc-expense-cell {
+    color: var(--status-unpaid-text) !important;
+    font-weight: 700;
+}
+
+.pc-positive {
+    color: var(--primary-green, var(--color-primary-green));
+    font-weight: 600;
+}
+
+.pc-negative {
+    color: var(--color-error);
+    font-weight: 700;
+}
+
+/* Нижние итоговые строки: Дневной баланс и Кумулятивный остаток */
+.pc-summary-row td {
+    font-weight: 700;
+    border-top: 2px solid var(--border-color);
+}
+
+.pc-daily-balance-row td {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.pc-daily-balance-row .pc-sticky-col,
+.pc-daily-balance-row .pc-sticky-total {
+    background: #262b30;
+}
+
+.pc-cumulative-cell {
+    position: relative;
+    font-weight: 700;
+}
+
+.pc-ok-cell {
+    background: rgba(74, 130, 109, 0.22) !important;
+    color: var(--status-paid-text);
+}
+
+.pc-gap-cell {
+    background: rgba(220, 53, 69, 0.28) !important;
+    color: #ff8a93 !important;
+}
+
+.pc-gap-triangle {
+    display: inline-block;
+    font-size: 8px;
+    line-height: 1;
+    color: var(--color-error);
+    margin-right: 1px;
+}
+
+/* На узких экранах (меньше 1280px) возвращаем горизонтальный скролл без сдавливания */
+@media (max-width: 1280px) {
+    .pc-matrix-table {
+        width: max-content;
+        min-width: 100%;
+        table-layout: auto;
+    }
+
+    .pc-day-th {
+        width: auto;
+        min-width: 44px;
+        padding: 4px 3px !important;
+    }
+
+    .pc-matrix-table th,
+    .pc-matrix-table td {
+        font-size: 11px;
+        padding: 4px 5px;
+    }
+
+    .pc-sticky-col {
+        width: 165px;
+        min-width: 165px;
+        max-width: 165px;
+    }
+
+    .pc-sticky-total {
+        width: 82px;
+        min-width: 82px;
+        max-width: 82px;
+    }
+}
+
+/* ==========================================================================
+   Секция операций
+   ========================================================================== */
+
+.pc-operations-section {
+    margin-top: var(--spacing-md);
+}
+
+.pc-operations-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.pc-operations-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.pc-operations-title {
+    margin: 0;
+    font-size: 16px;
+    color: var(--text-primary);
+}
+
+.pc-filters {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pc-filter-select {
+    width: auto;
+    min-width: 135px;
+    font-size: 12px;
+    padding: 4px 8px;
+}
+
+.pc-ops-table td {
+    font-size: 13px;
+}
+
+.pc-desc-cell {
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pc-direction-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.pc-direction-badge.pc-in {
+    background: var(--status-paid-bg);
+    color: var(--status-paid-text);
+    border: 1px solid var(--status-paid-border);
+}
+
+.pc-direction-badge.pc-out {
+    background: var(--status-unpaid-bg);
+    color: var(--status-unpaid-text);
+    border: 1px solid var(--status-unpaid-border);
+}
+
+.pc-auto-row td {
+    color: var(--text-muted);
+}
+
+.pc-empty {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 18px !important;
+}
+
+/* ==========================================================================
+   Переопределения базовых стилей отчётов
+   Всё ниже скоупится под .pc-container: раньше здесь были дубли правил
+   .pc-sticky-col / .pc-day-th / .pc-val-cell (второй раз в том же файле) и
+   глобальный селектор main:has(.pc-container), который пересчитывал стили
+   всей шапки при каждом обновлении таблицы.
+   ========================================================================== */
+
+/* Карточка отчёта на весь экран, без внешних отступов и скруглений */
+.report-container.pc-container {
+    margin: 0 !important;
+    padding: 10px 12px !important;
+    border-radius: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box;
+}
+
+.pc-container .pc-header .month-navigation-inline {
+    margin: 0;
+}
+
+.pc-container .pc-header .month-label {
+    min-width: 185px;
+    text-align: center;
+}
+
+/* Сообщения о загрузке и ошибках не должны занимать место и вызывать
+   повторную раскладку всей страницы */
+.pc-container .pc-error {
+    margin-top: 12px;
+}
+
+.pc-container .finance-summary-widgets-grid {
+    margin-top: 14px;
+}
+
+/* В ячейках значений значения крупные числа обрезаются, поэтому уменьшаем
+   межбуквенный интервал; многоточие в матрице оставляем только в названиях
+   статей. */
+.pc-container .pc-val-cell {
+    overflow: visible !important;
+}
+
+/*
+ * Отключаем вертикальный скролл 65vh, унаследованный от FinanceReport.css:
+ * у матрицы 13 строк, она влезает целиком, а вложенный скролл заставлял
+ * браузер пересчитывать sticky-позиции закреплённых колонок на каждый кадр.
+ * `overflow-y: visible` вместе с `overflow-x: auto` браузер приводит к `auto`,
+ * поэтому прокрутку по вертикали ограничиваем явно: контент выше, а не скролл.
+ */
+.pc-container .pc-matrix-wrapper {
+    overflow-y: hidden;
+    max-height: none;
+}
+
+/* Ширины закреплённых колонок — единственное место, где они заданы */
+.pc-container .pc-matrix-table .pc-sticky-col {
+    width: 138px;
+    min-width: 138px;
+    max-width: 138px;
+}
+
+.pc-container .pc-matrix-table .pc-sticky-total {
+    width: 66px;
+    min-width: 66px;
+    max-width: 66px;
+}
+
+/*
+ * Отступы ячеек матрицы.
+ *
+ * Базовое `.report-table tbody td { padding: 14px 20px }` из FinanceReport.css
+ * имеет специфичность (0,1,2) и перебивает `.pc-matrix-table td` (0,1,1),
+ * поэтому без этого правила матрица фактически жила на 14px 20px, а не на
+ * компактных 3px 2px. Здесь (0,2,2) — этого достаточно, чтобы перебить
+ * общее правило отчётов без !important.
+ */
+.pc-container .pc-matrix-table tbody td {
+    padding: 14px 5px;
+}
+
+/*
+ * Подсветка под курсором без анимации.
+ *
+ * Из FinanceReport.css в ячейки наследуется `transition: background 0.2s`
+ * (селектор `.report-table tbody td` специфичнее, чем `.pc-clickable-cell`,
+ * поэтому локальные 0.1s не применялись). При движении мыши по сетке это
+ * давало непрерывную череду 200-мс анимаций фона, и на каждом кадре браузер
+ * перерисовывал строку вместе с двумя закреплёнными (position: sticky)
+ * колонками. Мгновенная подсветка убирает эти кадры полностью.
+ */
+.pc-container .pc-matrix-table tbody td {
+    transition: none;
+}
+
+@media (max-width: 1280px) {
+    .pc-container .pc-matrix-table .pc-sticky-col {
+        width: 165px;
+        min-width: 165px;
+        max-width: 165px;
+    }
+
+    .pc-container .pc-matrix-table .pc-sticky-total {
+        width: 82px;
+        min-width: 82px;
+        max-width: 82px;
+    }
+}

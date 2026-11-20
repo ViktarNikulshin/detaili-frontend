@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import logo from '../asserts/fd6cad63-cb26-4d08-bcf6-0c4f7d152eed.jpg';
 import {
     FaCalendarAlt,
+    FaCalendarDay,
     FaMoneyCheckAlt,
     FaUserClock,
     FaClock,
@@ -91,6 +92,7 @@ const Navigation: React.FC = () => {
         { label: 'Долги партнёрам', path: '/reports/partner-debts-report', icon: <FaHandshake /> },
         { label: 'Пользователи и роли', path: '/users', icon: <FaUsersCog /> },
         { label: 'Клиентская база', path: '/clients', icon: <FaAddressBook /> },
+        { label: 'Платёжный календарь', path: '/reports/payment-calendar', icon: <FaCalendarDay /> },
         { label: 'Справочник работ', path: '/dictionaries/work-types', icon: <FaTools /> },
     ];
 

@@ -17,6 +17,7 @@ import MasterSalaryLog from "./components/MasterSalary/MasterSalaryLog";
 import EmployeeProductivity from "./components/EmployeeProductivity/EmployeeProductivity";
 import Timesheet from "./components/Timesheet/Timesheet";
 import FinanceReport from "./components/FinanceReport/FinanceReport";
+import PaymentCalendar from "./components/PaymentCalendar/PaymentCalendar";
 import ActsAnalytics from "./components/ActsAnalytics/ActsAnalytics";
 import Landlord from "./components/Landlord/Landlord";
 import {IndexRedirect} from "./components/IndexRedirect/IndexRedirect";
@@ -53,6 +54,7 @@ function App() {
                                 <Route path="/reports/productivity" element={<EmployeeProductivity />} />
                                 <Route path="/reports/time-sheet" element={<Timesheet />} />
                                 <Route path="/reports/finance-report" element={<FinanceReport />} />
+                                <Route path="/reports/payment-calendar" element={<PaymentCalendar />} />
                                 <Route path="/reports/acts-report" element={<ActsAnalytics />} />
                                 <Route path="/reports/debts-report" element={<DebtsAnalytics />} />
                                 <Route path="/reports/partner-debts-report" element={<DebtsAnalytics debtType="PARTNER" />} />
